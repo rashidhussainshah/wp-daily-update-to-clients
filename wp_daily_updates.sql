@@ -71,7 +71,7 @@ CREATE TABLE `data_rows` (
   PRIMARY KEY (`id`),
   KEY `data_rows_data_type_id_foreign` (`data_type_id`),
   CONSTRAINT `data_rows_data_type_id_foreign` FOREIGN KEY (`data_type_id`) REFERENCES `data_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=94 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -80,7 +80,7 @@ CREATE TABLE `data_rows` (
 
 LOCK TABLES `data_rows` WRITE;
 /*!40000 ALTER TABLE `data_rows` DISABLE KEYS */;
-INSERT INTO `data_rows` VALUES (1,1,'id','number','ID',1,0,0,0,0,0,NULL,1),(2,1,'name','text','Name',1,1,1,1,1,1,NULL,2),(3,1,'email','text','Email',1,1,1,1,1,1,NULL,3),(4,1,'password','password','Password',1,0,0,1,1,0,NULL,4),(5,1,'remember_token','text','Remember Token',0,0,0,0,0,0,NULL,5),(6,1,'created_at','timestamp','Created At',0,1,1,0,0,0,NULL,6),(7,1,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,7),(8,1,'avatar','image','Avatar',0,1,1,1,1,1,NULL,8),(9,1,'user_belongsto_role_relationship','relationship','Role',0,1,1,1,1,0,'{\"model\":\"TCG\\\\Voyager\\\\Models\\\\Role\",\"table\":\"roles\",\"type\":\"belongsTo\",\"column\":\"role_id\",\"key\":\"id\",\"label\":\"display_name\",\"pivot_table\":\"roles\",\"pivot\":0}',10),(10,1,'user_belongstomany_role_relationship','relationship','voyager::seeders.data_rows.roles',0,1,1,1,1,0,'{\"model\":\"TCG\\\\Voyager\\\\Models\\\\Role\",\"table\":\"roles\",\"type\":\"belongsToMany\",\"column\":\"id\",\"key\":\"id\",\"label\":\"display_name\",\"pivot_table\":\"user_roles\",\"pivot\":\"1\",\"taggable\":\"0\"}',11),(11,1,'settings','hidden','Settings',0,0,0,0,0,0,NULL,12),(12,2,'id','number','ID',1,0,0,0,0,0,NULL,1),(13,2,'name','text','Name',1,1,1,1,1,1,NULL,2),(14,2,'created_at','timestamp','Created At',0,0,0,0,0,0,NULL,3),(15,2,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,4),(16,3,'id','number','ID',1,0,0,0,0,0,NULL,1),(17,3,'name','text','Name',1,1,1,1,1,1,NULL,2),(18,3,'created_at','timestamp','Created At',0,0,0,0,0,0,NULL,3),(19,3,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,4),(20,3,'display_name','text','Display Name',1,1,1,1,1,1,NULL,5),(21,1,'role_id','text','Role',1,1,1,1,1,1,NULL,9),(22,4,'id','number','ID',1,0,0,0,0,0,NULL,1),(23,4,'parent_id','select_dropdown','Parent',0,0,1,1,1,1,'{\"default\":\"\",\"null\":\"\",\"options\":{\"\":\"-- None --\"},\"relationship\":{\"key\":\"id\",\"label\":\"name\"}}',2),(24,4,'order','text','Order',1,1,1,1,1,1,'{\"default\":1}',3),(25,4,'name','text','Name',1,1,1,1,1,1,NULL,4),(26,4,'slug','text','Slug',1,1,1,1,1,1,'{\"slugify\":{\"origin\":\"name\"}}',5),(27,4,'created_at','timestamp','Created At',0,0,1,0,0,0,NULL,6),(28,4,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,7),(29,5,'id','number','ID',1,0,0,0,0,0,NULL,1),(30,5,'author_id','text','Author',1,0,1,1,0,1,NULL,2),(31,5,'category_id','text','Category',1,0,1,1,1,0,NULL,3),(32,5,'title','text','Title',1,1,1,1,1,1,NULL,4),(33,5,'excerpt','text_area','Excerpt',1,0,1,1,1,1,NULL,5),(34,5,'body','rich_text_box','Body',1,0,1,1,1,1,NULL,6),(35,5,'image','image','Post Image',0,1,1,1,1,1,'{\"resize\":{\"width\":\"1000\",\"height\":\"null\"},\"quality\":\"70%\",\"upsize\":true,\"thumbnails\":[{\"name\":\"medium\",\"scale\":\"50%\"},{\"name\":\"small\",\"scale\":\"25%\"},{\"name\":\"cropped\",\"crop\":{\"width\":\"300\",\"height\":\"250\"}}]}',7),(36,5,'slug','text','Slug',1,0,1,1,1,1,'{\"slugify\":{\"origin\":\"title\",\"forceUpdate\":true},\"validation\":{\"rule\":\"unique:posts,slug\"}}',8),(37,5,'meta_description','text_area','Meta Description',1,0,1,1,1,1,NULL,9),(38,5,'meta_keywords','text_area','Meta Keywords',1,0,1,1,1,1,NULL,10),(39,5,'status','select_dropdown','Status',1,1,1,1,1,1,'{\"default\":\"DRAFT\",\"options\":{\"PUBLISHED\":\"published\",\"DRAFT\":\"draft\",\"PENDING\":\"pending\"}}',11),(40,5,'created_at','timestamp','Created At',0,1,1,0,0,0,NULL,12),(41,5,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,13),(42,5,'seo_title','text','SEO Title',0,1,1,1,1,1,NULL,14),(43,5,'featured','checkbox','Featured',1,1,1,1,1,1,NULL,15),(44,6,'id','number','ID',1,0,0,0,0,0,NULL,1),(45,6,'author_id','text','Author',1,0,0,0,0,0,NULL,2),(46,6,'title','text','Title',1,1,1,1,1,1,NULL,3),(47,6,'excerpt','text_area','Excerpt',1,0,1,1,1,1,NULL,4),(48,6,'body','rich_text_box','Body',1,0,1,1,1,1,NULL,5),(49,6,'slug','text','Slug',1,0,1,1,1,1,'{\"slugify\":{\"origin\":\"title\"},\"validation\":{\"rule\":\"unique:pages,slug\"}}',6),(50,6,'meta_description','text','Meta Description',1,0,1,1,1,1,NULL,7),(51,6,'meta_keywords','text','Meta Keywords',1,0,1,1,1,1,NULL,8),(52,6,'status','select_dropdown','Status',1,1,1,1,1,1,'{\"default\":\"INACTIVE\",\"options\":{\"INACTIVE\":\"INACTIVE\",\"ACTIVE\":\"ACTIVE\"}}',9),(53,6,'created_at','timestamp','Created At',1,1,1,0,0,0,NULL,10),(54,6,'updated_at','timestamp','Updated At',1,0,0,0,0,0,NULL,11),(55,6,'image','image','Page Image',0,1,1,1,1,1,NULL,12);
+INSERT INTO `data_rows` VALUES (1,1,'id','number','ID',1,0,0,0,0,0,NULL,1),(2,1,'name','text','Name',1,1,1,1,1,1,NULL,2),(3,1,'email','text','Email',1,1,1,1,1,1,NULL,3),(4,1,'password','password','Password',1,0,0,1,1,0,NULL,4),(5,1,'remember_token','text','Remember Token',0,0,0,0,0,0,NULL,5),(6,1,'created_at','timestamp','Created At',0,1,1,0,0,0,NULL,6),(7,1,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,7),(8,1,'avatar','image','Avatar',0,1,1,1,1,1,NULL,8),(9,1,'user_belongsto_role_relationship','relationship','Role',0,1,1,1,1,0,'{\"model\":\"TCG\\\\Voyager\\\\Models\\\\Role\",\"table\":\"roles\",\"type\":\"belongsTo\",\"column\":\"role_id\",\"key\":\"id\",\"label\":\"display_name\",\"pivot_table\":\"roles\",\"pivot\":0}',10),(10,1,'user_belongstomany_role_relationship','relationship','voyager::seeders.data_rows.roles',0,1,1,1,1,0,'{\"model\":\"TCG\\\\Voyager\\\\Models\\\\Role\",\"table\":\"roles\",\"type\":\"belongsToMany\",\"column\":\"id\",\"key\":\"id\",\"label\":\"display_name\",\"pivot_table\":\"user_roles\",\"pivot\":\"1\",\"taggable\":\"0\"}',11),(11,1,'settings','hidden','Settings',0,0,0,0,0,0,NULL,12),(12,2,'id','number','ID',1,0,0,0,0,0,NULL,1),(13,2,'name','text','Name',1,1,1,1,1,1,NULL,2),(14,2,'created_at','timestamp','Created At',0,0,0,0,0,0,NULL,3),(15,2,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,4),(16,3,'id','number','ID',1,0,0,0,0,0,NULL,1),(17,3,'name','text','Name',1,1,1,1,1,1,NULL,2),(18,3,'created_at','timestamp','Created At',0,0,0,0,0,0,NULL,3),(19,3,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,4),(20,3,'display_name','text','Display Name',1,1,1,1,1,1,NULL,5),(21,1,'role_id','text','Role',1,1,1,1,1,1,NULL,9),(22,4,'id','number','ID',1,0,0,0,0,0,NULL,1),(23,4,'parent_id','select_dropdown','Parent',0,0,1,1,1,1,'{\"default\":\"\",\"null\":\"\",\"options\":{\"\":\"-- None --\"},\"relationship\":{\"key\":\"id\",\"label\":\"name\"}}',2),(24,4,'order','text','Order',1,1,1,1,1,1,'{\"default\":1}',3),(25,4,'name','text','Name',1,1,1,1,1,1,NULL,4),(26,4,'slug','text','Slug',1,1,1,1,1,1,'{\"slugify\":{\"origin\":\"name\"}}',5),(27,4,'created_at','timestamp','Created At',0,0,1,0,0,0,NULL,6),(28,4,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,7),(29,5,'id','number','ID',1,0,0,0,0,0,NULL,1),(30,5,'author_id','text','Author',1,0,1,1,0,1,NULL,2),(31,5,'category_id','text','Category',1,0,1,1,1,0,NULL,3),(32,5,'title','text','Title',1,1,1,1,1,1,NULL,4),(33,5,'excerpt','text_area','Excerpt',1,0,1,1,1,1,NULL,5),(34,5,'body','rich_text_box','Body',1,0,1,1,1,1,NULL,6),(35,5,'image','image','Post Image',0,1,1,1,1,1,'{\"resize\":{\"width\":\"1000\",\"height\":\"null\"},\"quality\":\"70%\",\"upsize\":true,\"thumbnails\":[{\"name\":\"medium\",\"scale\":\"50%\"},{\"name\":\"small\",\"scale\":\"25%\"},{\"name\":\"cropped\",\"crop\":{\"width\":\"300\",\"height\":\"250\"}}]}',7),(36,5,'slug','text','Slug',1,0,1,1,1,1,'{\"slugify\":{\"origin\":\"title\",\"forceUpdate\":true},\"validation\":{\"rule\":\"unique:posts,slug\"}}',8),(37,5,'meta_description','text_area','Meta Description',1,0,1,1,1,1,NULL,9),(38,5,'meta_keywords','text_area','Meta Keywords',1,0,1,1,1,1,NULL,10),(39,5,'status','select_dropdown','Status',1,1,1,1,1,1,'{\"default\":\"DRAFT\",\"options\":{\"PUBLISHED\":\"published\",\"DRAFT\":\"draft\",\"PENDING\":\"pending\"}}',11),(40,5,'created_at','timestamp','Created At',0,1,1,0,0,0,NULL,12),(41,5,'updated_at','timestamp','Updated At',0,0,0,0,0,0,NULL,13),(42,5,'seo_title','text','SEO Title',0,1,1,1,1,1,NULL,14),(43,5,'featured','checkbox','Featured',1,1,1,1,1,1,NULL,15),(44,6,'id','number','ID',1,0,0,0,0,0,NULL,1),(45,6,'author_id','text','Author',1,0,0,0,0,0,NULL,2),(46,6,'title','text','Title',1,1,1,1,1,1,NULL,3),(47,6,'excerpt','text_area','Excerpt',1,0,1,1,1,1,NULL,4),(48,6,'body','rich_text_box','Body',1,0,1,1,1,1,NULL,5),(49,6,'slug','text','Slug',1,0,1,1,1,1,'{\"slugify\":{\"origin\":\"title\"},\"validation\":{\"rule\":\"unique:pages,slug\"}}',6),(50,6,'meta_description','text','Meta Description',1,0,1,1,1,1,NULL,7),(51,6,'meta_keywords','text','Meta Keywords',1,0,1,1,1,1,NULL,8),(52,6,'status','select_dropdown','Status',1,1,1,1,1,1,'{\"default\":\"INACTIVE\",\"options\":{\"INACTIVE\":\"INACTIVE\",\"ACTIVE\":\"ACTIVE\"}}',9),(53,6,'created_at','timestamp','Created At',1,1,1,0,0,0,NULL,10),(54,6,'updated_at','timestamp','Updated At',1,0,0,0,0,0,NULL,11),(55,6,'image','image','Page Image',0,1,1,1,1,1,NULL,12),(56,7,'id','text','Id',1,0,0,0,0,0,'{}',1),(57,7,'name','text','Name',1,1,1,1,1,1,'{\"validation\":{\"rule\":\"required|max:191|unique:projects,name\"}}',2),(58,7,'client_id','hidden','Client',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',3),(59,7,'payment_mode','select_dropdown','Payment Mode',1,0,1,1,1,1,'{\"default\":\"Direct\",\"options\":{\"Direct\":\"Direct\",\"Fiver\":\"Fiver\",\"Upwork\":\"Upwork\",\"Payonner\":\"Payonner\"},\"display\":{\"width\":\"6\"}}',6),(60,7,'start_date','timestamp','Start Date',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',4),(61,7,'expected_delivery_date','timestamp','Expected Delivery Date',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',5),(62,7,'created_at','timestamp','Created At',0,0,1,1,0,1,'{}',8),(63,7,'updated_at','timestamp','Updated At',0,0,0,0,0,0,'{}',9),(64,7,'deleted_at','timestamp','Deleted At',0,0,0,0,0,0,'{}',10),(65,7,'project_belongsto_user_relationship','relationship','Client',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"},\"model\":\"App\\\\Models\\\\User\",\"table\":\"users\",\"type\":\"belongsTo\",\"column\":\"client_id\",\"key\":\"id\",\"label\":\"name\",\"pivot_table\":\"categories\",\"pivot\":\"0\",\"taggable\":\"0\"}',7),(66,8,'id','text','Id',1,0,0,0,0,0,'{}',1),(67,8,'project_id','hidden','Project Id',1,1,1,1,1,1,'{}',2),(68,8,'title','text','Title',1,1,1,1,1,1,'{}',4),(69,8,'status','text','Status',1,1,1,1,1,1,'{\"default\":\"In Progress\",\"options\":{\"In Progress\":\"In Progress\",\"QA\":\"QA\",\"Completed\":\"Completed\"},\"display\":{\"width\":\"6\"}}',5),(70,8,'type','text','Type',1,1,1,1,1,1,'{\"default\":\"User Story\",\"options\":{\"User Story\":\"User Story\",\"Assignment\":\"Assignment\",\"Milestone\":\"Milestone\",\"Project\":\"Project\",\"Sprint\":\"Sprint\",\"Update\":\"Update\",\"Feature\":\"Feature\"},\"display\":{\"width\":\"6\"}}',6),(71,8,'start_date','timestamp','Start Date',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',7),(72,8,'end_date','timestamp','End Date',0,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',8),(73,8,'description','markdown_editor','Description',0,1,1,1,1,1,'{}',9),(74,8,'attachment_files','file','Attachment Files',0,1,1,1,1,1,'{}',10),(75,8,'created_at','timestamp','Created At',0,1,1,1,0,1,'{}',11),(76,8,'updated_at','timestamp','Updated At',0,0,0,0,0,0,'{}',12),(77,8,'deleted_at','timestamp','Deleted At',0,0,0,0,0,0,'{}',13),(78,8,'project_target_belongsto_project_relationship','relationship','Project',1,1,1,1,1,1,'{\"model\":\"App\\\\Models\\\\Project\",\"table\":\"projects\",\"type\":\"belongsTo\",\"column\":\"project_id\",\"key\":\"id\",\"label\":\"name\",\"pivot_table\":\"categories\",\"pivot\":\"0\",\"taggable\":\"0\"}',3),(79,9,'id','text','Id',1,0,0,0,0,0,'{}',1),(80,9,'project_target_id','hidden','Project Target Id',1,1,1,1,1,1,'{}',3),(81,9,'developer_id','hidden','Developer Id',1,1,1,1,1,1,'{}',2),(82,9,'title','text','Title',1,1,1,1,1,1,'{}',6),(83,9,'status','select_dropdown','Status',1,1,1,1,1,1,'{\"default\":\"In Progress\",\"options\":{\"In Progress\":\"In Progress\",\"QA\":\"QA\",\"Completed\":\"Completed\"},\"display\":{\"width\":\"6\"}}',7),(84,9,'type','select_dropdown','Type',1,1,1,1,1,1,'{\"default\":\"Bug\",\"options\":{\"Bug\":\"Bug\",\"Development\":\"Development\",\"Enhancement\":\"Enhancement\",\"Feature\":\"Feature\",\"Issue\":\"Issue\",\"Modification\":\"Modification\",\"Meeting\":\"Meeting\"},\"display\":{\"width\":\"6\"}}',8),(85,9,'start_date','timestamp','Start Date',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',9),(86,9,'end_date','timestamp','End Date',0,1,1,1,1,1,'{\"display\":{\"width\":\"6\"}}',10),(87,9,'description','markdown_editor','Description',1,0,1,1,1,1,'{}',11),(88,9,'attachment_files','file','Attachment Files',0,0,1,1,1,1,'{}',12),(89,9,'created_at','timestamp','Created At',0,0,1,1,0,1,'{}',13),(90,9,'updated_at','timestamp','Updated At',0,0,0,0,0,0,'{}',14),(91,9,'deleted_at','timestamp','Deleted At',0,0,0,0,0,0,'{}',15),(92,9,'project_target_task_belongsto_project_target_task_relationship','relationship','Project Target',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"},\"model\":\"App\\\\Models\\\\ProjectTarget\",\"table\":\"project_target_tasks\",\"type\":\"belongsTo\",\"column\":\"project_target_id\",\"key\":\"id\",\"label\":\"title\",\"pivot_table\":\"categories\",\"pivot\":\"0\",\"taggable\":\"0\"}',4),(93,9,'project_target_task_belongsto_user_relationship','relationship','Developer',1,1,1,1,1,1,'{\"display\":{\"width\":\"6\"},\"model\":\"App\\\\Models\\\\User\",\"table\":\"users\",\"type\":\"belongsTo\",\"column\":\"developer_id\",\"key\":\"id\",\"label\":\"name\",\"pivot_table\":\"categories\",\"pivot\":\"0\",\"taggable\":\"0\"}',5);
 /*!40000 ALTER TABLE `data_rows` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -110,7 +110,7 @@ CREATE TABLE `data_types` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `data_types_name_unique` (`name`),
   UNIQUE KEY `data_types_slug_unique` (`slug`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -119,7 +119,7 @@ CREATE TABLE `data_types` (
 
 LOCK TABLES `data_types` WRITE;
 /*!40000 ALTER TABLE `data_types` DISABLE KEYS */;
-INSERT INTO `data_types` VALUES (1,'users','users','User','Users','voyager-person','TCG\\Voyager\\Models\\User','TCG\\Voyager\\Policies\\UserPolicy','TCG\\Voyager\\Http\\Controllers\\VoyagerUserController','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(2,'menus','menus','Menu','Menus','voyager-list','TCG\\Voyager\\Models\\Menu',NULL,'','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(3,'roles','roles','Role','Roles','voyager-lock','TCG\\Voyager\\Models\\Role',NULL,'TCG\\Voyager\\Http\\Controllers\\VoyagerRoleController','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(4,'categories','categories','Category','Categories','voyager-categories','TCG\\Voyager\\Models\\Category',NULL,'','',1,0,NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(5,'posts','posts','Post','Posts','voyager-news','TCG\\Voyager\\Models\\Post','TCG\\Voyager\\Policies\\PostPolicy','','',1,0,NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(6,'pages','pages','Page','Pages','voyager-file-text','TCG\\Voyager\\Models\\Page',NULL,'','',1,0,NULL,'2022-01-24 00:22:06','2022-01-24 00:22:06');
+INSERT INTO `data_types` VALUES (1,'users','users','User','Users','voyager-person','TCG\\Voyager\\Models\\User','TCG\\Voyager\\Policies\\UserPolicy','TCG\\Voyager\\Http\\Controllers\\VoyagerUserController','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(2,'menus','menus','Menu','Menus','voyager-list','TCG\\Voyager\\Models\\Menu',NULL,'','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(3,'roles','roles','Role','Roles','voyager-lock','TCG\\Voyager\\Models\\Role',NULL,'TCG\\Voyager\\Http\\Controllers\\VoyagerRoleController','',1,0,NULL,'2022-01-24 00:22:04','2022-01-24 00:22:04'),(4,'categories','categories','Category','Categories','voyager-categories','TCG\\Voyager\\Models\\Category',NULL,'','',1,0,NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(5,'posts','posts','Post','Posts','voyager-news','TCG\\Voyager\\Models\\Post','TCG\\Voyager\\Policies\\PostPolicy','','',1,0,NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(6,'pages','pages','Page','Pages','voyager-file-text','TCG\\Voyager\\Models\\Page',NULL,'','',1,0,NULL,'2022-01-24 00:22:06','2022-01-24 00:22:06'),(7,'projects','projects','Project','Projects','voyager-file-text','App\\Models\\Project',NULL,NULL,NULL,1,0,'{\"order_column\":null,\"order_display_column\":null,\"order_direction\":\"asc\",\"default_search_key\":null,\"scope\":null}','2022-01-24 08:39:21','2022-01-24 09:43:17'),(8,'project_targets','project-targets','Project Target','Project Targets','voyager-folder','App\\Models\\ProjectTarget',NULL,NULL,NULL,1,0,'{\"order_column\":null,\"order_display_column\":null,\"order_direction\":\"asc\",\"default_search_key\":null,\"scope\":null}','2022-01-24 09:52:26','2022-01-27 00:33:17'),(9,'project_target_tasks','project-target-tasks','Project Target Task','Project Target Tasks','voyager-news','App\\Models\\ProjectTargetTask',NULL,NULL,NULL,1,0,'{\"order_column\":null,\"order_display_column\":null,\"order_direction\":\"asc\",\"default_search_key\":null,\"scope\":null}','2022-01-27 00:56:21','2022-01-27 01:09:09');
 /*!40000 ALTER TABLE `data_types` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -176,7 +176,7 @@ CREATE TABLE `menu_items` (
   PRIMARY KEY (`id`),
   KEY `menu_items_menu_id_foreign` (`menu_id`),
   CONSTRAINT `menu_items_menu_id_foreign` FOREIGN KEY (`menu_id`) REFERENCES `menus` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -185,7 +185,7 @@ CREATE TABLE `menu_items` (
 
 LOCK TABLES `menu_items` WRITE;
 /*!40000 ALTER TABLE `menu_items` DISABLE KEYS */;
-INSERT INTO `menu_items` VALUES (1,1,'Dashboard','','_self','voyager-boat',NULL,NULL,1,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.dashboard',NULL),(2,1,'Media','','_self','voyager-images',NULL,NULL,5,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.media.index',NULL),(3,1,'Users','','_self','voyager-person',NULL,NULL,3,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.users.index',NULL),(4,1,'Roles','','_self','voyager-lock',NULL,NULL,2,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.roles.index',NULL),(5,1,'Tools','','_self','voyager-tools',NULL,NULL,9,'2022-01-24 00:22:04','2022-01-24 00:22:04',NULL,NULL),(6,1,'Menu Builder','','_self','voyager-list',NULL,5,10,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.menus.index',NULL),(7,1,'Database','','_self','voyager-data',NULL,5,11,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.database.index',NULL),(8,1,'Compass','','_self','voyager-compass',NULL,5,12,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.compass.index',NULL),(9,1,'BREAD','','_self','voyager-bread',NULL,5,13,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.bread.index',NULL),(10,1,'Settings','','_self','voyager-settings',NULL,NULL,14,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.settings.index',NULL),(11,1,'Categories','','_self','voyager-categories',NULL,NULL,8,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.categories.index',NULL),(12,1,'Posts','','_self','voyager-news',NULL,NULL,6,'2022-01-24 00:22:06','2022-01-24 00:22:06','voyager.posts.index',NULL),(13,1,'Pages','','_self','voyager-file-text',NULL,NULL,7,'2022-01-24 00:22:06','2022-01-24 00:22:06','voyager.pages.index',NULL);
+INSERT INTO `menu_items` VALUES (1,1,'Dashboard','','_self','voyager-boat',NULL,NULL,1,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.dashboard',NULL),(2,1,'Media','','_self','voyager-images',NULL,NULL,5,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.media.index',NULL),(3,1,'Users','','_self','voyager-person',NULL,NULL,3,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.users.index',NULL),(4,1,'Roles','','_self','voyager-lock',NULL,NULL,2,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.roles.index',NULL),(5,1,'Tools','','_self','voyager-tools',NULL,NULL,9,'2022-01-24 00:22:04','2022-01-24 00:22:04',NULL,NULL),(6,1,'Menu Builder','','_self','voyager-list',NULL,5,10,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.menus.index',NULL),(7,1,'Database','','_self','voyager-data',NULL,5,11,'2022-01-24 00:22:04','2022-01-24 00:22:04','voyager.database.index',NULL),(8,1,'Compass','','_self','voyager-compass',NULL,5,12,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.compass.index',NULL),(9,1,'BREAD','','_self','voyager-bread',NULL,5,13,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.bread.index',NULL),(10,1,'Settings','','_self','voyager-settings',NULL,NULL,14,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.settings.index',NULL),(11,1,'Categories','','_self','voyager-categories',NULL,NULL,8,'2022-01-24 00:22:05','2022-01-24 00:22:05','voyager.categories.index',NULL),(12,1,'Posts','','_self','voyager-news',NULL,NULL,6,'2022-01-24 00:22:06','2022-01-24 00:22:06','voyager.posts.index',NULL),(13,1,'Pages','','_self','voyager-file-text',NULL,NULL,7,'2022-01-24 00:22:06','2022-01-24 00:22:06','voyager.pages.index',NULL),(14,1,'Projects','','_self','voyager-file-text',NULL,NULL,15,'2022-01-24 08:39:21','2022-01-24 08:39:21','voyager.projects.index',NULL),(15,1,'Project Targets','','_self','voyager-folder',NULL,NULL,16,'2022-01-24 09:52:26','2022-01-24 09:52:26','voyager.project-targets.index',NULL),(16,1,'Project Target Tasks','','_self','voyager-news','#000000',NULL,17,'2022-01-27 00:56:21','2022-01-27 01:03:28','voyager.project-target-tasks.index','null');
 /*!40000 ALTER TABLE `menu_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -228,7 +228,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `batch` int NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -237,7 +237,7 @@ CREATE TABLE `migrations` (
 
 LOCK TABLES `migrations` WRITE;
 /*!40000 ALTER TABLE `migrations` DISABLE KEYS */;
-INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2016_01_01_000000_add_voyager_user_fields',1),(4,'2016_01_01_000000_create_data_types_table',1),(5,'2016_05_19_173453_create_menu_table',1),(6,'2016_10_21_190000_create_roles_table',1),(7,'2016_10_21_190000_create_settings_table',1),(8,'2016_11_30_135954_create_permission_table',1),(9,'2016_11_30_141208_create_permission_role_table',1),(10,'2016_12_26_201236_data_types__add__server_side',1),(11,'2017_01_13_000000_add_route_to_menu_items_table',1),(12,'2017_01_14_005015_create_translations_table',1),(13,'2017_01_15_000000_make_table_name_nullable_in_permissions_table',1),(14,'2017_03_06_000000_add_controller_to_data_types_table',1),(15,'2017_04_21_000000_add_order_to_data_rows_table',1),(16,'2017_07_05_210000_add_policyname_to_data_types_table',1),(17,'2017_08_05_000000_add_group_to_settings_table',1),(18,'2017_11_26_013050_add_user_role_relationship',1),(19,'2017_11_26_015000_create_user_roles_table',1),(20,'2018_03_11_000000_add_user_settings',1),(21,'2018_03_14_000000_add_details_to_data_types_table',1),(22,'2018_03_16_000000_make_settings_value_nullable',1),(23,'2019_08_19_000000_create_failed_jobs_table',1),(24,'2019_12_14_000001_create_personal_access_tokens_table',1),(25,'2016_01_01_000000_create_pages_table',2),(26,'2016_01_01_000000_create_posts_table',2),(27,'2016_02_15_204651_create_categories_table',2),(28,'2017_04_11_000000_alter_post_nullable_fields_table',2);
+INSERT INTO `migrations` VALUES (1,'2014_10_12_000000_create_users_table',1),(2,'2014_10_12_100000_create_password_resets_table',1),(3,'2016_01_01_000000_add_voyager_user_fields',1),(4,'2016_01_01_000000_create_data_types_table',1),(5,'2016_05_19_173453_create_menu_table',1),(6,'2016_10_21_190000_create_roles_table',1),(7,'2016_10_21_190000_create_settings_table',1),(8,'2016_11_30_135954_create_permission_table',1),(9,'2016_11_30_141208_create_permission_role_table',1),(10,'2016_12_26_201236_data_types__add__server_side',1),(11,'2017_01_13_000000_add_route_to_menu_items_table',1),(12,'2017_01_14_005015_create_translations_table',1),(13,'2017_01_15_000000_make_table_name_nullable_in_permissions_table',1),(14,'2017_03_06_000000_add_controller_to_data_types_table',1),(15,'2017_04_21_000000_add_order_to_data_rows_table',1),(16,'2017_07_05_210000_add_policyname_to_data_types_table',1),(17,'2017_08_05_000000_add_group_to_settings_table',1),(18,'2017_11_26_013050_add_user_role_relationship',1),(19,'2017_11_26_015000_create_user_roles_table',1),(20,'2018_03_11_000000_add_user_settings',1),(21,'2018_03_14_000000_add_details_to_data_types_table',1),(22,'2018_03_16_000000_make_settings_value_nullable',1),(23,'2019_08_19_000000_create_failed_jobs_table',1),(24,'2019_12_14_000001_create_personal_access_tokens_table',1),(25,'2016_01_01_000000_create_pages_table',2),(26,'2016_01_01_000000_create_posts_table',2),(27,'2016_02_15_204651_create_categories_table',2),(28,'2017_04_11_000000_alter_post_nullable_fields_table',2),(32,'2022_01_24_120331_create_projects_table',3),(33,'2022_01_24_121647_create_project_targets_table',3),(34,'2022_01_24_121734_create_project_target_tasks_table',3);
 /*!40000 ALTER TABLE `migrations` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -324,7 +324,7 @@ CREATE TABLE `permission_role` (
 
 LOCK TABLES `permission_role` WRITE;
 /*!40000 ALTER TABLE `permission_role` DISABLE KEYS */;
-INSERT INTO `permission_role` VALUES (1,1),(1,3),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),(27,1),(28,1),(29,1),(30,1),(31,1),(32,1),(33,1),(34,1),(35,1),(36,1),(37,1),(38,1),(39,1),(40,1);
+INSERT INTO `permission_role` VALUES (1,1),(1,3),(2,1),(3,1),(4,1),(5,1),(6,1),(7,1),(8,1),(9,1),(10,1),(11,1),(12,1),(13,1),(14,1),(15,1),(16,1),(17,1),(18,1),(19,1),(20,1),(21,1),(22,1),(23,1),(24,1),(25,1),(26,1),(27,1),(28,1),(29,1),(30,1),(31,1),(32,1),(33,1),(34,1),(35,1),(36,1),(37,1),(38,1),(39,1),(40,1),(41,1),(42,1),(43,1),(44,1),(45,1),(46,1),(47,1),(48,1),(49,1),(50,1),(51,1),(52,1),(53,1),(54,1),(55,1);
 /*!40000 ALTER TABLE `permission_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -343,7 +343,7 @@ CREATE TABLE `permissions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `permissions_key_index` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=41 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -352,7 +352,7 @@ CREATE TABLE `permissions` (
 
 LOCK TABLES `permissions` WRITE;
 /*!40000 ALTER TABLE `permissions` DISABLE KEYS */;
-INSERT INTO `permissions` VALUES (1,'browse_admin',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(2,'browse_bread',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(3,'browse_database',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(4,'browse_media',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(5,'browse_compass',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(6,'browse_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(7,'read_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(8,'edit_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(9,'add_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(10,'delete_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(11,'browse_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(12,'read_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(13,'edit_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(14,'add_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(15,'delete_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(16,'browse_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(17,'read_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(18,'edit_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(19,'add_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(20,'delete_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(21,'browse_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(22,'read_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(23,'edit_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(24,'add_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(25,'delete_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(26,'browse_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(27,'read_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(28,'edit_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(29,'add_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(30,'delete_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(31,'browse_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(32,'read_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(33,'edit_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(34,'add_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(35,'delete_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(36,'browse_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(37,'read_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(38,'edit_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(39,'add_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(40,'delete_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06');
+INSERT INTO `permissions` VALUES (1,'browse_admin',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(2,'browse_bread',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(3,'browse_database',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(4,'browse_media',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(5,'browse_compass',NULL,'2022-01-24 00:22:05','2022-01-24 00:22:05'),(6,'browse_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(7,'read_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(8,'edit_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(9,'add_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(10,'delete_menus','menus','2022-01-24 00:22:05','2022-01-24 00:22:05'),(11,'browse_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(12,'read_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(13,'edit_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(14,'add_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(15,'delete_roles','roles','2022-01-24 00:22:05','2022-01-24 00:22:05'),(16,'browse_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(17,'read_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(18,'edit_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(19,'add_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(20,'delete_users','users','2022-01-24 00:22:05','2022-01-24 00:22:05'),(21,'browse_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(22,'read_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(23,'edit_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(24,'add_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(25,'delete_settings','settings','2022-01-24 00:22:05','2022-01-24 00:22:05'),(26,'browse_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(27,'read_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(28,'edit_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(29,'add_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(30,'delete_categories','categories','2022-01-24 00:22:05','2022-01-24 00:22:05'),(31,'browse_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(32,'read_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(33,'edit_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(34,'add_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(35,'delete_posts','posts','2022-01-24 00:22:06','2022-01-24 00:22:06'),(36,'browse_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(37,'read_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(38,'edit_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(39,'add_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(40,'delete_pages','pages','2022-01-24 00:22:06','2022-01-24 00:22:06'),(41,'browse_projects','projects','2022-01-24 08:39:21','2022-01-24 08:39:21'),(42,'read_projects','projects','2022-01-24 08:39:21','2022-01-24 08:39:21'),(43,'edit_projects','projects','2022-01-24 08:39:21','2022-01-24 08:39:21'),(44,'add_projects','projects','2022-01-24 08:39:21','2022-01-24 08:39:21'),(45,'delete_projects','projects','2022-01-24 08:39:21','2022-01-24 08:39:21'),(46,'browse_project_targets','project_targets','2022-01-24 09:52:26','2022-01-24 09:52:26'),(47,'read_project_targets','project_targets','2022-01-24 09:52:26','2022-01-24 09:52:26'),(48,'edit_project_targets','project_targets','2022-01-24 09:52:26','2022-01-24 09:52:26'),(49,'add_project_targets','project_targets','2022-01-24 09:52:26','2022-01-24 09:52:26'),(50,'delete_project_targets','project_targets','2022-01-24 09:52:26','2022-01-24 09:52:26'),(51,'browse_project_target_tasks','project_target_tasks','2022-01-27 00:56:21','2022-01-27 00:56:21'),(52,'read_project_target_tasks','project_target_tasks','2022-01-27 00:56:21','2022-01-27 00:56:21'),(53,'edit_project_target_tasks','project_target_tasks','2022-01-27 00:56:21','2022-01-27 00:56:21'),(54,'add_project_target_tasks','project_target_tasks','2022-01-27 00:56:21','2022-01-27 00:56:21'),(55,'delete_project_target_tasks','project_target_tasks','2022-01-27 00:56:21','2022-01-27 00:56:21');
 /*!40000 ALTER TABLE `permissions` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -427,6 +427,110 @@ INSERT INTO `posts` VALUES (1,0,NULL,'Lorem Ipsum Post',NULL,'This is the excerp
 UNLOCK TABLES;
 
 --
+-- Table structure for table `project_target_tasks`
+--
+
+DROP TABLE IF EXISTS `project_target_tasks`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_target_tasks` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `project_target_id` bigint unsigned NOT NULL,
+  `developer_id` bigint unsigned NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('In Progress','QA','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'In Progress',
+  `type` enum('Bug','Development','Enhancement','Feature','Issue','Modification','Meeting') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Bug',
+  `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `attachment_files` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `project_target_tasks_developer_id_foreign` (`developer_id`),
+  CONSTRAINT `project_target_tasks_developer_id_foreign` FOREIGN KEY (`developer_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_target_tasks`
+--
+
+LOCK TABLES `project_target_tasks` WRITE;
+/*!40000 ALTER TABLE `project_target_tasks` DISABLE KEYS */;
+INSERT INTO `project_target_tasks` VALUES (1,1,1,'Working on uplisting','In Progress','Bug','2022-01-27 06:07:00',NULL,'1. Import Collection \r\n2. Test API\'s\r\n3. Visit uplisting dashboard\r\n4. Sign up on AirBnb','[]','2022-01-27 01:07:37','2022-01-27 01:07:37',NULL);
+/*!40000 ALTER TABLE `project_target_tasks` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `project_targets`
+--
+
+DROP TABLE IF EXISTS `project_targets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `project_targets` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `project_id` bigint unsigned NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('In Progress','QA','Completed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'In Progress',
+  `type` enum('User Story','Assignment','Milestone','Project','Sprint','Update','Feature') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'User Story',
+  `start_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `end_date` timestamp NULL DEFAULT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `attachment_files` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `project_targets`
+--
+
+LOCK TABLES `project_targets` WRITE;
+/*!40000 ALTER TABLE `project_targets` DISABLE KEYS */;
+INSERT INTO `project_targets` VALUES (1,1,'Uplisting milestone','In Progress','User Story','2022-02-02 05:33:00','2022-03-31 05:34:00','1. Integrate API\'s of uplisting','[]','2022-01-27 00:35:00','2022-01-27 00:44:46',NULL);
+/*!40000 ALTER TABLE `project_targets` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `projects`
+--
+
+DROP TABLE IF EXISTS `projects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `projects` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `client_id` bigint unsigned NOT NULL,
+  `payment_mode` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Direct',
+  `start_date` timestamp NOT NULL,
+  `expected_delivery_date` timestamp NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `projects_client_id_foreign` (`client_id`),
+  CONSTRAINT `projects_client_id_foreign` FOREIGN KEY (`client_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+LOCK TABLES `projects` WRITE;
+/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+INSERT INTO `projects` VALUES (1,'Tal Sanga (staging.onyxsa.co.uk)',5,'Direct','2022-01-24 14:38:00','2022-01-31 14:39:00','2022-01-24 09:41:41','2022-01-24 09:56:20',NULL);
+/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `roles`
 --
 
@@ -441,7 +545,7 @@ CREATE TABLE `roles` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `roles_name_unique` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -450,7 +554,7 @@ CREATE TABLE `roles` (
 
 LOCK TABLES `roles` WRITE;
 /*!40000 ALTER TABLE `roles` DISABLE KEYS */;
-INSERT INTO `roles` VALUES (1,'Admin','Administrator','2022-01-24 00:22:05','2022-01-24 00:27:01'),(2,'User','Normal User','2022-01-24 00:22:05','2022-01-24 00:27:10'),(3,'Developer','Developer','2022-01-24 00:26:42','2022-01-24 00:26:42');
+INSERT INTO `roles` VALUES (1,'Admin','Administrator','2022-01-24 00:22:05','2022-01-24 00:27:01'),(2,'User','Normal User','2022-01-24 00:22:05','2022-01-24 00:27:10'),(3,'Developer','Developer','2022-01-24 00:26:42','2022-01-24 00:26:42'),(4,'Client','Client','2022-01-24 07:03:09','2022-01-24 07:03:09');
 /*!40000 ALTER TABLE `roles` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -566,7 +670,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `users_email_unique` (`email`),
   KEY `users_role_id_foreign` (`role_id`),
   CONSTRAINT `users_role_id_foreign` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -575,7 +679,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,1,'Rashid','rashid@webpenter.com','users/default.png',NULL,'$2y$10$CrqiZRNAF0yjKTtmRZYq9.U/86h6afMp2kbAi3W5Whpa.Y.W6sHdW','IhATSDOMWVx2kBJB7IoWKghsO20reFNbfuQawe33WOwkICnBVbIFTDAWeZBW','{\"locale\":\"en\"}','2022-01-24 00:22:05','2022-01-24 00:34:21'),(2,3,'Ahmad','ahmad@webpenter.com','users/default.png',NULL,'$2y$10$6E0k7gyzFWNHPhQrdror4ubMz.jokgYkj6QLkT2Za3qFO32zUF0pi',NULL,'{\"locale\":\"en\"}','2022-01-24 00:30:21','2022-01-24 00:30:21'),(3,3,'Ayub','ayub@webpenter.com','users/default.png',NULL,'$2y$10$.BcJPeujYhUuEHUDejtyIekuWUhS.DWuVWujS1mVMAuGlseACtQ82',NULL,'{\"locale\":\"en\"}','2022-01-24 00:31:35','2022-01-24 00:31:35'),(4,3,'Zahid','zahid@webpenter.com','users/default.png',NULL,'$2y$10$0E8ytFB7eDzRVACYz6zf.e.9./l8q87hmO9fpd49nVDDuRpT.T2vS',NULL,'{\"locale\":\"en\"}','2022-01-24 00:32:38','2022-01-24 00:32:38');
+INSERT INTO `users` VALUES (1,1,'Rashid','rashid@webpenter.com','users/default.png',NULL,'$2y$10$CrqiZRNAF0yjKTtmRZYq9.U/86h6afMp2kbAi3W5Whpa.Y.W6sHdW','yCZZxAHHthycxDAbGtodDAmsdbIbOvpYVk6RfUlYoyQvODwoZpD1uzDT69mL','{\"locale\":\"en\"}','2022-01-24 00:22:05','2022-01-24 00:34:21'),(2,3,'Ahmad','ahmad@webpenter.com','users/default.png',NULL,'$2y$10$6E0k7gyzFWNHPhQrdror4ubMz.jokgYkj6QLkT2Za3qFO32zUF0pi',NULL,'{\"locale\":\"en\"}','2022-01-24 00:30:21','2022-01-24 00:30:21'),(3,3,'Ayub','ayub@webpenter.com','users/default.png',NULL,'$2y$10$.BcJPeujYhUuEHUDejtyIekuWUhS.DWuVWujS1mVMAuGlseACtQ82',NULL,'{\"locale\":\"en\"}','2022-01-24 00:31:35','2022-01-24 00:31:35'),(4,3,'Zahid','zahid@webpenter.com','users/default.png',NULL,'$2y$10$0E8ytFB7eDzRVACYz6zf.e.9./l8q87hmO9fpd49nVDDuRpT.T2vS',NULL,'{\"locale\":\"en\"}','2022-01-24 00:32:38','2022-01-24 00:32:38'),(5,4,'Tal Sanga','tal.sanga@onyxsa.co.uk','users/default.png',NULL,'$2y$10$X8ORJXBWimp7MGsDfLi5.OLsZOD9nExgVfGHD9WJdwMVV96zYrSIa',NULL,'{\"locale\":\"en\"}','2022-01-24 09:38:22','2022-01-24 09:38:22');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -588,4 +692,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2022-01-24 10:48:47
+-- Dump completed on 2022-01-27 11:14:57
