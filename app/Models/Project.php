@@ -11,8 +11,4 @@ class Project extends Model
     use HasFactory, SoftDeletes;
     protected $dates = ['deleted_at'];
 
-    public function scopeCurrentUser($query)
-    {
-        return $query->where('client_id', Auth::user()->id);
-    }
 }

@@ -16,11 +16,10 @@ class CreateProjectTargetsTable extends Migration
         Schema::create('project_targets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('project_id');
+            $table->unsignedBigInteger('developer_id');
             $table->string('title');
             $table->enum('status', ['In Progress', 'QA', 'Completed'])->default('In Progress');
             $table->enum('type', ['User Story', 'Assignment', 'Milestone', 'Project', 'Sprint', 'Update', 'Feature'])->default('User Story');
-            $table->timestamp('start_date')->useCurrent();
-            $table->timestamp('end_date')->nullable();
             $table->text('description')->nullable();
             $table->string('attachment_files')->nullable();
             $table->timestamps();
