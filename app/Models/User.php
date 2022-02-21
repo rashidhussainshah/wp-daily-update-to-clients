@@ -2,9 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
@@ -34,6 +32,13 @@ class User extends \TCG\Voyager\Models\User
     ];
 
     /**
+     * The attributes related to role.
+     *
+     * @var string
+     */
+    protected $DEVELOPER_ROLE_ID = 3;
+    protected $CLIENT_ROLE_ID = 4;
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -41,4 +46,22 @@ class User extends \TCG\Voyager\Models\User
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeOnlyClient($query)
+    {
+        return $query->where('role_id', $this->CLIENT_ROLE_ID);
+    }
+
+    /**
+     * @param $query
+     * @return mixed
+     */
+    public function scopeOnlyDeveloper($query)
+    {
+        return $query->where('role_id', $this->DEVELOPER_ROLE_ID);
+    }
 }
