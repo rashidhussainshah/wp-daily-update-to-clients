@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,5 +17,6 @@ Route::redirect('/', '/admin/login');
 
 
 Route::group(['prefix' => 'admin'], function () {
+    Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Voyager::routes();
 });

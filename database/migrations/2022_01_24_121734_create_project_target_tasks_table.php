@@ -20,8 +20,6 @@ class CreateProjectTargetTasksTable extends Migration
             $table->string('title');
             $table->enum('status', ['In Progress', 'QA', 'Completed'])->default('In Progress');
             $table->enum('type', ['Bug', 'Development', 'Enhancement', 'Feature', 'Issue', 'Modification', 'Meeting'])->default('Bug');
-            $table->timestamp('start_date')->useCurrent();
-            $table->timestamp('end_date')->nullable();
             $table->text('description');
             $table->string('attachment_files')->nullable();
 
