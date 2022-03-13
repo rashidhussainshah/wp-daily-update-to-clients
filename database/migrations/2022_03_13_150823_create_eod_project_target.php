@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateProjectTargetTasksTable extends Migration
+class CreateEodProjectTarget extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,11 @@ class CreateProjectTargetTasksTable extends Migration
      */
     public function up()
     {
-        Schema::create('project_target_tasks', function (Blueprint $table) {
+        Schema::create('eod_project_target', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('eod_id');
             $table->foreignId('project_target_id');
-            $table->unsignedBigInteger('developer_id');
-            $table->text('description');
-            $table->string('attachment_files')->nullable();
-
-            $table->foreign('developer_id')->references('id')->on('users');
             $table->timestamps();
-            $table->softDeletes();
         });
     }
 
@@ -33,6 +28,6 @@ class CreateProjectTargetTasksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('project_target_tasks');
+        Schema::dropIfExists('eod_project_target');
     }
 }

@@ -1,8 +1,5 @@
 @extends('voyager::bread.edit-add')
-@section('submit-buttons')
-    @parent
-    <button type="submit" class="btn btn-primary save">Save And Publish</button>
-@endsection
+
 
 @section('javascript')
     <script type="text/javascript">
@@ -11,21 +8,24 @@
             $.ajax({
                 url:"{{ route('eod.get') }}",
                 success: function(res){
-                    if (res.data && res.data.length) {
-                        res.data.forEach(projectTarget => {
-                        });
-                        tinymce.get("richtextemail").setContent(" <h4><strong>Today's Activities:</strong></h4>" +
-                            "<strong>Project:</strong> Tal Sanga" +
-                            "<ul>" +
-                            "<li>Resolve Image Broken Issue<ul>" +
-                            "<li>dasfa" +
-                            "<ul>" +
-                            "<li>fasdf</li>" +
-                            "</ul></li></ul></li>" +
-
-                            "<li>AP-1933 Resolve tag issue<ul>" +
-                            "<li>dfads</li>" +
-                            "<li>dsaf</li></ul></li></ul> ");
+                    if (res.data) {
+                        // add email (eod) configuration greetings
+                        eodDynamicHtml = `${res.data.eod_configuration.greetings} <ul>`;
+                        if (res.data.targets && res.data.targets.length) {
+                            res.data.targets.forEach(projectTarget => {
+                                eodDynamicHtml += `<li><b>${projectTarget.title}</b> <span class="${projectTarget.status}">[${projectTarget.status}]</span> </li>`;
+                                if (projectTarget.tasks && projectTarget.tasks.length) {
+                                    projectTarget.tasks.forEach(projectTargetTasks => {
+                                        eodDynamicHtml += projectTargetTasks.description
+                                    });
+                                }
+                            });
+                        }
+                        eodDynamicHtml += '</ul>';
+                        // append email configuration signatures
+                        eodDynamicHtml += `${res.data.eod_configuration.signature}`;
+                        tinymce.get("richtextemail")
+                                .setContent(`${eodDynamicHtml}`);
                     }
                 },
                 error: function(data){
