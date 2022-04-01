@@ -3,19 +3,23 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EodMail;
 use App\Models\Project;
 use App\Models\ProjectTarget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use TCG\Voyager\Http\Controllers\VoyagerBaseController;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use TCG\Voyager\Facades\Voyager;
 
 /**
  * Eod -> End of Day Email Controller
  */
-class EodController extends VoyagerBaseController
+class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
     /**
      * Get Today Target tasks with configuration
@@ -40,7 +44,8 @@ class EodController extends VoyagerBaseController
      */
     public function store(Request $request)
     {
-            dd($request);
-//            parent::store();
+        $project = Project::find($request->project_id);
+        Mail::to($project->eodConfiguration->client->email)->send(new EodMail($project, $request->email));
+        return parent::store($request);
     }
 }
