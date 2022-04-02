@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Http\Controllers\Controller;
+use App\Mail\EndOfDayReport;
 use App\Mail\EodMail;
 use App\Models\Project;
 use App\Models\ProjectTarget;
@@ -45,7 +46,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
     public function store(Request $request)
     {
         $project = Project::find($request->project_id);
-        Mail::to($project->eodConfiguration->client->email)->send(new EodMail($project, $request->email));
+        Mail::to($project->eodConfiguration->client->email)->send(new EndOfDayReport($project, $request->email));
         return parent::store($request);
     }
 }
