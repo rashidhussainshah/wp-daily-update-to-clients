@@ -34,7 +34,9 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                                 $targetQry->whereHas('tasks', function (Builder $targetTaskQry) {
                                 $targetTaskQry->whereDate('created_at', today());
                                 });
-                            }, 'eodConfiguration', 'targets.tasks'])->first();
+                            }, 'eodConfiguration' => function($eodConfQry) {
+                                $eodConfQry->whereDeveloperId(Auth::user()->id);
+                                }, 'targets.tasks'])->first();
         return response()->json(['data'=> $project]);
     }
 

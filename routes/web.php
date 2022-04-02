@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Voyager\EodController;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,8 +14,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::redirect('/', '/admin/login');
-
+//Route::redirect('/', '/admin/login');
+Route::get('/', function () {
+    App::setLocale('pt');
+    return view('welcome');
+});
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');

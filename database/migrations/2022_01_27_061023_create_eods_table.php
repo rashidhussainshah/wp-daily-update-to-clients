@@ -16,7 +16,6 @@ class CreateEodsTable extends Migration
         Schema::create('eods', function (Blueprint $table) {
             $table->id();
             $table->longText('email')->comment('daily email that we need to send');
-            $table->text('notes')->nullable();
             $table->foreignId('project_id');
             $table->unsignedBigInteger('developer_id');
             $table->timestamps();
