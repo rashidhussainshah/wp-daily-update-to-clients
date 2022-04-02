@@ -1,6 +1,6 @@
 @extends('layouts.emails')
 
-@section('title', 'End of Day Report')
+@section('title', 'Daily Report '. readableCurrentDate())
 
 
 @section('content')
