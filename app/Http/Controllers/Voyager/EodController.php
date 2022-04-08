@@ -48,7 +48,10 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
     public function store(Request $request)
     {
         $project = Project::find($request->project_id);
-        Mail::to($project->eodConfiguration->client->email)->send(new EndOfDayReport($project, $request->email));
+        Mail::to($project->eodConfiguration->client->email)
+            ->cc(explode(',', $project->eodConfiguration->cc))
+            ->bcc(explode(',', $project->eodConfiguration->bcc))
+            ->send(new EndOfDayReport($project, $request->email));
         return parent::store($request);
     }
 }
