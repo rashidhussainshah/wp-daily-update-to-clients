@@ -36,7 +36,7 @@ class ProjectTarget extends Model
 
     public function tasks(): HasMany
     {
-        return $this->hasMany(ProjectTargetTask::class);
+        return $this->hasMany(ProjectTargetTask::class)->whereDate('created_at', today());
     }
 
 
