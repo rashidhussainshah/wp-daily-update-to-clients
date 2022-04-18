@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //Route::redirect('/', '/admin/login');
-Route::get('/', function () {
-    App::setLocale('pt');
-    return view('welcome');
-});
+Route::permanentRedirect('/', 'admin/login');
+
+//Route::get('/', function () {
+//    App::setLocale('pt');
+//    return view('welcome');
+//});
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');

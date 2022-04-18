@@ -11,6 +11,11 @@ class EodConfiguration extends Model
 {
     use HasFactory, CommonRelationship;
 
+    /*
+     *  Accessors & Mutators
+     *------------------------
+    */
+
     /**
      * @return BelongsTo
      */

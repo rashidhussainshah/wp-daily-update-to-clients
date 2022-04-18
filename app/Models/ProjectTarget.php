@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectTarget extends Model
 {
-    use HasFactory, SoftDeletes, CommonRelationship;
+    use HasFactory, CommonRelationship;
 
     /**
      * @var string[]
@@ -36,7 +35,7 @@ class ProjectTarget extends Model
 
     public function tasks(): HasMany
     {
-        return $this->hasMany(ProjectTargetTask::class);
+        return $this->hasMany(ProjectTargetTask::class)->whereDate('created_at', today());
     }
 
 

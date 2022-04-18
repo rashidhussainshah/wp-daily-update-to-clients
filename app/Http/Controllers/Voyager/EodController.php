@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Voyager;
 
+use App\Jobs\EmailsHandlerJob;
 use App\Mail\EndOfDayReport;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,11 +56,14 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                 'alert-type' => 'error',
             ]);
         }
-        dd($vError);
-        Mail::to($project->eodConfiguration->client->email)
-            ->cc(explode(',', $project->eodConfiguration->cc))
-            ->bcc(explode(',', $project->eodConfiguration->bcc))
-            ->send(new EndOfDayReport($project, $request->email));
+
+        EmailsHandlerJob::dispatch([
+            'mail_name' => 'EndOfDayReport',
+            'dynamic_eod_content' => $request->email,
+            'to' => $project->eodConfiguration->client->email,
+            'cc' => $project->eodConfiguration->cc,
+            'bcc' => $project->eodConfiguration->bcc,
+        ]);
         return parent::store($request);
     }
 }
