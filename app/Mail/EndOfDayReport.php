@@ -4,10 +4,10 @@ namespace App\Mail;
 
 use App\Models\Project;
 use Illuminate\Bus\Queueable;
-use Illuminate\Mail\Mailable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
 
-class EndOfDayReport extends Mailable
+class EndOfDayReport extends BaseEmail implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
@@ -17,10 +17,10 @@ class EndOfDayReport extends Mailable
     /** @var string */
     public $eodHtmlTemplate;
 
-    public function __construct(Project $project, $eodHtmlTemplate)
+    public function __construct($data)
     {
-        $this->name = $project->eodConfiguration->client->name;
-        $this->eodHtmlTemplate = $eodHtmlTemplate;
+        parent::__construct($data);
+        $this->eodHtmlTemplate = $data['dynamic_eod_content'];
     }
 
     /**
@@ -30,6 +30,7 @@ class EndOfDayReport extends Mailable
      */
     public function build()
     {
-        return $this->subject('Daily Report '. readableCurrentDate())->view('email_templates.end_of_day_report');
+        return $this->subject('Daily Report '. readableCurrentDate())
+                ->view('email_templates.end_of_day_report');
     }
 }
