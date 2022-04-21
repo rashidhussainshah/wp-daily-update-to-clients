@@ -57,7 +57,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                 'alert-type' => 'error',
             ]);
         }
-        Log::info($request->email);
+
         EmailsHandlerJob::dispatch([
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
