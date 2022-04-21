@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 /**
@@ -56,7 +57,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                 'alert-type' => 'error',
             ]);
         }
-
+        Log::info($request->email);
         EmailsHandlerJob::dispatch([
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
