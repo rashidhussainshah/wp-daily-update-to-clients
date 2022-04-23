@@ -20,12 +20,12 @@ class BaseEmail extends Mailable
     public function __construct($data = null)
     {
             $mailConfig = array(
-                'transport'     => setting("email-configuration.driver"),
-                'host'       => setting('email-configuration.host'),
-                'port'       => setting('email-configuration.port'),
-                'encryption' => setting('email-configuration.encryption'),
-                'username'   => setting('email-configuration.username'),
-                'password'   => setting('email-configuration.password'),
+                'transport'  => setting("email-configuration.driver") ?? 'smtp',
+                'host'       => setting('email-configuration.host') ?? env('MAIL_HOST', 'smtp.mailgun.org'),
+                'port'       => setting('email-configuration.port') ?? env('MAIL_PORT', 587),
+                'encryption' => setting('email-configuration.encryption') ?? env('MAIL_ENCRYPTION', 'tls'),
+                'username'   => setting('email-configuration.username') ?? env('MAIL_USERNAME'),
+                'password'   => setting('email-configuration.password') ?? env('MAIL_PASSWORD'),
                 'timeout' => null,
                 'auth_mode' => null
             );
@@ -35,12 +35,8 @@ class BaseEmail extends Mailable
                 'name'       =>  setting('email-configuration.from.name') ?? env('MAIL_FROM_NAME', 'Example'),
             );
 
-//        Log::info('=== before ===');
-//        Log::info(Config::get('mail.from'));
-        Config::set('mail.from', $mailFromConfig);
-        Config::set('mail.mailers.smtp', $mailConfig);
-//        Log::info('=== after ===');
-//        Log::info(Config::get('mail.from'));
+//        Config::set('mail.from', $mailFromConfig);
+          Config::set('mail.mailers.smtp', $mailConfig);
     }
 
 }
