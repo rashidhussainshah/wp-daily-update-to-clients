@@ -65,6 +65,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
             'cc' => $project->eodConfiguration->cc,
             'bcc' => $project->eodConfiguration->bcc,
         ]);
+
         return parent::store($request);
     }
 }
