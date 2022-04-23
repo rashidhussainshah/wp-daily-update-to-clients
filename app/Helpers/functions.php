@@ -17,9 +17,17 @@ if (!function_exists('d')) {
         }
     }
 }
+
 if (!function_exists('readableCurrentDate')) {
     function readableCurrentDate(): string
     {
         return \Carbon\Carbon::now()->toFormattedDateString();
+    }
+}
+
+if (!function_exists('getMailFromAddress')) {
+    function getMailFromAddress(): string
+    {
+        return setting('email-configuration.from')?? 'test' ;
     }
 }
