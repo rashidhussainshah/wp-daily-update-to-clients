@@ -29,6 +29,6 @@ class EodConfiguration extends Model
      */
     public function developer(): belongsTo
     {
-        return $this->belongsTo(User::class, 'client_id');
+        return $this->belongsTo(User::class, 'developer_id');
     }
 }
