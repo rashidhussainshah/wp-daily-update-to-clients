@@ -20,8 +20,8 @@ class CreateEodConfigurationsTable extends Migration
             $table->string('cc')->nullable()->comment('email css address or address');
             $table->string('bcc')->nullable()->comment('email css address or address');
             $table->string('subject')->comment('email subject');
-            $table->boolean('task_status')->default(true);
-            $table->boolean('task_hours')->default(true);
+            $table->boolean('project_target_status')->default(true);
+            $table->boolean('project_task_hours')->default(true);
             $table->string('greetings')->comment('email heading');
             $table->text('signature')->comment('email signature');
             $table->unsignedBigInteger('developer_id')->comment('email send to client from this account');

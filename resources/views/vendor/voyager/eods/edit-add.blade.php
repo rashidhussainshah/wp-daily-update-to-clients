@@ -13,7 +13,11 @@
                         eodDynamicHtml = `${res.data.eod_configuration.greetings} <ul>`;
                         if (res.data.targets && res.data.targets.length) {
                             res.data.targets.forEach(projectTarget => {
-                                eodDynamicHtml += `<li><b>${projectTarget.title}</b> <span class="${projectTarget.status}">[${projectTarget.status}]</span> </li>`;
+                                eodDynamicHtml += `<li><b>${projectTarget.title}</b>`;
+                                if (res.data.eod_configuration.project_target_status) {
+                                    eodDynamicHtml += ` <span class="${projectTarget.status}">[${projectTarget.status}]</span>`;
+                                }
+                                eodDynamicHtml += `  </li>`;
                                 if (projectTarget.tasks && projectTarget.tasks.length) {
                                     projectTarget.tasks.forEach(projectTargetTasks => {
                                         eodDynamicHtml += projectTargetTasks.description

@@ -6,7 +6,6 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Log;
 
 class BaseEmail extends Mailable
 {

@@ -18,10 +18,14 @@ class EndOfDayReport extends BaseEmail implements ShouldQueue
     /** @var string */
     public $eodHtmlTemplate;
 
+    /** @var string */
+    public $subject;
+
     public function __construct($data)
     {
         parent::__construct($data);
         $this->eodHtmlTemplate = $data['dynamic_eod_content'];
+        $this->subject = $data['subject'];
     }
 
     /**
