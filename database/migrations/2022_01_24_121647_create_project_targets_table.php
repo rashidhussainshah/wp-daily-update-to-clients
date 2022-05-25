@@ -19,8 +19,7 @@ class CreateProjectTargetsTable extends Migration
             $table->unsignedBigInteger('developer_id');
             $table->string('title');
             $table->enum('status', ['In Progress', 'QA', 'Completed'])->default('In Progress');
-            $table->enum('type', ['User Story', 'Assignment', 'Milestone', 'Project', 'Sprint', 'Update', 'Feature'])->default('User Story');
-            $table->string('attachment_files')->nullable();
+//            $table->enum('type', ['User Story', 'Assignment', 'Milestone', 'Project', 'Sprint', 'Update', 'Feature'])->default('User Story');
             $table->timestamps();
             $table->softDeletes();
         });

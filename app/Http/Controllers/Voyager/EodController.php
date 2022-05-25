@@ -25,11 +25,13 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
     public function eodContent(): JsonResponse
     {
         $project = Project::with(['targets' => function ($targetQry) {
-                                $targetQry->whereDeveloperId(Auth::user()->id);
                                 $targetQry->whereHas('tasks');
                             }, 'eodConfiguration' => function($eodConfQry) {
                                 $eodConfQry->whereDeveloperId(Auth::user()->id);
-                                }, 'targets.tasks'])->first();
+                                }, 'targets.tasks' => function ($query)
+                                {
+                                    $query->today();
+                                }])->first();
         return response()->json(['data'=> $project]);
     }
 
@@ -62,6 +64,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
             'to' => $project->eodConfiguration->client->email,
+            'subject' => $project->eodConfiguration->subject,
             'cc' => $project->eodConfiguration->cc,
             'bcc' => $project->eodConfiguration->bcc,
         ]);

@@ -18,8 +18,9 @@ class CreateProjectTargetTasksTable extends Migration
             $table->foreignId('project_target_id');
             $table->unsignedBigInteger('developer_id');
             $table->text('description');
-            $table->string('attachment_files')->nullable();
-
+            $table->date('date');
+            $table->string('hours');
+            $table->string('minutes');
             $table->foreign('developer_id')->references('id')->on('users');
             $table->timestamps();
             $table->softDeletes();
