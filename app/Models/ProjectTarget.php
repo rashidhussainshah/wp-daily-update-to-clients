@@ -19,6 +19,17 @@ class ProjectTarget extends Model
     protected $dates = ['deleted_at'];
 
     /**
+     * The attributes that should be appended in models.
+     *
+     * @var array
+     */
+//    protected $appends = [
+//        'task_hours',
+//        'task_minutes',
+//    ];
+
+
+    /**
      * Set the developer_id.
      *
      * @return void
