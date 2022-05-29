@@ -31,7 +31,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                                 }, 'targets.tasks' => function ($query)
                                 {
                                     $query->today();
-                                }])->first();
+                                }])->find(4);
         return response()->json(['data'=> $project]);
     }
 
