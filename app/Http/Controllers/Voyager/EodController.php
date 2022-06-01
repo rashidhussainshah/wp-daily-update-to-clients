@@ -22,7 +22,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
      * to send in email
      * @return JsonResponse
      */
-    public function eodContent(): JsonResponse
+    public function eodContent(Request $request): JsonResponse
     {
         $project = Project::with(['targets' => function ($targetQry) {
                                 $targetQry->whereHas('tasks');
@@ -31,7 +31,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
                                 }, 'targets.tasks' => function ($query)
                                 {
                                     $query->today();
-                                }])->find(4);
+                                }])->find($request->project_id);
         return response()->json(['data'=> $project]);
     }
 
