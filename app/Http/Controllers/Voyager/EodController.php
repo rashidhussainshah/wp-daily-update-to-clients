@@ -3,14 +3,10 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Jobs\EmailsHandlerJob;
-use App\Mail\EndOfDayReport;
 use App\Models\Project;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 /**
  * Eod -> End of Day Email Controller

@@ -2,11 +2,9 @@
 
 namespace App\Mail;
 
-use App\Models\Project;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class EndOfDayReport extends BaseEmail implements ShouldQueue
 {

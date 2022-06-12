@@ -39,8 +39,19 @@ class EmailsHandlerJob implements ShouldQueue
                 //============== User Emails ==============\\
                 case 'EndOfDayReport':
                     $mail = new EndOfDayReport($this->data);
-                    \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
-                        ->bcc(explode(',', $this->data['bcc']))->send($mail);
+                    if (isset($this->data['cc']) && isset($this->data['bcc'])) {
+                        \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
+                            ->bcc(explode(',', $this->data['bcc']))->send($mail);
+                    } elseif (isset($this->data['cc'])) {
+                        \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
+                            ->send($mail);
+                    } elseif (isset($this->data['bcc'])) {
+                        \Mail::to($this->data['to'])->bcc(explode(',', $this->data['bcc']))
+                            ->send($mail);
+                    } else {
+                        \Mail::to($this->data['to'])
+                            ->send($mail);
+                    }
                     break;
                 //============== Default ==============\\
                 default:
