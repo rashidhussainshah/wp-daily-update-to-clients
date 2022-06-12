@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class Project extends Model
 {
@@ -21,7 +22,7 @@ class Project extends Model
 
     public function eodConfiguration(): HasOne
     {
-        return $this->hasOne(EodConfiguration::class);
+        return $this->hasOne(EodConfiguration::class)->whereDeveloperId(Auth::user()->id);
     }
 
 }

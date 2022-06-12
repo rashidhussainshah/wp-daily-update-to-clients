@@ -15,12 +15,12 @@
                     success: function(res){
                         if (res.data) {
                             // add email (eod) configuration greetings
-                            eodDynamicHtml = `${res.data.eod_configuration.greetings} <ul>`;
+                            eodDynamicHtml = (res.data.eod_configuration && res.data.eod_configuration.greetings)? `${res.data.eod_configuration.greetings} <ul>` :`<ul>`;
                             if (res.data.targets && res.data.targets.length) {
                                 res.data.targets.forEach(projectTarget => {
                                     eodDynamicHtml += `<li><b>${projectTarget.title}</b>`;
                                     // shown project target status if enabled from eod configuration
-                                    if (res.data.eod_configuration.project_target_status) {
+                                    if (res.data.eod_configuration && res.data.eod_configuration.project_target_status) {
                                         eodDynamicHtml += ` <span class="${projectTarget.status}">[${projectTarget.status}]</span>`;
                                     }
                                     // if (res.data.eod_configuration.project_task_hours) {
@@ -37,7 +37,7 @@
                             }
                             eodDynamicHtml += '</ul>';
                             // append email configuration signatures
-                            eodDynamicHtml += `${res.data.eod_configuration.signature}`;
+                            eodDynamicHtml += (res.data.eod_configuration && res.data.eod_configuration.signature) ? `${res.data.eod_configuration.signature}`: '';
                             // set dynamic email content in rich text editor
                             tinymce.get("richtextemail")
                                 .setContent(`${eodDynamicHtml}`);
