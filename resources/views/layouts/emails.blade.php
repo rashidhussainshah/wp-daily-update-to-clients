@@ -138,7 +138,7 @@
         vertical-align: top;
         min-width: 320px;
         margin: 0 auto;
-        background-color: #000000;
+        background-color: #f1f3f4;
         width: 100%;
       " cellpadding="0" cellspacing="0">
     <tbody>
@@ -399,7 +399,7 @@ padding: 6% 24% 4% 2%;">
                                         >
                                             <li style="display: inline">
                                                 <a
-                                                    href="#"
+                                                    href="https://webpenter.com/work/"
                                                     id="link-webpenter"
                                                     style="
                                   color: white;
@@ -407,12 +407,12 @@ padding: 6% 24% 4% 2%;">
                                   text-decoration: none;
                                   margin: 3px 2px;
                                 "
-                                                >Help</a
+                                                >Work</a
                                                 >
                                             </li>
                                             <li style="display: inline">
                                                 <a
-                                                    href="#"
+                                                    href="https://www.webpenter.com/contact"
                                                     id="link-webpenter"
                                                     style="
                                   color: white;
@@ -426,7 +426,8 @@ padding: 6% 24% 4% 2%;">
                                             <li style="display: inline">
                                                 <a
                                                     id="link-webpenter"
-                                                    href="#"
+                                                    target= "_blank"
+                                                    href="https://www.webpenter.com"
                                                     style="
                                   color: white;
                                   font-weight: 400;
@@ -542,7 +543,7 @@ padding: 6% 24% 4% 2%;">
                                             "
                                                                 >
                                                                     <a
-                                                                        href="https://facebook.com/"
+                                                                        href="https://web.facebook.com/webpenterinc/"
                                                                         title="Facebook"
                                                                         target="_blank"
                                                                     >
@@ -602,7 +603,7 @@ padding: 6% 24% 4% 2%;">
                                             "
                                                                 >
                                                                     <a
-                                                                        href="https://twitter.com/"
+                                                                        href="https://twitter.com/webpenterllc"
                                                                         title="Twitter"
                                                                         target="_blank"
                                                                     >
@@ -662,7 +663,7 @@ padding: 6% 24% 4% 2%;">
                                             "
                                                                 >
                                                                     <a
-                                                                        href="https://linkedin.com/"
+                                                                        href="https://www.linkedin.com/company/web-penter-inc/"
                                                                         title="LinkedIn"
                                                                         target="_blank"
                                                                     >
@@ -722,7 +723,7 @@ padding: 6% 24% 4% 2%;">
                                             "
                                                                 >
                                                                     <a
-                                                                        href="https://instagram.com/"
+                                                                        href="https://instagram.com/webpenter"
                                                                         title="Instagram"
                                                                         target="_blank"
                                                                     >
@@ -782,7 +783,7 @@ padding: 6% 24% 4% 2%;">
                                             "
                                                                 >
                                                                     <a
-                                                                        href="https://pinterest.com/"
+                                                                        href="https://pinterest.com/webpenterllc"
                                                                         title="Pinterest"
                                                                         target="_blank"
                                                                     >
