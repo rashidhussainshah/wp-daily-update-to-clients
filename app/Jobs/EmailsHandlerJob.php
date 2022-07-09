@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Mail\EndOfDayReport;
+use App\Mail\UserLogin;
 use Exception;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -37,6 +38,12 @@ class EmailsHandlerJob implements ShouldQueue
         try {
             switch ($this->data['mail_name']) {
                 //============== User Emails ==============\\
+                case 'UserLoginMail':
+                    $mail = new UserLogin($this->data);
+                    \Mail::to($this->data['to'])
+                        ->send($mail);
+
+                    break;
                 case 'EndOfDayReport':
                     $mail = new EndOfDayReport($this->data);
                     if (isset($this->data['cc']) && isset($this->data['bcc'])) {

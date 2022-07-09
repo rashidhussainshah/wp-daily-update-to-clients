@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //Route::redirect('/', '/admin/login');
+Route::get('/mail/{email_name}/{to_email?}/{send_email?}', [\App\Http\Controllers\TestController::class, 'testEmail']);
 Route::permanentRedirect('/', 'admin/login');
 
 //Route::get('/', function () {
