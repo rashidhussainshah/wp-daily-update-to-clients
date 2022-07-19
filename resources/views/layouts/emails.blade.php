@@ -122,7 +122,7 @@
       margin: 0;
       padding: 0;
       -webkit-text-size-adjust: 100%;
-      background-color: #000000;
+      background-color: #f0f8ff;
       color: #000000;
     ">
 <!--[if IE]>
@@ -138,7 +138,7 @@
         vertical-align: top;
         min-width: 320px;
         margin: 0 auto;
-        background-color: #f1f3f4;
+        background-color: #f0f8ff;
         width: 100%;
       " cellpadding="0" cellspacing="0">
     <tbody>
@@ -186,6 +186,7 @@
                       display: table-cell;
                       vertical-align: top;
                     ">
+                   
                             <div class="v-col-background-color" style="
                         background-color: #faf7f7;
                         width: 100% !important;
@@ -224,7 +225,7 @@
                                     ">
                                                         <div class="logo" style="text-align: center">
                                                             <img class="main-logo"
-                                                                 src="https://lh3.googleusercontent.com/fife/AAWUweWA0Xa60kM3bY0KXtIvnJRlLslcYu-2-eooxJya4hzOObUPBi-leSsHSMYXZ7DQ3zJOb3UcL3JMOYnmPQIIiKQ-IqJBGFd74oJ65G7hBvsWxvXIYiMO93haGwX-kYiMu58nSocNFm9oBHyAtPj8JuRXlFhH9NSSDodoUiNPBkXLfwc3PXTq1EsTbIfrMXJsj7oJZlyrcHa8uRYM4JZwqe_Y19q_XVtlun-dNPDXTCSsyKZONhwGKKWmGcQWZszNNDCnY4OyfkvX9zWRj-04T68bO_vDk52ZjDJ9HzI2YapaMJFFEIfMRYuI8wiQ7LNQ1LY3aMwjqtCEcIhNTBAxT7JvQ3qYyV5AfHr6A7S6ADucPY-rgXweRPCwI9FwHnGyLKHzBu9PnDW8tQ7VJBmZ6stAqo3_rTkrLzH7EClAM6JvTv8AveGCpOQkfRj4BHS4TdHcG1KepmBSDK_8t0w-CNV066bgC3sGZvQrURSyqO_uIgVq1kHmC472J1lQCmCE0hbhOM9b-ylBF7rph9kwNAIAaRTuFYFJlbOttaeCCPvX8Zfn2PP3hu1J-tZS_BclKtrebAmysux_ADbwFHOYRAYeCMvhiAa1Q9d46PLlQD6PBu-cLM_C9veyEduL9uznKB8ddDG5psWqsDqrPX777ABKvAiifcMeQlrkqNgEMkaGrE1sNJiAJLvVBx-86A2-Mp4tBrenp39GFTLdJxuAImHERMP_LueP7OmwTLioVO2bro6pLdKk7nh6X89i08P_PP-Ne0_u1rtPJHWGDBk=w1366-h295"
+                                                                 src="https://drive.google.com/file/d/1CoH-UJKhW6AB8UE_SEQCZVjTRmmN5NjM/view?usp=sharing"
                                                                  alt="" style="max-width: 150px; padding: 3%"/>
                                                         </div>
                                                         <!-- <div class="social-logos">
@@ -548,7 +549,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1XnYUY948G5tLV71BNG558vlBkGBmV962=w1366-h625-iv2"
+                                                                            src="https://drive.google.com/file/d/1XnYUY948G5tLV71BNG558vlBkGBmV962/view?usp=sharing"
                                                                             alt="Facebook"
                                                                             title="Facebook"
                                                                             width="32"
@@ -608,7 +609,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1voqWcCk5daWas8l8A7V5nLYHge-xxTdf=w1366-h295-iv2"
+                                                                            src="https://drive.google.com/file/d/1voqWcCk5daWas8l8A7V5nLYHge-xxTdf/view?usp=sharing"
                                                                             alt="Twitter"
                                                                             title="Twitter"
                                                                             width="32"
@@ -668,7 +669,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1bmUS1fOOdjJG2aAZb4L60YAmzE78AQi7=w1366-h295-iv2"
+                                                                            src="https://drive.google.com/file/d/1bmUS1fOOdjJG2aAZb4L60YAmzE78AQi7/view?usp=sharing"
                                                                             alt="LinkedIn"
                                                                             title="LinkedIn"
                                                                             width="32"
@@ -728,7 +729,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1Pc41jITAe_3uzia9tndS2kaidToDvqf7=w1366-h295-iv2"
+                                                                            src="https://drive.google.com/file/d/1Pc41jITAe_3uzia9tndS2kaidToDvqf7/view?usp=sharing"
                                                                             alt="Instagram"
                                                                             title="Instagram"
                                                                             width="32"
@@ -788,7 +789,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/17ldlOcWhrmsVruh5AhkAtABVecFallTa=w1366-h295-iv2"
+                                                                            src="https://drive.google.com/file/d/17ldlOcWhrmsVruh5AhkAtABVecFallTa/view?usp=sharing"
                                                                             alt="Pinterest"
                                                                             title="Pinterest"
                                                                             width="32"
