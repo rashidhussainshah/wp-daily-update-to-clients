@@ -225,7 +225,7 @@
                                     ">
                                                         <div class="logo" style="text-align: center">
                                                             <img class="main-logo"
-                                                                 src="https://drive.google.com/file/d/1CoH-UJKhW6AB8UE_SEQCZVjTRmmN5NjM/view?usp=sharing"
+                                                                 src="https://webpenter.com/wp-content/uploads/2022/07/TP-LOGO-1.png"
                                                                  alt="" style="max-width: 150px; padding: 3%"/>
                                                         </div>
                                                         <!-- <div class="social-logos">
@@ -549,7 +549,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://drive.google.com/file/d/1XnYUY948G5tLV71BNG558vlBkGBmV962/view?usp=sharing"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/facebook.png"
                                                                             alt="Facebook"
                                                                             title="Facebook"
                                                                             width="32"
@@ -609,7 +609,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://drive.google.com/file/d/1voqWcCk5daWas8l8A7V5nLYHge-xxTdf/view?usp=sharing"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Twitter.png"
                                                                             alt="Twitter"
                                                                             title="Twitter"
                                                                             width="32"
@@ -669,7 +669,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://drive.google.com/file/d/1bmUS1fOOdjJG2aAZb4L60YAmzE78AQi7/view?usp=sharing"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Linkedin.png"
                                                                             alt="LinkedIn"
                                                                             title="LinkedIn"
                                                                             width="32"
@@ -729,7 +729,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://drive.google.com/file/d/1Pc41jITAe_3uzia9tndS2kaidToDvqf7/view?usp=sharing"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Instagram.png"
                                                                             alt="Instagram"
                                                                             title="Instagram"
                                                                             width="32"
@@ -789,7 +789,7 @@ padding: 6% 24% 4% 2%;">
                                                                         target="_blank"
                                                                     >
                                                                         <img
-                                                                            src="https://drive.google.com/file/d/17ldlOcWhrmsVruh5AhkAtABVecFallTa/view?usp=sharing"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Pinterest.png"
                                                                             alt="Pinterest"
                                                                             title="Pinterest"
                                                                             width="32"
