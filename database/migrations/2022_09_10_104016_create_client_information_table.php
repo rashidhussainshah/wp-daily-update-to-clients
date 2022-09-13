@@ -18,7 +18,7 @@ class CreateClientInformationTable extends Migration
             $table->foreignId('user_id');
             $table->string('phone')->nullable();
             $table->string('website_url');
-            $table->string('website_login_email')->comment('website login admin email');
+            $table->string('website_email_or_username')->comment('website login admin email/username');
             $table->string('website_login_password')->comment('website login admin password');
             $table->text('server_login_information')->nullable()->comment('SSH or FTP or Cpanel login');
             $table->text('server_login_files')->nullable()->comment('.ssh or .ppk or any other file');
