@@ -22,7 +22,7 @@ class CreateUserPaymentsTable extends Migration
             $table->integer('payable_to_developer')->comment('value will be in dollars and other currencies etc ');
             $table->integer('currency_current_rate')->comment('currency current rates');
             $table->integer('fee')->comment('fiverr 20% upwork 20% 0 for direct clients');
-            $table->string('status')->default('requested');
+            $table->string('status')->default('Requested');
             $table->longText('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
