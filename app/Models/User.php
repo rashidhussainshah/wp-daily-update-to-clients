@@ -10,6 +10,9 @@ class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    const ADMINISTRATOR_ROLE_NAME = 'Administrator';
+    const ACCOUNTANT_ROLE_NAME = 'Accountant';
+
     /**
      * The attributes that are mass assignable.
      *

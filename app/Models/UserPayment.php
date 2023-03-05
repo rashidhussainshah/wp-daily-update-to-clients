@@ -24,4 +24,13 @@ class UserPayment extends Model
         return $query->where('status', UserPayment::APPROVED_STATUS);
     }
 
+    public function scopeCurrentUserAndManagement($query)
+    {
+        if (Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME )) {
+            return $query;
+        } else {
+            return $query->where('developer_id', Auth::user()->id);
+        }
+    }
+
 }
