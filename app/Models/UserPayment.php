@@ -26,6 +26,7 @@ class UserPayment extends Model
 
     public function scopeCurrentUserAndManagement($query)
     {
+        dd(Auth::user()->role->name,Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME ));
         if (Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME )) {
             return $query;
         } else {
