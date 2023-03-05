@@ -12,7 +12,7 @@ class User extends \TCG\Voyager\Models\User
 
     const ADMINISTRATOR_ROLE_NAME = 'Administrator';
     const ACCOUNTANT_ROLE_NAME = 'Accountant';
-    const DEVELOPER_ROLE_NAME = 'developer';
+    const DEVELOPER_ROLE_NAME = 'Developer';
 
     /**
      * The attributes that are mass assignable.
