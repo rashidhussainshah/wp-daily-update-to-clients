@@ -20,10 +20,10 @@ class CreateUserPaymentsTable extends Migration
             $table->foreignId('project_target_id');
             $table->double('total_earning');
             $table->double('dev_earning')->comment('value will be in dollars and other currencies etc ');
-            $table->double('currency_current_rate')->comment('currency current rates');
             $table->double('payable')->comment('company need to pay to the dev');
             $table->double('paid')->comment('company paid to the dev')->nullable();
-            $table->integer('fee')->comment('fiverr 20% upwork 20% 0 for direct clients')->default(0);
+            $table->integer('fee')->comment('fiverr 20% upwork 20% 0 for direct clients')->nullable();
+            $table->double('currency_current_rate')->comment('currency current rates')->nullable();
             $table->string('status')->default('Requested');
             $table->longText('notes')->nullable();
             $table->timestamps();
