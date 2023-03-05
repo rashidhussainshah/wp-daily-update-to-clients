@@ -16,7 +16,9 @@ class UserPayment extends Model
 
     public function setDeveloperIdAttribute()
     {
-        $this->attributes['developer_id'] = Auth::user()->id;
+        if ($this->isDeveloper()) {
+            $this->attributes['developer_id'] = Auth::user()->id;
+        }
     }
 
     public function scopeApproved($query)
@@ -31,6 +33,14 @@ class UserPayment extends Model
         } else {
             return $query->where('developer_id', Auth::user()->id);
         }
+    }
+
+    private function isDeveloper()
+    {
+        if (Auth::user()->role && (Auth::user()->role->name == USER::DEVELOPER_ROLE_NAME )) {
+            return true;
+        }
+        return false;
     }
 
 }
