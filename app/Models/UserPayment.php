@@ -11,8 +11,17 @@ use Illuminate\Support\Facades\Auth;
 class UserPayment extends Model
 {
     use HasFactory, CommonRelationship, SoftDeletes;
+
+    const APPROVED_STATUS = 'Approved';
+
     public function setDeveloperIdAttribute()
     {
         $this->attributes['developer_id'] = Auth::user()->id;
     }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('status', UserPayment::APPROVED_STATUS);
+    }
+
 }
