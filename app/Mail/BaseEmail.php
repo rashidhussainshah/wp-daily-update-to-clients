@@ -33,7 +33,6 @@ class BaseEmail extends Mailable
                 'address'     => setting('email-configuration.from') ?? env('MAIL_FROM_ADDRESS', 'hello@example.com'),
                 'name'       =>  setting('email-configuration.from.name') ?? env('MAIL_FROM_NAME', 'Example'),
             );
-dd($mailConfig);
 //        Config::set('mail.from', $mailFromConfig);
           Config::set('mail.mailers.smtp', $mailConfig);
     }
