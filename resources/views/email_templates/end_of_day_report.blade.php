@@ -85,19 +85,19 @@
 
 
                             <div class="task-box">
-                                <h2 style="
-                 text-align: left;
-    margin-left: 53px;
-    font-size: 18px;
-    font-family: arial;
-    font-weight: 300;
-    text-transform: uppercase;
-    padding: 21px 0 0px;
-    color: rgb(84, 85, 84);
-    margin-bottom: 0px;
-                                          ">
-                                    Daily Tasks Updates
-                                </h2>
+{{--                                <h2 style="--}}
+{{--                 text-align: left;--}}
+{{--    margin-left: 53px;--}}
+{{--    font-size: 18px;--}}
+{{--    font-family: arial;--}}
+{{--    font-weight: 300;--}}
+{{--    text-transform: uppercase;--}}
+{{--    padding: 21px 0 0px;--}}
+{{--    color: rgb(84, 85, 84);--}}
+{{--    margin-bottom: 0px;--}}
+{{--                                          ">--}}
+{{--                                    Daily Tasks Updates--}}
+{{--                                </h2>--}}
                                 <hr class="h2-hr" style="
                                  background-color: rgb(70, 63, 63);
     height: 0.5px;
