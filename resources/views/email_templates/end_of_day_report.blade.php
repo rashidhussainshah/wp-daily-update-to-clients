@@ -20,7 +20,63 @@
                                 " align="left">
                 <div>
                     <div class="content">
-
+{{--                        <div class="info-section" style="--}}
+{{--                                        display: grid;--}}
+{{--                                        grid-template-columns: 32% 32% 32%;--}}
+{{--                                        align-items: center;--}}
+{{--                                        justify-items: center;--}}
+{{--                                        background-color: white;--}}
+{{--                                        width: 100%;--}}
+{{--                                        text-transform: capitalize;--}}
+{{--                                      ">--}}
+{{--                            <div class="box1" style="--}}
+{{--                                          display: flex;--}}
+{{--                                          flex-direction: column !important;--}}
+{{--                                          padding: 5%;--}}
+{{--                                        ">--}}
+{{--                                <label style="--}}
+{{--                                            font-weight: 700;--}}
+{{--                                            padding-bottom: 7px;--}}
+{{--                                            color: green;--}}
+{{--                                          "> client Name <br></label>--}}
+{{--                                <span--}}
+{{--                                    style="color: gray; font-size: 13px">Robert--}}
+{{--                                                                                Jr</span>--}}
+{{--                            </div>--}}
+{{--                            <div class="box1" style="--}}
+{{--                                          display: flex;--}}
+{{--                                          flex-direction: column !important;--}}
+{{--                                          padding: 5%;--}}
+{{--                                        ">--}}
+{{--                                <label style="--}}
+{{--                                            font-weight: 700;--}}
+{{--                                            padding-bottom: 7px;--}}
+{{--                                            color: green;--}}
+{{--                                          ">Project</label>--}}
+{{--                                <span--}}
+{{--                                    style="color: gray; font-size: 13px">Onyxsa</span>--}}
+{{--                            </div>--}}
+{{--                            <div class="box1" style="--}}
+{{--                                          display: flex;--}}
+{{--                                          flex-direction: column !important;--}}
+{{--                                          padding: 5%;--}}
+{{--                                        ">--}}
+{{--                                <label style="--}}
+{{--                                            font-weight: 700;--}}
+{{--                                            padding-bottom: 7px;--}}
+{{--                                            color: green;--}}
+{{--                                          ">Week</label>--}}
+{{--                                <span--}}
+{{--                                    style="color: gray; font-size: 13px">january--}}
+{{--                                                                                20-27</span>--}}
+{{--                            </div>--}}
+{{--                        </div>--}}
+{{--                        <!-- <hr id="info-hr" style="--}}
+{{--background-color: grey;--}}
+{{--width: 100%;--}}
+{{--margin: 0;--}}
+{{--height: 1px;--}}
+{{--" /> -->--}}
                         <div class="task-section" style="
                                         background-color: rgb(255, 255, 255);
                                         width: 100%;
