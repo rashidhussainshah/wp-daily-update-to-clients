@@ -1,5 +1,5 @@
-<!DOCTYPE html
-    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml"
       xmlns:o="urn:schemas-microsoft-com:office:office">
 
@@ -49,7 +49,7 @@
             }
 
             .u-row {
-                width: calc(100% - 0px) !important;
+                width: calc(100% - 40px) !important;
             }
 
             .u-col {
@@ -122,7 +122,7 @@
       margin: 0;
       padding: 0;
       -webkit-text-size-adjust: 100%;
-      background-color: transparent;
+      background-color: #f0f8ff;
       color: #000000;
     ">
 <!--[if IE]>
@@ -138,7 +138,7 @@
         vertical-align: top;
         min-width: 320px;
         margin: 0 auto;
-        background-color: transparent;
+        background-color: #f0f8ff;
         width: 100%;
       " cellpadding="0" cellspacing="0">
     <tbody>
@@ -186,8 +186,9 @@
                       display: table-cell;
                       vertical-align: top;
                     ">
+
                             <div class="v-col-background-color" style="
-                        background-color: #008081;
+                        background-color: #faf7f7;
                         width: 100% !important;
                         border-radius: 0px;
                         -webkit-border-radius: 0px;
@@ -217,49 +218,45 @@
                                 " align="left">
                                                 <div>
                                                     <header class="nav" style="
-                                      background-color: #008081;
+                                      background-color: white;
                                       max-width: 100%;
                                       display: grid;
                                       grid-template-columns: 100%;
                                     ">
-                                                        <div class="logo" style="
-                                                                    text-align: center;
-                                                                    background: white;
-                                                                    margin: 11px 11px 3px; ">
+                                                        <div class="logo" style="text-align: center">
                                                             <img class="main-logo"
-                                                                 src="https://lh3.googleusercontent.com/fife/AAWUweWA0Xa60kM3bY0KXtIvnJRlLslcYu-2-eooxJya4hzOObUPBi-leSsHSMYXZ7DQ3zJOb3UcL3JMOYnmPQIIiKQ-IqJBGFd74oJ65G7hBvsWxvXIYiMO93haGwX-kYiMu58nSocNFm9oBHyAtPj8JuRXlFhH9NSSDodoUiNPBkXLfwc3PXTq1EsTbIfrMXJsj7oJZlyrcHa8uRYM4JZwqe_Y19q_XVtlun-dNPDXTCSsyKZONhwGKKWmGcQWZszNNDCnY4OyfkvX9zWRj-04T68bO_vDk52ZjDJ9HzI2YapaMJFFEIfMRYuI8wiQ7LNQ1LY3aMwjqtCEcIhNTBAxT7JvQ3qYyV5AfHr6A7S6ADucPY-rgXweRPCwI9FwHnGyLKHzBu9PnDW8tQ7VJBmZ6stAqo3_rTkrLzH7EClAM6JvTv8AveGCpOQkfRj4BHS4TdHcG1KepmBSDK_8t0w-CNV066bgC3sGZvQrURSyqO_uIgVq1kHmC472J1lQCmCE0hbhOM9b-ylBF7rph9kwNAIAaRTuFYFJlbOttaeCCPvX8Zfn2PP3hu1J-tZS_BclKtrebAmysux_ADbwFHOYRAYeCMvhiAa1Q9d46PLlQD6PBu-cLM_C9veyEduL9uznKB8ddDG5psWqsDqrPX777ABKvAiifcMeQlrkqNgEMkaGrE1sNJiAJLvVBx-86A2-Mp4tBrenp39GFTLdJxuAImHERMP_LueP7OmwTLioVO2bro6pLdKk7nh6X89i08P_PP-Ne0_u1rtPJHWGDBk=w1366-h295"
-                                                                 alt=""
-                                                                 style="max-width: 150px; padding: 3%"/>
+                                                                 src="https://webpenter.com/wp-content/uploads/2022/07/TP-LOGO-1.png"
+                                                                 alt="" style="max-width: 150px; padding: 3%"/>
                                                         </div>
                                                         <!-- <div class="social-logos">
-                                                <ul id="social" style=" display: flex;
+                                                            <ul id="social" style=" display: flex;
 max-width: 50px;
 list-style-type: none;
 float: right;
 padding: 6% 24% 4% 2%;">
-                                                    <li>
-                                                        <a href="">
-                                                            <img src="https://lh3.google.com/u/0/d/1zu3fwSmns_-m9ws1WuVK1HSyBRAAbm5k=w1366-h625-iv1" alt="" style=" max-width: 20px;
-float: right;
-margin-right: 20px;">
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="">
-                                                            <img src="https://lh3.google.com/u/0/d/1A2qT0SoDaowfgvt6IVkPeRindLiMPBIA=w1366-h295-iv1" alt="" style=" max-width: 20px;
-float: right;
-margin-right: 20px;">
-                                                        </a>
-                                                    </li>
-                                                    <li>
-                                                        <a href="">
-                                                            <img src="https://lh3.google.com/u/0/d/1y_lVN2AXEwTNHBrm4lnpmXDWQhANxGXR=w1366-h625-iv1" alt="" style=" max-width: 20px;
-float: right;
-margin-right: 20px;">
-                                                        </a>
-                                                    </li>
-                                                </ul>
-                                            </div> -->
+                                                                <li>
+                                                                    <a href="">
+                                                                        <img src="https://lh3.google.com/u/0/d/1zu3fwSmns_-m9ws1WuVK1HSyBRAAbm5k=w1366-h625-iv1" alt="" style=" max-width: 20px;
+            float: right;
+            margin-right: 20px;">
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="">
+                                                                        <img src="https://lh3.google.com/u/0/d/1A2qT0SoDaowfgvt6IVkPeRindLiMPBIA=w1366-h295-iv1" alt="" style=" max-width: 20px;
+            float: right;
+            margin-right: 20px;">
+                                                                    </a>
+                                                                </li>
+                                                                <li>
+                                                                    <a href="">
+                                                                        <img src="https://lh3.google.com/u/0/d/1y_lVN2AXEwTNHBrm4lnpmXDWQhANxGXR=w1366-h625-iv1" alt="" style=" max-width: 20px;
+            float: right;
+            margin-right: 20px;">
+                                                                    </a>
+                                                                </li>
+                                                            </ul>
+                                                        </div> -->
                                                     </header>
                                                 </div>
                                             </td>
@@ -267,7 +264,52 @@ margin-right: 20px;">
                                         </tbody>
                                     </table>
 
-                                    @yield('content')
+                                    <table style="font-family: arial, helvetica, sans-serif" role="presentation"
+                                           cellpadding="0" cellspacing="0" width="100%" border="0">
+                                        <tbody>
+                                        <tr>
+                                            <td style="
+                                  overflow-wrap: break-word;
+                                  word-break: break-word;
+                                  padding: 10px;
+                                  font-family: arial, helvetica, sans-serif;
+                                " align="left">
+                                                <div>
+                                                    <div class="content">
+                                                        <hr
+                                                            id="info-hr"
+                                                            style="
+                                        background-color: grey;
+                                        width: 100%;
+                                        margin: 0;
+                                        height: 1px;
+                                      "
+                                                        />
+                                                        <div class="task-section" style="
+                                        background-color: rgb(255, 255, 255);
+                                        width: 100%;
+                                        padding-bottom: 45px;
+                                      ">
+
+
+                                                            <div class="task-box">
+                                                                @yield('content')
+                                                            </div>
+                                                            <hr style="
+                                          background-color: rgb(70, 63, 63);
+                                          height: 2px;
+                                          clear: both;
+                                          width: 95%;
+                                          margin: auto;
+                                        ">
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
 
                                     <!--[if (!mso)&(!IE)]><!-->
                                 </div>
@@ -280,8 +322,13 @@ margin-right: 20px;">
                 </div>
             </div>
 
-            <div class="u-row-container" style="padding: 0px 0px 0px; background-color: transparent">
-                <div class="u-row" style="
+            <div
+                class="u-row-container"
+                style="padding: 0px 0px 20px; background-color: transparent"
+            >
+                <div
+                    class="u-row"
+                    style="
                   margin: 0 auto;
                   min-width: 320px;
                   max-width: 600px;
@@ -289,13 +336,16 @@ margin-right: 20px;">
                   word-wrap: break-word;
                   word-break: break-word;
                   background-color: transparent;
-                ">
-                    <div style="
+                "
+                >
+                    <div
+                        style="
                     border-collapse: collapse;
                     display: table;
                     width: 100%;
                     background-color: transparent;
-                  ">
+                  "
+                    >
                         <!--[if (mso)|(IE)]>
                         <table width="100%" cellpadding="0" cellspacing="0" border="0">
                             <tr>
@@ -307,21 +357,29 @@ margin-right: 20px;">
                         <td align="center" width="600" class="v-col-background-color"
                             style="background-color: #008aaa;width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;border-radius: 0px;-webkit-border-radius: 0px; -moz-border-radius: 0px;"
                             valign="top"><![endif]-->
-                        <div id="u_column_6" class="u-col u-col-100" style="
+                        <div
+                            id="u_column_6"
+                            class="u-col u-col-100"
+                            style="
                       max-width: 320px;
                       min-width: 600px;
                       display: table-cell;
                       vertical-align: top;
-                    ">
-                            <div class="v-col-background-color" style="
+                    "
+                        >
+                            <div
+                                class="v-col-background-color"
+                                style="
                         background-color: #008081;
                         width: 100% !important;
                         border-radius: 0px;
                         -webkit-border-radius: 0px;
                         -moz-border-radius: 0px;
-                      ">
+                      "
+                            >
                                 <!--[if (!mso)&(!IE)]><!-->
-                                <div style="
+                                <div
+                                    style="
                           padding: 0px;
                           border-top: 0px solid transparent;
                           border-left: 0px solid transparent;
@@ -330,39 +388,55 @@ margin-right: 20px;">
                           border-radius: 0px;
                           -webkit-border-radius: 0px;
                           -moz-border-radius: 0px;
-                        ">
+                        "
+                                >
                                     <div class="footer-ul">
-                                        <ul style="
+                                        <ul
+                                            style="
                               text-align: center;
                               margin: 0;
                               padding-top: 9px;
-                            ">
+                            "
+                                        >
                                             <li style="display: inline">
-                                                <a target="_blank" href="https://webpenter.com/work" id="link-webpenter"
-                                                   style="
+                                                <a
+                                                    href="https://webpenter.com/work/"
+                                                    id="link-webpenter"
+                                                    style="
                                   color: white;
                                   font-weight: 400;
                                   text-decoration: none;
                                   margin: 3px 2px;
-                                ">Portfolio</a>
+                                "
+                                                >Work</a
+                                                >
                                             </li>
                                             <li style="display: inline">
-                                                <a target="_blank" href="https://webpenter.com/contact/"
-                                                   id="link-webpenter" style="
+                                                <a
+                                                    href="https://www.webpenter.com/contact"
+                                                    id="link-webpenter"
+                                                    style="
                                   color: white;
                                   font-weight: 400;
                                   text-decoration: none;
                                   margin: 3px 2px;
-                                ">Feedback</a>
+                                "
+                                                >Feedback</a
+                                                >
                                             </li>
                                             <li style="display: inline">
-                                                <a target="_blank" id="link-webpenter" href="https://www.webpenter.com/"
-                                                   style="
+                                                <a
+                                                    id="link-webpenter"
+                                                    target= "_blank"
+                                                    href="https://www.webpenter.com"
+                                                    style="
                                   color: white;
                                   font-weight: 400;
                                   text-decoration: none;
                                   margin: 3px 2px;
-                                ">Visit Us</a>
+                                "
+                                                >Visit Us</a
+                                                >
                                             </li>
                                         </ul>
                                     </div>
@@ -370,17 +444,27 @@ margin-right: 20px;">
 
                                     <!--<![endif]-->
 
-                                    <table style="font-family: arial, helvetica, sans-serif" role="presentation"
-                                           cellpadding="0" cellspacing="0" width="100%" border="0">
+                                    <table
+                                        style="font-family: arial, helvetica, sans-serif"
+                                        role="presentation"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        width="100%"
+                                        border="0"
+                                    >
                                         <tbody>
                                         <tr>
-                                            <td style="
+                                            <td
+                                                style="
                                   overflow-wrap: break-word;
                                   word-break: break-word;
                                   padding: 17px 10px 10px;
                                   font-family: arial, helvetica, sans-serif;
-                                " align="left">
-                                                <h1 style="
+                                "
+                                                align="left"
+                                            >
+                                                <h1
+                                                    style="
                                     margin: 0px;
                                     color: #f5f1f1;
                                     line-height: 140%;
@@ -389,7 +473,8 @@ margin-right: 20px;">
                                     font-weight: normal;
                                     font-family: 'Montserrat', sans-serif;
                                     font-size: 19px;
-                                  ">
+                                  "
+                                                >
                                                     Follow Us On:
                                                 </h1>
                                             </td>
@@ -397,16 +482,25 @@ margin-right: 20px;">
                                         </tbody>
                                     </table>
 
-                                    <table style="font-family: arial, helvetica, sans-serif" role="presentation"
-                                           cellpadding="0" cellspacing="0" width="100%" border="0">
+                                    <table
+                                        style="font-family: arial, helvetica, sans-serif"
+                                        role="presentation"
+                                        cellpadding="0"
+                                        cellspacing="0"
+                                        width="100%"
+                                        border="0"
+                                    >
                                         <tbody>
                                         <tr>
-                                            <td style="
+                                            <td
+                                                style="
                                   overflow-wrap: break-word;
                                   word-break: break-word;
                                   padding: 0px 10px 10px;
                                   font-family: arial, helvetica, sans-serif;
-                                " align="left">
+                                "
+                                                align="left"
+                                            >
                                                 <div align="center">
                                                     <div style="display: table; max-width: 209px">
                                                         <!--[if (mso)|(IE)]>
@@ -421,8 +515,14 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]>
                                                         <td width="32" style="width:32px; padding-right: 10px;"
                                                             valign="top"><![endif]-->
-                                                        <table align="left" border="0" cellspacing="0"
-                                                               cellpadding="0" width="32" height="32" style="
+                                                        <table
+                                                            align="left"
+                                                            border="0"
+                                                            cellspacing="0"
+                                                            cellpadding="0"
+                                                            width="32"
+                                                            height="32"
+                                                            style="
                                         border-collapse: collapse;
                                         table-layout: fixed;
                                         border-spacing: 0;
@@ -430,21 +530,29 @@ margin-right: 20px;">
                                         mso-table-rspace: 0pt;
                                         vertical-align: top;
                                         margin-right: 10px;
-                                      ">
+                                      "
+                                                        >
                                                             <tbody>
                                                             <tr style="vertical-align: top">
-                                                                <td align="left" valign="middle" style="
+                                                                <td
+                                                                    align="left"
+                                                                    valign="middle"
+                                                                    style="
                                               word-break: break-word;
                                               border-collapse: collapse !important;
                                               vertical-align: top;
-                                            ">
-                                                                    <a href="https://facebook.com/webpenter"
-                                                                       title="Facebook"
-                                                                       target="_blank">
+                                            "
+                                                                >
+                                                                    <a
+                                                                        href="https://web.facebook.com/webpenterinc/"
+                                                                        title="Facebook"
+                                                                        target="_blank"
+                                                                    >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1XnYUY948G5tLV71BNG558vlBkGBmV962=w1366-h625-iv2"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/facebook.png"
                                                                             alt="Facebook"
-                                                                            title="Facebook" width="32"
+                                                                            title="Facebook"
+                                                                            width="32"
                                                                             style="
                                                   outline: none;
                                                   text-decoration: none;
@@ -455,7 +563,8 @@ margin-right: 20px;">
                                                   height: auto;
                                                   float: none;
                                                   max-width: 32px !important;
-                                                "/>
+                                                "
+                                                                        />
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -466,8 +575,14 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]>
                                                         <td width="32" style="width:32px; padding-right: 10px;"
                                                             valign="top"><![endif]-->
-                                                        <table align="left" border="0" cellspacing="0"
-                                                               cellpadding="0" width="32" height="32" style="
+                                                        <table
+                                                            align="left"
+                                                            border="0"
+                                                            cellspacing="0"
+                                                            cellpadding="0"
+                                                            width="32"
+                                                            height="32"
+                                                            style="
                                         border-collapse: collapse;
                                         table-layout: fixed;
                                         border-spacing: 0;
@@ -475,20 +590,29 @@ margin-right: 20px;">
                                         mso-table-rspace: 0pt;
                                         vertical-align: top;
                                         margin-right: 10px;
-                                      ">
+                                      "
+                                                        >
                                                             <tbody>
                                                             <tr style="vertical-align: top">
-                                                                <td align="left" valign="middle" style="
+                                                                <td
+                                                                    align="left"
+                                                                    valign="middle"
+                                                                    style="
                                               word-break: break-word;
                                               border-collapse: collapse !important;
                                               vertical-align: top;
-                                            ">
-                                                                    <a href="https://twitter.com/webpenter"
-                                                                       title="Twitter" target="_blank">
+                                            "
+                                                                >
+                                                                    <a
+                                                                        href="https://twitter.com/webpenterllc"
+                                                                        title="Twitter"
+                                                                        target="_blank"
+                                                                    >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1voqWcCk5daWas8l8A7V5nLYHge-xxTdf=w1366-h295-iv2"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Twitter.png"
                                                                             alt="Twitter"
-                                                                            title="Twitter" width="32"
+                                                                            title="Twitter"
+                                                                            width="32"
                                                                             style="
                                                   outline: none;
                                                   text-decoration: none;
@@ -499,7 +623,8 @@ margin-right: 20px;">
                                                   height: auto;
                                                   float: none;
                                                   max-width: 32px !important;
-                                                "/>
+                                                "
+                                                                        />
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -510,8 +635,14 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]>
                                                         <td width="32" style="width:32px; padding-right: 10px;"
                                                             valign="top"><![endif]-->
-                                                        <table align="left" border="0" cellspacing="0"
-                                                               cellpadding="0" width="32" height="32" style="
+                                                        <table
+                                                            align="left"
+                                                            border="0"
+                                                            cellspacing="0"
+                                                            cellpadding="0"
+                                                            width="32"
+                                                            height="32"
+                                                            style="
                                         border-collapse: collapse;
                                         table-layout: fixed;
                                         border-spacing: 0;
@@ -519,21 +650,29 @@ margin-right: 20px;">
                                         mso-table-rspace: 0pt;
                                         vertical-align: top;
                                         margin-right: 10px;
-                                      ">
+                                      "
+                                                        >
                                                             <tbody>
                                                             <tr style="vertical-align: top">
-                                                                <td align="left" valign="middle" style="
+                                                                <td
+                                                                    align="left"
+                                                                    valign="middle"
+                                                                    style="
                                               word-break: break-word;
                                               border-collapse: collapse !important;
                                               vertical-align: top;
-                                            ">
-                                                                    <a href="https://www.linkedin.com/in/webpenter/"
-                                                                       title="LinkedIn"
-                                                                       target="_blank">
+                                            "
+                                                                >
+                                                                    <a
+                                                                        href="https://www.linkedin.com/company/web-penter-inc/"
+                                                                        title="LinkedIn"
+                                                                        target="_blank"
+                                                                    >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1bmUS1fOOdjJG2aAZb4L60YAmzE78AQi7=w1366-h295-iv2"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Linkedin.png"
                                                                             alt="LinkedIn"
-                                                                            title="LinkedIn" width="32"
+                                                                            title="LinkedIn"
+                                                                            width="32"
                                                                             style="
                                                   outline: none;
                                                   text-decoration: none;
@@ -544,7 +683,8 @@ margin-right: 20px;">
                                                   height: auto;
                                                   float: none;
                                                   max-width: 32px !important;
-                                                "/>
+                                                "
+                                                                        />
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -555,8 +695,14 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]>
                                                         <td width="32" style="width:32px; padding-right: 10px;"
                                                             valign="top"><![endif]-->
-                                                        <table align="left" border="0" cellspacing="0"
-                                                               cellpadding="0" width="32" height="32" style="
+                                                        <table
+                                                            align="left"
+                                                            border="0"
+                                                            cellspacing="0"
+                                                            cellpadding="0"
+                                                            width="32"
+                                                            height="32"
+                                                            style="
                                         border-collapse: collapse;
                                         table-layout: fixed;
                                         border-spacing: 0;
@@ -564,21 +710,29 @@ margin-right: 20px;">
                                         mso-table-rspace: 0pt;
                                         vertical-align: top;
                                         margin-right: 10px;
-                                      ">
+                                      "
+                                                        >
                                                             <tbody>
                                                             <tr style="vertical-align: top">
-                                                                <td align="left" valign="middle" style="
+                                                                <td
+                                                                    align="left"
+                                                                    valign="middle"
+                                                                    style="
                                               word-break: break-word;
                                               border-collapse: collapse !important;
                                               vertical-align: top;
-                                            ">
-                                                                    <a href="https://instagram.com/webpenter"
-                                                                       title="Instagram"
-                                                                       target="_blank">
+                                            "
+                                                                >
+                                                                    <a
+                                                                        href="https://instagram.com/webpenter"
+                                                                        title="Instagram"
+                                                                        target="_blank"
+                                                                    >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/1Pc41jITAe_3uzia9tndS2kaidToDvqf7=w1366-h295-iv2"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Instagram.png"
                                                                             alt="Instagram"
-                                                                            title="Instagram" width="32"
+                                                                            title="Instagram"
+                                                                            width="32"
                                                                             style="
                                                   outline: none;
                                                   text-decoration: none;
@@ -589,7 +743,8 @@ margin-right: 20px;">
                                                   height: auto;
                                                   float: none;
                                                   max-width: 32px !important;
-                                                "/>
+                                                "
+                                                                        />
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -600,8 +755,14 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]>
                                                         <td width="32" style="width:32px; padding-right: 0px;"
                                                             valign="top"><![endif]-->
-                                                        <table align="left" border="0" cellspacing="0"
-                                                               cellpadding="0" width="32" height="32" style="
+                                                        <table
+                                                            align="left"
+                                                            border="0"
+                                                            cellspacing="0"
+                                                            cellpadding="0"
+                                                            width="32"
+                                                            height="32"
+                                                            style="
                                         border-collapse: collapse;
                                         table-layout: fixed;
                                         border-spacing: 0;
@@ -609,21 +770,29 @@ margin-right: 20px;">
                                         mso-table-rspace: 0pt;
                                         vertical-align: top;
                                         margin-right: 0px;
-                                      ">
+                                      "
+                                                        >
                                                             <tbody>
                                                             <tr style="vertical-align: top">
-                                                                <td align="left" valign="middle" style="
+                                                                <td
+                                                                    align="left"
+                                                                    valign="middle"
+                                                                    style="
                                               word-break: break-word;
                                               border-collapse: collapse !important;
                                               vertical-align: top;
-                                            ">
-                                                                    <a href="https://pinterest.com/webpenter"
-                                                                       title="Pinterest"
-                                                                       target="_blank">
+                                            "
+                                                                >
+                                                                    <a
+                                                                        href="https://pinterest.com/webpenterllc"
+                                                                        title="Pinterest"
+                                                                        target="_blank"
+                                                                    >
                                                                         <img
-                                                                            src="https://lh3.google.com/u/0/d/17ldlOcWhrmsVruh5AhkAtABVecFallTa=w1366-h295-iv2"
+                                                                            src="https://webpenter.com/wp-content/uploads/2022/07/Pinterest.png"
                                                                             alt="Pinterest"
-                                                                            title="Pinterest" width="32"
+                                                                            title="Pinterest"
+                                                                            width="32"
                                                                             style="
                                                   outline: none;
                                                   text-decoration: none;
@@ -634,7 +803,8 @@ margin-right: 20px;">
                                                   height: auto;
                                                   float: none;
                                                   max-width: 32px !important;
-                                                "/>
+                                                "
+                                                                        />
                                                                     </a>
                                                                 </td>
                                                             </tr>
@@ -643,12 +813,15 @@ margin-right: 20px;">
                                                         <!--[if (mso)|(IE)]></td><![endif]-->
 
                                                         <!--[if (mso)|(IE)]></tr></table></td></tr></table><![endif]-->
-                                                        <div class="copyright" style="
+                                                        <div
+                                                            class="copyright"
+                                                            style="
                                         text-align: center;
                                         padding: 13px 3px 0px;
                                         color: white;
                                         margin-top: 36px;
-                                      ">
+                                      "
+                                                        >
                                                             All Rights Reserved to Webpenter. LLC
                                                         </div>
                                                     </div>
@@ -677,5 +850,4 @@ margin-right: 20px;">
 <!--[if mso]></div><![endif]-->
 <!--[if IE]></div><![endif]-->
 </body>
-
 </html>
