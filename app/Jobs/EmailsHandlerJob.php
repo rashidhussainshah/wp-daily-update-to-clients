@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class EmailsHandlerJob implements ShouldQueue
 {
@@ -52,6 +53,7 @@ class EmailsHandlerJob implements ShouldQueue
                         \Mail::to($this->data['to'])
                             ->send($mail);
                     }
+                    Log::channel('slackEODNotificationLog')->info($this->data['dynamic_eod_content']);
                     break;
                 //============== Default ==============\\
                 default:

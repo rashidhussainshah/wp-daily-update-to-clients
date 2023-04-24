@@ -78,7 +78,7 @@ return [
         'slackEODNotificationLog' => [
             'driver' => 'slack',
             'url' => env('LOG_EOD_SLACK_WEBHOOK_URL'),
-            'username' => 'WebPenter Daily Updates',
+            'username' => 'Portal Updates',
             'emoji' => ':boom:',
             // some other configuration if you need as a key-pair value
         ],
