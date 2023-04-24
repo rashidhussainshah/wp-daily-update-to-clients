@@ -61,8 +61,7 @@ class EmailsHandlerJob implements ShouldQueue
                     break;
             }
         } catch (Exception $exception) {
-            $log = "EmailsHandlerJob ErrorMessage => " . $exception;
-            \Log::info($log);
+                Log::critical($exception->getMessage());
         }
     }
 }
