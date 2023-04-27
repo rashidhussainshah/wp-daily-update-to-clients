@@ -53,7 +53,9 @@ class EmailsHandlerJob implements ShouldQueue
                         \Mail::to($this->data['to'])
                             ->send($mail);
                     }
-                    Log::channel('slackEODNotificationLog')->info($this->data['dynamic_eod_content']);
+                    if ($this->data['enable_slack']) {
+                        Log::channel('slackEODNotificationLog')->info(strip_tags($this->data['dynamic_eod_content']));
+                    }
                     break;
                 //============== Default ==============\\
                 default:
