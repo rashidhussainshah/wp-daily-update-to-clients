@@ -11,6 +11,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class EmailsHandlerJob implements ShouldQueue
 {
@@ -50,10 +51,12 @@ class EmailsHandlerJob implements ShouldQueue
                         \Mail::to($this->data['to'])->bcc(explode(',', $this->data['bcc']))
                             ->send($mail);
                     } else {
-                        \Mail::to($this->data['to'])
-                            ->send($mail);
+                        \Mail::to($this->data['to'])->send($mail);
                     }
-                    Log::channel('slackEODNotificationLog')->info(strip_tags($this->data['dynamic_eod_content']));
+                    if ($this->data['enable_slack']) {
+//                        Log::channel('slackEODNotificationLog')->info(strip_tags($this->data['dynamic_eod_content']));
+                        SlackAlert::to($this->data['slack_webhook_url'])->message(strip_tags($this->data['dynamic_eod_content']));
+                    }
                     break;
                 //============== Default ==============\\
                 default:
