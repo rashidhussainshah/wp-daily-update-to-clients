@@ -37,7 +37,7 @@
                             }
                             eodDynamicHtml += '</ul>';
                             // append email configuration signatures
-                            eodDynamicHtml += (res.data.eod_configuration && res.data.eod_configuration.signature) ? `${res.data.eod_configuration.signature}`: '';
+                            // eodDynamicHtml += (res.data.eod_configuration && res.data.eod_configuration.signature) ? `${res.data.eod_configuration.signature}`: '';
                             // set dynamic email content in rich text editor
                             tinymce.get("richtextemail")
                                 .setContent(`${eodDynamicHtml}`);

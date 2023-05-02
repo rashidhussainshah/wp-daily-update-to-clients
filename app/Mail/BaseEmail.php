@@ -29,10 +29,10 @@ class BaseEmail extends Mailable
                 'auth_mode' => null
             );
 
-            $mailFromConfig = array(
-                'address'     => setting('email-configuration.from') ?? env('MAIL_FROM_ADDRESS', 'hello@example.com'),
-                'name'       =>  setting('email-configuration.from.name') ?? env('MAIL_FROM_NAME', 'Example'),
-            );
+//            $mailFromConfig = array(
+//                'address'     => setting('email-configuration.from') ?? env('MAIL_FROM_ADDRESS', 'hello@example.com'),
+//                'name'       =>  setting('email-configuration.from.name') ?? env('MAIL_FROM_NAME', 'Example'),
+//            );
 //        Config::set('mail.from', $mailFromConfig);
           Config::set('mail.mailers.smtp', $mailConfig);
     }

@@ -62,6 +62,10 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
         EmailsHandlerJob::dispatch([
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
+            'developer_name' => Auth::user()->name,
+            'client_name' => $project->eodConfiguration->client->name,
+            'project_name' => $project->name,
+            'signature' => $project->eodConfiguration->signature,
             'to' => $project->eodConfiguration->client->email,
             'enable_slack' => $project->eodConfiguration->enable_slack,
             'slack_webhook_url' => $project->eodConfiguration->slack_webhook_url,

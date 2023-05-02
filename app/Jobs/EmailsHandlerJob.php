@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Mail\DeveloperPaymentRequestMail;
 use App\Mail\EndOfDayReport;
 use Exception;
 use Illuminate\Bus\Queueable;
@@ -58,9 +59,20 @@ class EmailsHandlerJob implements ShouldQueue
 //                        SlackAlert::to($this->data['slack_webhook_url'])->message(strip_tags($this->data['dynamic_eod_content']));
 //                    }
                     break;
+                case 'DeveloperPaymentRequest':
+                    $mail = new DeveloperPaymentRequestMail($this->data);
+                    // add payment request in email if need to set email to management
+                    $mpre = setting('admin.management_payment_request_email');
+                    if ($mpre) {
+                        \Mail::to($this->data['to'])->cc($mpre)
+                            ->send($mail);
+                    } else {
+                        \Mail::to($this->data['to'])->send($mail);
+                    }
+                    break;
                 //============== Default ==============\\
                 default:
-                    \Log::info('EmailsHandlerJob ('.$this->data['mail_name'].'): No matching email found');
+                    \Log::critical('EmailsHandlerJob ('.$this->data['mail_name'].'): No matching email found');
                     break;
             }
         } catch (Exception $exception) {
