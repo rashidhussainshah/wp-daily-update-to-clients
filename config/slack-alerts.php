@@ -6,8 +6,6 @@ return [
      */
     'webhook_urls' => [
         'default' => env('SLACK_ALERT_WEBHOOK'),
-        'eod' => 'https://hooks.slack.com/services/YYYYYY',
-
     ],
 
     /*

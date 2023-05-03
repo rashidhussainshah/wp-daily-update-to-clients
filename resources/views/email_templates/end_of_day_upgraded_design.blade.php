@@ -309,30 +309,32 @@
                                                                 <div style="font-size: 18px; margin-top: 8px;"><b>Project:</b> {{$projectName}}</div>
                                                             </div>
                                                             <div class="daily-update-sheet">
-                                                                <ul style="margin: 0;" class="update-sheet-ul">
-                                                                    <li>Daily Meeting with the team </li>
-                                                                    <li>Did meeting with the team about how we will manage to do the task for today</li>
-                                                                    <li>Youtube daily SEO of videos and other stuff</li>
-                                                                    <li>Linkedin Posting </li>
-                                                                    <li>Daily standup meeting with student</li>
-                                                                    <li>Gave lecture to student who are studing here</li>
-                                                                    <li>went for a cricket match as a sports hour</li>
-                                                                    <li>had an upwork meeting with client about project </li>
-                                                                    <li>discussed with sadiq about how he will clone a repo from github</li>
-                                                                    <li>Did meeting with the team about how we will manage to do the task for today</li>
+{{--                                                                <ul style="margin: 0;" class="update-sheet-ul">--}}
+{{--                                                                    <li>Daily Meeting with the team </li>--}}
+{{--                                                                    <li>Did meeting with the team about how we will manage to do the task for today</li>--}}
+{{--                                                                    <li>Youtube daily SEO of videos and other stuff</li>--}}
+{{--                                                                    <li>Linkedin Posting </li>--}}
+{{--                                                                    <li>Daily standup meeting with student</li>--}}
+{{--                                                                    <li>Gave lecture to student who are studing here</li>--}}
+{{--                                                                    <li>went for a cricket match as a sports hour</li>--}}
+{{--                                                                    <li>had an upwork meeting with client about project </li>--}}
+{{--                                                                    <li>discussed with sadiq about how he will clone a repo from github</li>--}}
+{{--                                                                    <li>Did meeting with the team about how we will manage to do the task for today</li>--}}
 
-                                                                </ul>
+{{--                                                                </ul>--}}
+                                                                {!! $eodHtmlTemplate !!}
                                                             </div>
                                                             <br>
                                                             <div class="next-day-plan">
                                                                 <div class="plan-container">
-                                                                    <div>Plan For tommorow:</div>
-                                                                    <div style="    font-size: 13px; margin-top: 8px;"><b>Project:</b> Project marker</div>
+                                                                    <div>Plan For tomorrow:</div>
+                                                                    <div style="    font-size: 13px; margin-top: 8px;"><b>Project:</b> {{$projectName}}</div>
 
-                                                                    <ul class="next-day-update-ul" style="margin: 0;">
-                                                                        <li>tommorow i am gonna start our next milestone on calender API</li>
-                                                                        <li>we will conduct a 20 minute meeting about how things will go next</li>
-                                                                    </ul>
+{{--                                                                    <ul class="next-day-update-ul" style="margin: 0;">--}}
+{{--                                                                        <li>tommorow i am gonna start our next milestone on calender API</li>--}}
+{{--                                                                        <li>we will conduct a 20 minute meeting about how things will go next</li>--}}
+{{--                                                                    </ul>--}}
+                                                                    {!! $planForTomorrow !!}
 
                                                                 </div>
                                                             </div>

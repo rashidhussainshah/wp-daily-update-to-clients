@@ -34,6 +34,10 @@ class EndOfDayReport extends BaseEmail implements ShouldQueue
      * @var mixed
      */
     public $signature;
+    /**
+     * @var mixed
+     */
+    public $planForTomorrow;
 
     public function __construct($data)
     {
@@ -44,6 +48,7 @@ class EndOfDayReport extends BaseEmail implements ShouldQueue
         $this->clientName = $data['client_name'];
         $this->projectName = $data['project_name'];
         $this->signature = $data['signature'];
+        $this->planForTomorrow = $data['plan_for_tomorrow'];
     }
 
     /**
@@ -54,6 +59,6 @@ class EndOfDayReport extends BaseEmail implements ShouldQueue
     public function build()
     {
         return $this->subject('Daily Report '. readableCurrentDate())
-                ->view('email_templates.end_of_day_report');
+                ->view('email_templates.end_of_day_upgraded_design');
     }
 }

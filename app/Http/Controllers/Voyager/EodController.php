@@ -62,6 +62,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
         EmailsHandlerJob::dispatch([
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
+            'plan_for_tomorrow' => $request->plan_for_tomorrow,
             'developer_name' => Auth::user()->name,
             'client_name' => $project->eodConfiguration->client->name,
             'project_name' => $project->name,
