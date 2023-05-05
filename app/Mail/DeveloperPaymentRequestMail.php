@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class DeveloperPaymentRequestMail extends BaseEmail implements ShouldQueue
@@ -34,7 +33,7 @@ class DeveloperPaymentRequestMail extends BaseEmail implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject('Payment Request of '. $this->data['developer_name'])
-            ->view('email_templates.end_of_day_report');
+        return $this->subject($this->data['subject'] ?? '')
+            ->view('email_templates.payment_request_for_management');
     }
 }

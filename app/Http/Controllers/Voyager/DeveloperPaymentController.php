@@ -24,6 +24,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         EmailsHandlerJob::dispatch([
             'mail_name' => 'DeveloperPaymentRequest',
             'to' => Auth::user()->email,
+            'subject' => 'Payment Request of '. Auth::user()->name,
             'developer_name' => Auth::user()->name,
             'project_name' => $project->name,
             'project_target_title' => $pt->title,
