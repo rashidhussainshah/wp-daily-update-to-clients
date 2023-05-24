@@ -524,7 +524,7 @@
                                                         <a href="https://facebook.com/webpenter"
                                                            title="Facebook"
                                                            target="_blank">
-                                                            <img src="https://lh3.google.com/u/0/d/1XnYUY948G5tLV71BNG558vlBkGBmV962=w1366-h625-iv2"
+                                                            <img src="{{assert('static/mail/img/facebook.png')}}"
                                                                  alt="Facebook"
                                                                  title="Facebook" width="32"
                                                                  style="
@@ -567,7 +567,7 @@
                                             ">
                                                         <a href="https://twitter.com/webpenter"
                                                            title="Twitter" target="_blank">
-                                                            <img src="https://lh3.google.com/u/0/d/1voqWcCk5daWas8l8A7V5nLYHge-xxTdf=w1366-h295-iv2"
+                                                            <img src="{{assert('static/mail/img/twitter.png')}}"
                                                                  alt="Twitter"
                                                                  title="Twitter" width="32"
                                                                  style="
@@ -611,7 +611,7 @@
                                                         <a href="https://www.linkedin.com/in/webpenter/"
                                                            title="LinkedIn"
                                                            target="_blank">
-                                                            <img src="https://lh3.google.com/u/0/d/1bmUS1fOOdjJG2aAZb4L60YAmzE78AQi7=w1366-h295-iv2"
+                                                            <img src="{{assert('static/mail/img/ld.png')}}"
                                                                  alt="LinkedIn"
                                                                  title="LinkedIn" width="32"
                                                                  style="
@@ -655,7 +655,7 @@
                                                         <a href="https://instagram.com/webpenter"
                                                            title="Instagram"
                                                            target="_blank">
-                                                            <img src="https://lh3.google.com/u/0/d/1Pc41jITAe_3uzia9tndS2kaidToDvqf7=w1366-h295-iv2"
+                                                            <img src="{{assert('static/mail/img/insta.png')}}"
                                                                  alt="Instagram"
                                                                  title="Instagram" width="32"
                                                                  style="
@@ -699,7 +699,7 @@
                                                         <a href="https://pinterest.com/webpenter"
                                                            title="Pinterest"
                                                            target="_blank">
-                                                            <img src="https://lh3.google.com/u/0/d/17ldlOcWhrmsVruh5AhkAtABVecFallTa=w1366-h295-iv2"
+                                                            <img src="{{ asset('static/mail/img/pinterest.png') }}"
                                                                  alt="Pinterest"
                                                                  title="Pinterest" width="32"
                                                                  style="
