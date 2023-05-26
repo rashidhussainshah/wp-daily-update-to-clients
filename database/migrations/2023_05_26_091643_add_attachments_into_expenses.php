@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddUserIdIntoIncome extends Migration
+class AddAttachmentsIntoExpenses extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class AddUserIdIntoIncome extends Migration
      */
     public function up()
     {
-        Schema::table('incomes', function (Blueprint $table) {
-            $table->foreignId('user_id')->after('id')->comment('income save into user id');
+        Schema::table('expenses', function (Blueprint $table) {
+            $table->text('attachment')->nullable();
         });
     }
 
@@ -25,8 +25,8 @@ class AddUserIdIntoIncome extends Migration
      */
     public function down()
     {
-        Schema::table('incomes', function (Blueprint $table) {
-            $table->dropColumn('user_id');
+        Schema::table('expenses', function (Blueprint $table) {
+            $table->dropColumn('attachment');
         });
     }
 }
