@@ -14,7 +14,7 @@ class AddAttachmentsIntoExpenses extends Migration
     public function up()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->text('attachment')->nullable();
+            $table->text('attachments')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AddAttachmentsIntoExpenses extends Migration
     public function down()
     {
         Schema::table('expenses', function (Blueprint $table) {
-            $table->dropColumn('attachment');
+            $table->dropColumn('attachments');
         });
     }
 }

@@ -14,7 +14,7 @@ class AddAttachmentsIntoIncome extends Migration
     public function up()
     {
         Schema::table('incomes', function (Blueprint $table) {
-            $table->text('attachment')->nullable();
+            $table->text('attachments')->nullable();
         });
     }
 
@@ -26,7 +26,7 @@ class AddAttachmentsIntoIncome extends Migration
     public function down()
     {
         Schema::table('incomes', function (Blueprint $table) {
-            $table->dropColumn('attachment');
+            $table->dropColumn('attachments');
         });
     }
 }
