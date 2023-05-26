@@ -15,6 +15,7 @@ class CreateExpensesTable extends Migration
     {
         Schema::create('expenses', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->comment('user that pay expense');
             $table->unsignedDouble('amount');
             $table->string('amount_in')->default('usd');
             $table->string('purpose')->default('salaries')->comment('purpose for expense');
