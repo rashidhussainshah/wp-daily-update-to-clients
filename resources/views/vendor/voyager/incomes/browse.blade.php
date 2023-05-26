@@ -4,7 +4,7 @@
 @section('page_header')
     <div class="container-fluid">
         <div>
-            <p>Rashid: Total USD: 123, Total PKR:  Zahid: Total USD: 123, Total PKR:</p>
+            <p>{!! getIncomeDetails() !!}</p>
         </div>
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
