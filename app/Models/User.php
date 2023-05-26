@@ -43,6 +43,10 @@ class User extends \TCG\Voyager\Models\User
     protected $DEVELOPER_ROLE_ID = 3;
     protected $CLIENT_ROLE_ID = 4;
     /**
+     * @var mixed
+     */
+    private $ADMINISTRATOR_ROLE_ID = 1;
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
@@ -67,5 +71,9 @@ class User extends \TCG\Voyager\Models\User
     public function scopeOnlyDeveloper($query)
     {
         return $query->where('role_id', $this->DEVELOPER_ROLE_ID);
+    }
+    public function scopeOnlyAdministrator($query)
+    {
+        return $query->where('role_id', $this->ADMINISTRATOR_ROLE_ID);
     }
 }
