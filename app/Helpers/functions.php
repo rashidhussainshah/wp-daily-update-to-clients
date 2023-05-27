@@ -1,6 +1,7 @@
 <?php
 
 
+use App\Models\Expense;
 use App\Models\Income;
 use App\Models\User;
 
@@ -20,6 +21,23 @@ if (!function_exists('d')) {
     }
 }
 
+if (!function_exists('getExpenseDetails')) {
+
+    function getExpenseDetails(): string
+    {
+        $user1Administrator = User::where('email', 'rashid.bukhari78600@gmail.com')->first();
+        $user2Administrator = User::where('email', 'zaars59208@gmail.com')->first();
+        $totalUSD = Expense::where('amount_in', 'usd')->sum('amount');
+        $totalPKR = Expense::where('amount_in', 'pkr')->sum('amount');
+        if ($user1Administrator && $user2Administrator) {
+            $totalUSDOfUser1 = Expense::where('amount_in', 'usd')->where('user_id', $user1Administrator->id)->sum('amount');
+            $totalUSDOfUser2 = Expense::where('amount_in', 'usd')->where('user_id', $user2Administrator->id)->sum('amount');
+            $totalPkrOfUser1 = Expense::where('amount_in', 'pkr')->where('user_id', $user1Administrator->id)->sum('amount');
+            $totalPkrOfUser2 = Expense::where('amount_in', 'pkr')->where('user_id', $user2Administrator->id)->sum('amount');
+            return "<strong>Total Expense (USD):</strong> <strong>{$totalUSD}</strong>, Total Expense (PKR): <strong>{$totalPKR}</strong>, <strong>{$user1Administrator->name}</strong> have <strong>{$totalUSDOfUser1} USD</strong> and <strong>{$totalPkrOfUser1} PKR</strong>, <strong>{$user2Administrator->name}</strong> have <strong>{$totalUSDOfUser2} USD</strong> and <strong>{$totalPkrOfUser2} PKR</strong>";
+        }
+    }
+}
 if (!function_exists('getIncomeDetails')) {
 
     function getIncomeDetails(): string
