@@ -34,7 +34,7 @@ if (!function_exists('getExpenseDetails')) {
             $totalUSDOfUser2 = Expense::where('amount_in', 'usd')->where('user_id', $user2Administrator->id)->sum('amount');
             $totalPkrOfUser1 = Expense::where('amount_in', 'pkr')->where('user_id', $user1Administrator->id)->sum('amount');
             $totalPkrOfUser2 = Expense::where('amount_in', 'pkr')->where('user_id', $user2Administrator->id)->sum('amount');
-            return "<strong>Total Expense (USD):</strong> <strong>{$totalUSD}</strong>, Total Expense (PKR): <strong>{$totalPKR}</strong>, <strong>{$user1Administrator->name}</strong> have <strong>{$totalUSDOfUser1} USD</strong> and <strong>{$totalPkrOfUser1} PKR</strong>, <strong>{$user2Administrator->name}</strong> have <strong>{$totalUSDOfUser2} USD</strong> and <strong>{$totalPkrOfUser2} PKR</strong>";
+            return "<strong>Total Expense (USD):</strong> <strong>{$totalUSD}</strong>, Total Expense (PKR): <strong>{$totalPKR}</strong>, <strong>{$user1Administrator->name}</strong> USD Expense, <strong>{$totalUSDOfUser1}</strong> PKR Expense <strong>{$totalPkrOfUser1} </strong>, <strong>{$user2Administrator->name}</strong> USD Expenses <strong>{$totalUSDOfUser2}</strong> PKR Expenses <strong>{$totalPkrOfUser2}</strong>";
         }
     }
 }
