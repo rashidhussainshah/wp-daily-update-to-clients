@@ -524,7 +524,7 @@
                                                         <a href="https://facebook.com/webpenter"
                                                            title="Facebook"
                                                            target="_blank">
-                                                            <img src="{{assert('static/mail/img/facebook.png')}}"
+                                                            <img src="{{asset('static/mail/img/facebook.png')}}"
                                                                  alt="Facebook"
                                                                  title="Facebook" width="32"
                                                                  style="
@@ -567,7 +567,7 @@
                                             ">
                                                         <a href="https://twitter.com/webpenter"
                                                            title="Twitter" target="_blank">
-                                                            <img src="{{assert('static/mail/img/twitter.png')}}"
+                                                            <img src="{{asset('static/mail/img/twitter.png')}}"
                                                                  alt="Twitter"
                                                                  title="Twitter" width="32"
                                                                  style="
@@ -611,7 +611,7 @@
                                                         <a href="https://www.linkedin.com/in/webpenter/"
                                                            title="LinkedIn"
                                                            target="_blank">
-                                                            <img src="{{assert('static/mail/img/ld.png')}}"
+                                                            <img src="{{asset('static/mail/img/ld.png')}}"
                                                                  alt="LinkedIn"
                                                                  title="LinkedIn" width="32"
                                                                  style="
@@ -655,7 +655,7 @@
                                                         <a href="https://instagram.com/webpenter"
                                                            title="Instagram"
                                                            target="_blank">
-                                                            <img src="{{assert('static/mail/img/insta.png')}}"
+                                                            <img src="{{asset('static/mail/img/insta.png')}}"
                                                                  alt="Instagram"
                                                                  title="Instagram" width="32"
                                                                  style="
