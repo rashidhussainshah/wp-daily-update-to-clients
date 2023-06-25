@@ -58,10 +58,10 @@ class EmailsHandlerJob implements ShouldQueue
                     $planForTomorrow = strip_tags($this->data['plan_for_tomorrow']);
                     $msg = $dynamicEodContent . 'Plan For tomorrow:'. $planForTomorrow;
 
-                    Log::channel('slackEODNotificationLog')->info($msg);
-//                    if ($this->data['enable_slack']) {
-//                        SlackAlert::to($this->data['slack_webhook_url'])->message(strip_tags($this->data['dynamic_eod_content']));
-//                    }
+//                    Log::channel('slackEODNotificationLog')->info($msg);
+                    if ($this->data['enable_slack']) {
+                        SlackAlert::to($this->data['slack_webhook_url'])->message(strip_tags($this->data['dynamic_eod_content']));
+                    }
                     break;
                 case 'DeveloperPaymentRequest':
                     $mail = new DeveloperPaymentRequestMail($this->data);
