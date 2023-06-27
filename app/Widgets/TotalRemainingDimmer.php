@@ -4,6 +4,7 @@ namespace App\Widgets;
 
 use App\Models\User;
 use App\Models\UserPayment;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use TCG\Voyager\Facades\Voyager;
@@ -22,10 +23,17 @@ class TotalRemainingDimmer extends BaseDimmer
      * Treat this method as a controller action.
      * Return view() or other content to display.
      */
-    public function run()
+    public function run(Request $request)
     {
-        $countPayable = UserPayment::currentDeveloper()->sum('payable');
-        $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
+        if ($request->query('user_id')) {
+            $countPayable = UserPayment::where('developer_id',$request->query('user_id'))->sum('payable');
+            $countPaid = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('paid');
+
+        } else {
+            $countPayable = UserPayment::currentDeveloper()->sum('payable');
+            $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
+        }
+
         $count = $countPayable - $countPaid;
 
         $string = trans_choice('eod.total_remaining', $count);
