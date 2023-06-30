@@ -32,7 +32,7 @@ class ViewUserPaymentDetailAction extends AbstractAction
     {
         $user_id = null;
         if ($this->dataType->slug == 'users') {
-            $user_id = $this->data->id
+            $user_id = $this->data->id;
         } elseif ($this->dataType->slug == 'user-payments') {
             $user_id = $this->data->developer_id; // on user-payments, user_id is saved into developer_id column
         }
