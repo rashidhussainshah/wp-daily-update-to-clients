@@ -43,7 +43,6 @@ class ApprovePaymentRequest extends Command
         $upq = UserPayment::whereDeveloperId($this->argument('user_id'))->requested()->get();
         if (!$upq->isEmpty()) {
             $this->info('processing started');
-            $this->info(json_encode($upq));
             foreach ($upq as $pq) {
                 $pq->paid = $pq->payable;
                 $pq->status = UserPayment::APPROVED_STATUS;
