@@ -67,12 +67,9 @@ class EmailsHandlerJob implements ShouldQueue
                     $mail = new DeveloperPaymentRequestMail($this->data);
                     // add payment request in email if need to set email to management
                     $mpre = setting('admin.management_payment_request_email');
-                    if ($mpre) {
-                        \Mail::to($this->data['to'])->cc($mpre)
-                            ->send($mail);
-                    } else {
-                        \Mail::to($this->data['to'])->send($mail);
-                    }
+                    \Mail::to($this->data['to'])->cc($mpre)
+                        ->send($mail);
+
                     break;
                 //============== Default ==============\\
                 default:

@@ -5,6 +5,9 @@
 
 @section('content')
     <h1>Payment Request Details</h1>
+    @if($data['is_payment_approve_req'])
+        <h1>Payment request is approved</h1>
+    @endif
     <table>
         <tbody>
         <tr>
@@ -49,7 +52,7 @@
             <td>Rs {{$data['currency_current_rate'] ?? ''}}</td>
         </tr>
         <tr>
-            <th>Requested At:</th>
+            <th>{{$data['is_payment_approve_req'] ? 'Approved' : 'Requested'}} At:</th>
             <td>{{readableCurrentDate()}}</td>
         </tr>
         <tr>

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\utils\traits\CommonRelationship;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,4 +49,15 @@ class UserPayment extends Model
         return false;
     }
 
+    /**
+     * @return BelongsTo
+     */
+    public function project(): belongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
+    public function developer(): belongsTo
+    {
+        return $this->belongsTo(User::class, 'developer_id');
+    }
 }
