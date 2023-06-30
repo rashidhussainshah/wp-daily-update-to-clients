@@ -36,6 +36,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             'currency_current_rate' => $request->currency_current_rate,
             'fee' => $request->fee,
             'notes' => $request->notes,
+            'slack_mes'
         ]);
 
         return parent::store($request);

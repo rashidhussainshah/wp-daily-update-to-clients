@@ -30,10 +30,16 @@ class ViewUserPaymentDetailAction extends AbstractAction
 
     public function getDefaultRoute()
     {
-        return route('voyager.dashboard', ['user_id' => $this->data->id]);
+        $user_id = null;
+        if ($this->dataType->slug == 'users') {
+            $user_id = $this->data->id
+        } elseif ($this->dataType->slug == 'user-payments') {
+            $user_id = $this->data->developer_id; // on user-payments, user_id is saved into developer_id column
+        }
+        return route('voyager.dashboard', ['user_id' => $user_id]);
     }
     public function shouldActionDisplayOnDataType()
     {
-        return $this->dataType->slug == 'users';
+        return $this->dataType->slug == 'users' || $this->dataType->slug == 'user-payments';
     }
 }
