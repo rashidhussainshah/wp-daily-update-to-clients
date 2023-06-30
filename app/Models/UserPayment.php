@@ -13,6 +13,7 @@ class UserPayment extends Model
     use HasFactory, CommonRelationship, SoftDeletes;
 
     const APPROVED_STATUS = 'Approved';
+    const REQUESTED_STATUS = 'Requested';
 
     public function setDeveloperIdAttribute()
     {
@@ -24,6 +25,10 @@ class UserPayment extends Model
     public function scopeApproved($query)
     {
         return $query->where('status', UserPayment::APPROVED_STATUS);
+    }
+    public function scopeRequested($query)
+    {
+        return $query->where('status', UserPayment::REQUESTED_STATUS);
     }
 
     public function scopeCurrentUserAndManagement($query)
