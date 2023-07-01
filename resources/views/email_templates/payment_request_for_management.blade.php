@@ -40,8 +40,8 @@
             <td class="status paid">Rs {{$data['paid'] ?? ''}}</td>
         </tr>
         <tr>
-            <th>Project Target Status:</th>
-            <td>{{$data['project_target_status'] ?? ''}}</td>
+            <th>Status:</th>
+            <td>{{$data['status'] ?? ''}}</td>
         </tr>
         <tr>
             <th>Fee:</th>

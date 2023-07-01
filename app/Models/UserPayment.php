@@ -56,6 +56,10 @@ class UserPayment extends Model
     {
         return $this->belongsTo(Project::class);
     }
+    public function projectTarget(): belongsTo
+    {
+        return $this->belongsTo(Project::class);
+    }
     public function developer(): belongsTo
     {
         return $this->belongsTo(User::class, 'developer_id');
