@@ -46,6 +46,7 @@ class User extends \TCG\Voyager\Models\User
      * @var mixed
      */
     private $ADMINISTRATOR_ROLE_ID = 1;
+    private $STUDENT_ROLE_ID = 12;
     /**
      * The attributes that should be cast.
      *
@@ -75,5 +76,9 @@ class User extends \TCG\Voyager\Models\User
     public function scopeOnlyAdministrator($query)
     {
         return $query->where('role_id', $this->ADMINISTRATOR_ROLE_ID);
+    }
+    public function scopeOnlyStudent($query)
+    {
+        return $query->where('role_id', $this->STUDENT_ROLE_ID);
     }
 }
