@@ -4,6 +4,8 @@
 use App\Models\Expense;
 use App\Models\Income;
 use App\Models\User;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Config;
 
 if (!function_exists('d')) {
     function d($data, $exit = true)
@@ -59,6 +61,13 @@ if (!function_exists('readableCurrentDate')) {
     function readableCurrentDate(): string
     {
         return \Carbon\Carbon::now()->toFormattedDateString();
+    }
+}
+if (!function_exists('getRandomQuote')) {
+    function getRandomQuote()
+    {
+        $quotes = Config::get('motivationalQuotes');
+        return Arr::random($quotes);
     }
 }
 

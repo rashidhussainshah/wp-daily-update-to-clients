@@ -11,42 +11,53 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Facades\Voyager;
 
 class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
     /**
-     * Override store method to send email before store
-     * @param Request $request
-     * @return RedirectResponse
+     * POST BRE(A)D - Store data.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
-        $project = Project::find($request->project_id);
-        $pt = ProjectTarget::find($request->project_target_id);
-        EmailsHandlerJob::dispatch([
-            'mail_name' => 'DeveloperPaymentRequest',
-            'to' => Auth::user()->email,
-            'subject' => 'Payment Request of '. Auth::user()->name,
-            'developer_name' => Auth::user()->name,
-            'project_name' => $project->name,
-            'project_target_title' => $pt->title,
-            'status' => $pt->status,
-            'total_earning' => $request->total_earning,
-            'dev_earning' => $request->dev_earning,
-            'payable' => $request->payable,
-            'paid' => $request->paid,
-            'currency_current_rate' => $request->currency_current_rate,
-            'fee' => $request->fee,
-            'notes' => $request->notes,
-            'is_payment_approve_req' => false,
-        ]);
+        $slug = $this->getSlug($request);
 
-        return parent::store($request);
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        // Check permission
+        $this->authorize('add', app($dataType->model_name));
+
+        // Validate fields with ajax
+        $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
+        $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+
+        event(new BreadDataAdded($dataType, $data));
+        $this->sendEmail($data);
+
+
+        if (!$request->has('_tagging')) {
+            if (auth()->user()->can('browse', $data)) {
+                $redirect = redirect()->route("voyager.{$dataType->slug}.index");
+            } else {
+                $redirect = redirect()->back();
+            }
+
+            return $redirect->with([
+                'message'    => __('voyager::generic.successfully_added_new')." {$dataType->getTranslatedAttribute('display_name_singular')}",
+                'alert-type' => 'success',
+            ]);
+        } else {
+            return response()->json(['success' => true, 'data' => $data]);
+        }
     }
 
-    // POST BR(E)AD
+
     // POST BR(E)AD
     public function update(Request $request, $id)
     {
@@ -88,23 +99,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         event(new BreadDataUpdated($dataType, $data));
         if ($data->status == UserPayment::APPROVED_STATUS) {
-            EmailsHandlerJob::dispatch([
-                'mail_name' => 'DeveloperPaymentRequest',
-                'to' => $data->developer->email,
-                'subject' => 'Your Payment Request Approved'. $data->title,
-                'developer_name' => $data->developer->name,
-                'project_name' => $data->project->name,
-                'project_target_title' => $data->projectTarget->name,
-                'status' => $data->status, // user payment status will send in this key
-                'total_earning' => $data->total_earning,
-                'dev_earning' => $data->dev_earning,
-                'payable' => $data->payable,
-                'paid' => $data->paid,
-                'currency_current_rate' => $data->currency_current_rate,
-                'fee' => $data->fee,
-                'notes' => $data->notes,
-                'is_payment_approve_req' => true,
-            ]);
+            $this->sendEmail($data, true);
 
         }
         if (auth()->user()->can('browse', app($dataType->model_name))) {
@@ -116,6 +111,33 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         return $redirect->with([
             'message'    => __('voyager::generic.successfully_updated')." {$dataType->getTranslatedAttribute('display_name_singular')}",
             'alert-type' => 'success',
+        ]);
+    }
+
+    /**
+     * @param $data
+     * @param bool $updateReq
+     * @return void
+     */
+    public function sendEmail($data, bool $updateReq = false): void
+    {
+        EmailsHandlerJob::dispatch([
+            'mail_name' => 'DeveloperPaymentRequest',
+            'to' => $updateReq ? $data->developer->email : Auth::user()->email,
+            'id' => $data->id,
+            'subject' => $updateReq ? 'Your Payment Request Approved' . $data->title : 'Payment Request of '. Auth::user()->name,
+            'developer_name' => $updateReq ? $data->developer->name : Auth::user()->name,
+            'project_name' => $data->project->name,
+            'project_target_title' => $data->projectTarget->name,
+            'status' => $data->status, // user payment status will send in this key
+            'total_earning' => $data->total_earning,
+            'dev_earning' => $data->dev_earning,
+            'payable' => $data->payable,
+            'paid' => $data->paid,
+            'currency_current_rate' => $data->currency_current_rate,
+            'fee' => $data->fee,
+            'notes' => $data->notes,
+            'is_payment_approve_req' => $updateReq,
         ]);
     }
 }

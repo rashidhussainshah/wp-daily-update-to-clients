@@ -6,7 +6,7 @@
 @section('content')
     <h1>Payment Request Details</h1>
     @if($data['is_payment_approve_req'])
-        <h1>Payment request is approved</h1>
+        <h3>Congratulations, Payment request is approved</h3>
     @endif
     <table>
         <tbody>
@@ -61,4 +61,6 @@
         </tr>
         </tbody>
     </table>
+    <a href="{{ route('voyager.user-payments.show', ['id' => $data['id']]) }}">Click here</a> to view the payment request details.
+    <p>{{ getRandomQuote() }}</p>
 @stop
