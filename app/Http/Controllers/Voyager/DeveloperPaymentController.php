@@ -127,8 +127,8 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             'id' => $data->id,
             'subject' => $updateReq ? 'Your Payment Request Approved' . $data->title : 'Payment Request of '. Auth::user()->name,
             'developer_name' => $updateReq ? $data->developer->name : Auth::user()->name,
-            'project_name' => $data->project->name,
-            'project_target_title' => $data->projectTarget->name,
+            'project_name' => $data->project->name ?? '',
+            'project_target_title' => $data->projectTarget->title ?? '',
             'status' => $data->status, // user payment status will send in this key
             'total_earning' => $data->total_earning,
             'dev_earning' => $data->dev_earning,
