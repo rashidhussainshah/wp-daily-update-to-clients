@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class UserPayment extends Model
 {
     use HasFactory, CommonRelationship, SoftDeletes;
+    public $allow_export_all = true;
 
     const APPROVED_STATUS = 'Approved';
     const REQUESTED_STATUS = 'Requested';

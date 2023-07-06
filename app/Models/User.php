@@ -9,6 +9,8 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable;
+    public $disable_export = true;
+
 
     const ADMINISTRATOR_ROLE_NAME = 'Administrator';
     const ACCOUNTANT_ROLE_NAME = 'Accountant';

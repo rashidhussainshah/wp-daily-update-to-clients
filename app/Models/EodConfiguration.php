@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EodConfiguration extends Model
 {
     use HasFactory, CommonRelationship;
+    public $disable_export = true;
 
     /*
      *  Accessors & Mutators

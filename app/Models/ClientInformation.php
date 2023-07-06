@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class ClientInformation extends Model
 {
     use HasFactory;
+    public $allow_export_all = true;
 }

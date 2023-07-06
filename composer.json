@@ -13,7 +13,8 @@
         "laravel/tinker": "^2.5",
         "spatie/laravel-database-mail-templates": "^3.5",
         "spatie/laravel-slack-alerts": "^1.2",
-        "tcg/voyager": "^1.5"
+        "tcg/voyager": "^1.5",
+        "tu6ge/voyager-excel": "^2.2"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

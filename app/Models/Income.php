@@ -9,4 +9,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Income extends Model
 {
     use HasFactory, SoftDeletes;
+    public $allow_export_all = true;
+
 }
