@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Expense extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, CommonRelationship, SoftDeletes;
     public $allow_export_all = true;
 
 }

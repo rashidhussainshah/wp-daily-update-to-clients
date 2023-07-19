@@ -2,6 +2,7 @@
 
 namespace App\Widgets;
 
+use App\Models\Expense;
 use App\Models\User;
 use App\Models\UserPayment;
 use Illuminate\Http\Request;
@@ -33,15 +34,16 @@ class TotalRemainingDimmer extends BaseDimmer
             $countPayable = UserPayment::currentDeveloper()->sum('payable');
             $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
         }
+        $advanceGivenPayment = Expense::currentDeveloper()->sum('amount'); // payment that given advance
 
-        $count = $countPayable - $countPaid;
+        $count = ( $countPayable + $advanceGivenPayment ) - $countPaid;
 
         $string = trans_choice('eod.total_remaining', $count);
         $currency  = setting('admin.currency');
         return view('voyager::dimmer', array_merge($this->config, [
             'icon'   => 'voyager-truck',
             'title'  => " {$string} {$currency} {$count}",
-            'text'   => __('eod.remaining_text', ['currency' => $currency, 'count' => $count]),
+            'text'   => __('eod.remaining_text', ['currency' => $currency, 'count' => $count, 'advance' => $advanceGivenPayment]),
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),

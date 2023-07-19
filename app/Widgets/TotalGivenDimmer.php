@@ -2,6 +2,7 @@
 
 namespace App\Widgets;
 
+use App\Models\Expense;
 use App\Models\User;
 use App\Models\UserPayment;
 use Illuminate\Http\Request;
@@ -26,16 +27,18 @@ class TotalGivenDimmer extends BaseDimmer
     public function run(Request $request)
     {
         if ($request->query('user_id')) {
-            $count = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('payable');
+            $paidThroughUserPayment = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('payable');
         } else {
-            $count = UserPayment::currentDeveloper()->approved()->sum('payable');
+            $paidThroughUserPayment = UserPayment::currentDeveloper()->approved()->sum('payable');
         }
-        $string = trans_choice('eod.total_paid', $count);
+        $advanceGivenPayment = Expense::currentDeveloper()->sum('amount'); // payment that given advance
+        $totalPaid = $paidThroughUserPayment + $advanceGivenPayment;
+        $string = trans_choice('eod.total_paid', $totalPaid);
         $currency  = setting('admin.currency');
         return view('voyager::dimmer', array_merge($this->config, [
             'icon'   => 'voyager-check',
-            'title'  => " {$string} {$currency} {$count}",
-            'text'   => __('eod.paid_text', ['currency' => $currency, 'count' => $count]),
+            'title'  => " {$string} {$currency} {$totalPaid}",
+            'text'   => __('eod.paid_text', ['currency' => $currency, 'count' => $totalPaid, 'advance' => $advanceGivenPayment]),
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),

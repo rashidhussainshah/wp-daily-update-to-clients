@@ -7,7 +7,7 @@ return [
     'total_remaining' => 'Total Remaining',
     'view_all_payments' => 'View All Payments',
     'payable_text'      => 'Total payment requests amount is :currency :count Click below to view all payments.',
-    'paid_text'      => 'Total given  amount is :currency :count Click below to view all payments.',
-    'remaining_text'      => 'Total remaining  amount is :currency :count Click below to view all payments.',
+    'paid_text'      => 'Total given  amount is :currency :count, advance given :currency :advance  Click below to view all payments.',
+    'remaining_text'      => 'Total remaining  amount is :currency :count, advance given :currency :advance Click below to view all payments.',
 
 ];
