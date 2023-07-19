@@ -31,7 +31,7 @@ class TotalGivenDimmer extends BaseDimmer
         } else {
             $paidThroughUserPayment = UserPayment::currentDeveloper()->approved()->sum('payable');
         }
-        $advanceGivenPayment = Expense::currentDeveloper()->sum('amount'); // payment that given advance
+        $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
         $totalPaid = $paidThroughUserPayment + $advanceGivenPayment;
         $string = trans_choice('eod.total_paid', $totalPaid);
         $currency  = setting('admin.currency');

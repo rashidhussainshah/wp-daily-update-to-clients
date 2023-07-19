@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Expense extends Model
 {
     use HasFactory, CommonRelationship, SoftDeletes;
+
+    const CREDIT_TO_DEV_STATUS = 'credit_to_dev';
     public $allow_export_all = true;
 
 }
