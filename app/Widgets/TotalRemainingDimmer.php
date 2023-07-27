@@ -29,14 +29,15 @@ class TotalRemainingDimmer extends BaseDimmer
         if ($request->query('user_id')) {
             $countPayable = UserPayment::where('developer_id',$request->query('user_id'))->sum('payable');
             $countPaid = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('paid');
+            $count = $countPayable - $countPaid;
 
         } else {
             $countPayable = UserPayment::currentDeveloper()->sum('payable');
             $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
+            $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
+            $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
         }
-        $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
 
-        $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
 
         $string = trans_choice('eod.total_remaining', $count);
         $currency  = setting('admin.currency');
