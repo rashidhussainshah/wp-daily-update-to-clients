@@ -26,6 +26,7 @@ class TotalRemainingDimmer extends BaseDimmer
      */
     public function run(Request $request)
     {
+        $advanceGivenPayment = 0;
         if ($request->query('user_id')) {
             $countPayable = UserPayment::where('developer_id',$request->query('user_id'))->sum('payable');
             $countPaid = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('paid');
