@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use Illuminate\Support\Facades\Auth;
 use TCG\Voyager\Actions\AbstractAction;
 
 class ViewUserPaymentDetailAction extends AbstractAction
@@ -40,6 +41,6 @@ class ViewUserPaymentDetailAction extends AbstractAction
     }
     public function shouldActionDisplayOnDataType()
     {
-        return $this->dataType->slug == 'users' || $this->dataType->slug == 'user-payments';
+        return ($this->dataType->slug == 'users' || $this->dataType->slug == 'user-payments' && (Auth::user()->email == 'rashid.bukhari78600@gmail.com' || Auth::user()->email == 'zaars59208@gmail.com'));
     }
 }
