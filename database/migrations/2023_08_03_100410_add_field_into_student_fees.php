@@ -15,7 +15,7 @@ class AddFieldIntoStudentFees extends Migration
     {
         Schema::table('student_fees', function (Blueprint $table) {
             $table->string('batch')->after('id');
-            $table->date('date')->after('batch');
+            $table->dateTime('date')->nullable()->after('batch');
         });
     }
 
