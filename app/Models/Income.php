@@ -10,5 +10,9 @@ class Income extends Model
 {
     use HasFactory, SoftDeletes;
     public $allow_export_all = true;
+    public function scopeOnlyShowToDev($query)
+    {
+        return $query->where('show_to_dev', true);
+    }
 
 }
