@@ -14,7 +14,7 @@ class AddShowToDev extends Migration
     public function up()
     {
         Schema::table('user_payments', function (Blueprint $table) {
-            $table->boolean('show_to_dev')->default(false)->after('income_id');
+            $table->string('show_to_dev')->default(false)->after('income_id');
         });
     }
 
