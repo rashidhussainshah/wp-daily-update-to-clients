@@ -13,8 +13,8 @@ class AddShowToDev extends Migration
      */
     public function up()
     {
-        Schema::table('user_payments', function (Blueprint $table) {
-            $table->string('show_to_dev')->default(false)->after('income_id');
+        Schema::table('incomes', function (Blueprint $table) {
+            $table->string('show_to_dev')->default(false)->after('id');
         });
     }
 
@@ -25,7 +25,7 @@ class AddShowToDev extends Migration
      */
     public function down()
     {
-        Schema::table('user_payments', function (Blueprint $table) {
+        Schema::table('incomes', function (Blueprint $table) {
             $table->dropColumn('show_to_dev');
         });
     }
