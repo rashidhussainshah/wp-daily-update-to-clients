@@ -12,7 +12,7 @@ class Income extends Model
     public $allow_export_all = true;
     public function scopeOnlyShowToDev($query)
     {
-        return $query->where('show_to_dev', true);
+        return $query->where('show_to_dev', 'yes');
     }
 
 }
