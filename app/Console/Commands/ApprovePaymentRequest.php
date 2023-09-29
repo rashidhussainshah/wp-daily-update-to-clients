@@ -45,6 +45,7 @@ class ApprovePaymentRequest extends Command
             $this->info('processing started');
             foreach ($upq as $pq) {
                 $pq->paid = $pq->payable;
+                $pq->update_by_command = true;
                 $pq->status = UserPayment::APPROVED_STATUS;
 
                 // Retrieve the existing text from the specific field
