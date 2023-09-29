@@ -40,7 +40,7 @@ class ApprovePaymentRequest extends Command
     public function handle()
     {
         $this->info('The command was successful!');
-        $upq = UserPayment::whereDeveloperId($this->argument('user_id'))->requested()->get();
+        $upq = UserPayment::whereDeveloperId($this->argument('user_id'))->approved()->get();
         if (!$upq->isEmpty()) {
             $this->info('processing started');
             foreach ($upq as $pq) {
