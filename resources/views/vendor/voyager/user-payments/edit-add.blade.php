@@ -214,16 +214,21 @@
     </script>
 
     <script>
-        // Get references to the input fields by name
-        const totalEarningInput = document.querySelector('input[name="total_earning"]');
-        const clientSourceSelect = document.querySelector('select[name="client_source"]');
-        const devEarningInput = document.querySelector('input[name="dev_earning"]');
         const currentCurrencyRateInput = document.querySelector('input[name="currency_current_rate"]');
-        const payableInput = document.querySelector('input[name="payable"]');
-
+        const clientSourceSelect = document.querySelector('select[name="client_source"]');
 
         // Add a focus-out event listener to the total earning input field
-        totalEarningInput.addEventListener("blur", () => {
+        currentCurrencyRateInput.addEventListener("blur", autofillFields);
+        clientSourceSelect.addEventListener("change", autofillFields);
+        function autofillFields() {
+            // Get references to the input fields by name
+            const totalEarningInput = document.querySelector('input[name="total_earning"]');
+            const clientSourceSelect = document.querySelector('select[name="client_source"]');
+            const devEarningInput = document.querySelector('input[name="dev_earning"]');
+            const currentCurrencyRateInput = document.querySelector('input[name="currency_current_rate"]');
+            const payableInput = document.querySelector('input[name="payable"]');
+
+
             // Get the selected client source
             const selectedClientSource = clientSourceSelect.value;
 
@@ -258,6 +263,6 @@
                 // If total earning is not a valid number, clear the dev earning input
                 devEarningInput.value = "";
             }
-        });
+        }
     </script>
 @stop
