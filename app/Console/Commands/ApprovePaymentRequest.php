@@ -3,11 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Models\UserPayment;
+use App\utils\traits\EmailTrait;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class ApprovePaymentRequest extends Command
 {
+    use EmailTrait;
     /**
      * The name and signature of the console command.
      *
@@ -69,6 +71,7 @@ class ApprovePaymentRequest extends Command
 
                 $pq->updated_at = now();
                 $pq->save();
+                $this->sendPaymentReqApproveEmail($pq);
             }
         }
         return 0;

@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers\Voyager;
 
-use App\Http\Controllers\Controller;
 use App\Jobs\EmailsHandlerJob;
-use App\Models\Project;
-use App\Models\ProjectTarget;
 use App\Models\UserPayment;
+use App\utils\traits\EmailTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use TCG\Voyager\Events\BreadDataAdded;
@@ -17,6 +14,7 @@ use TCG\Voyager\Facades\Voyager;
 
 class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
+    use EmailTrait;
     /**
      * POST BRE(A)D - Store data.
      *
@@ -114,30 +112,4 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         ]);
     }
 
-    /**
-     * @param $data
-     * @param bool $updateReq
-     * @return void
-     */
-    public function sendEmail($data, bool $updateReq = false): void
-    {
-        EmailsHandlerJob::dispatch([
-            'mail_name' => 'DeveloperPaymentRequest',
-            'to' => $updateReq ? $data->developer->email : Auth::user()->email,
-            'id' => $data->id,
-            'subject' => $updateReq ? 'Your Payment Request Approved' . $data->title : 'Payment Request of '. Auth::user()->name,
-            'developer_name' => $updateReq ? $data->developer->name : Auth::user()->name,
-            'project_name' => $data->project->name ?? '',
-            'project_target_title' => $data->projectTarget->title ?? '',
-            'status' => $data->status, // user payment status will send in this key
-            'total_earning' => $data->total_earning,
-            'dev_earning' => $data->dev_earning,
-            'payable' => $data->payable,
-            'paid' => $data->paid,
-            'currency_current_rate' => $data->currency_current_rate,
-            'fee' => $data->fee,
-            'notes' => $data->notes,
-            'is_payment_approve_req' => $updateReq,
-        ]);
-    }
 }

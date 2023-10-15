@@ -23,6 +23,14 @@
             <td>{{$data['developer_name'] ?? ''}}</td>
         </tr>
         <tr>
+            <th>Client Source:</th>
+            <td> {{$data['client_source'] ?? ''}}</td>
+        </tr>
+        <tr>
+            <th>Currency Current Rate:</th>
+            <td>Rs {{$data['currency_current_rate'] ?? ''}}</td>
+        </tr>
+        <tr>
             <th>Total Earning:</th>
             <td>$ {{$data['total_earning'] ?? ''}}</td>
         </tr>
@@ -47,10 +55,7 @@
             <th>Fee:</th>
             <td>{{$data['fee'] ?? ''}}</td>
         </tr>
-        <tr>
-            <th>Currency Current Rate:</th>
-            <td>Rs {{$data['currency_current_rate'] ?? ''}}</td>
-        </tr>
+
         <tr>
             <th>{{$data['is_payment_approve_req'] ? 'Approved' : 'Requested'}} At:</th>
             <td>{{readableCurrentDate()}}</td>
