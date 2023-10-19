@@ -14,8 +14,8 @@ class NullAbleUserPayments extends Migration
     public function up()
     {
         Schema::table('user_payments', function (Blueprint $table) {
-            $table->double('dev_earning')->nullable()->change();
-            $table->double('payable')->nullable()->change();
+            $table->double('dev_earning')->default(0)->change();
+            $table->double('payable')->default(0)->change();
             $table->text('attachments')->nullable()->change();
         });
     }
