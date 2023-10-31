@@ -111,5 +111,21 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             'alert-type' => 'success',
         ]);
     }
+    public function markUserPaymentPaid($id): \Illuminate\Http\RedirectResponse
+    {
+        // Find the UserPayment record by ID
+        $userPayment = UserPayment::find($id);
+
+        if (!$userPayment) {
+            return redirect()->back()->with('error', 'Payment not found.');
+        }
+
+        $userPayment->paid = $userPayment->payable;
+        $userPayment->status = UserPayment::APPROVED_STATUS;
+        $userPayment->save();
+
+        // Redirect the user
+        return redirect()->back()->with('success', 'Payment marked as paid successfully.');
+    }
 
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
 use Spatie\SlackAlerts\Facades\SlackAlert;
@@ -61,5 +62,6 @@ Route::permanentRedirect('/', 'admin/login');
 
 Route::group(['prefix' => 'admin'], function () {
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
+    Route::get('mark-user-payment-paid/{id}', [DeveloperPaymentController::class, 'markUserPaymentPaid'])->name('mark-user-payment-paid');
     Voyager::routes();
 });
