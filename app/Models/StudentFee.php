@@ -20,21 +20,21 @@ class StudentFee extends Model
     // Scope to get data where status is Paid
     public function scopePaidStatus($query)
     {
-        return $query->where('status', 'Paid');
+        return $query->where('status', 'paid');
     }
 
     // Scope to get data where status is Pending
     public function scopePendingStatus($query)
     {
-        return $query->where('status', 'Pending');
+        return $query->where('status', 'pending');
     }
 
-    // Combined scope to get data for the current month with Paid status or where status is Pending
+    // Combined scope to get data for the current month without Paid status or where status is Pending
     public function scopeCurrentMonthOrPendingStatus($query)
     {
         return $query->where(function ($query) {
             $query->currentMonth()
-                ->paidStatus()
+                ->whereNotIn('status', ['paid'])
                 ->orWhere(function ($query) {
                     $query->pendingStatus();
                 });
