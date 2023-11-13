@@ -24,7 +24,7 @@ class AddStudentFeesForCurrentMonth extends Command
         $currentYear = Carbon::now()->year;
 
         // Fetch users with role_id equal to 12 (adjust the role_id as needed)
-        $students = User::where('role_id', 12)->get();
+        $students = User::where('role_id', 12)->where('no_fee', false)->get();
 
         foreach ($students as $student) {
             // Replace 'your_batch_name' with the appropriate batch name
