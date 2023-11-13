@@ -23,8 +23,14 @@ class StudentFee extends Model
     }
 
     // Combined scope to get data for the current month and where status is pending
-    public function scopeCurrentMonthAndPendingStatus($query)
+    // Combined scope to get data for the current month or where status is pending
+    public function scopeCurrentMonthOrPendingStatus($query)
     {
-        return $query->currentMonth()->pendingStatus();
+        return $query->where(function ($query) {
+            $query->currentMonth()
+                ->orWhere(function ($query) {
+                    $query->pendingStatus();
+                });
+        });
     }
 }
