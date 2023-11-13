@@ -3,6 +3,7 @@
 
 use App\Models\Expense;
 use App\Models\Income;
+use App\Models\StudentFee;
 use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
@@ -55,6 +56,24 @@ if (!function_exists('getIncomeDetails')) {
             $totalPkrOfUser2 = Income::where('amount_in', 'pkr')->where('user_id', $user2Administrator->id)->sum('amount');
             return "<strong>Total Income (USD):</strong> <strong>{$totalUSD}</strong>, Total Income (PKR): <strong>{$totalPKR}</strong>, <strong>{$user1Administrator->name}</strong> have <strong>{$totalUSDOfUser1} USD</strong> and <strong>{$totalPkrOfUser1} PKR</strong>, <strong>{$user2Administrator->name}</strong> have <strong>{$totalUSDOfUser2} USD</strong> and <strong>{$totalPkrOfUser2} PKR</strong>";
         }
+    }
+}
+if (!function_exists('getRemainingAmounts')) {
+    function getRemainingAmounts()
+    {
+        // Define the status values
+        $statuses = ['pending', 'over_due'];
+
+        // Retrieve the total, current month, and overdue remaining amounts
+        $totalRemaining = StudentFee::whereIn('status', $statuses)->sum('amount');
+        $currentMonthRemaining = StudentFee::currentMonth()->whereIn('status', $statuses)->sum('amount');
+        $overdueRemaining = StudentFee::where('status', 'over_due')->sum('amount');
+
+        return [
+            'total' => $totalRemaining,
+            'currentMonth' => $currentMonthRemaining,
+            'overdue' => $overdueRemaining,
+        ];
     }
 }
 if (!function_exists('readableCurrentDate')) {
