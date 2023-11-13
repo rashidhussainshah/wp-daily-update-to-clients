@@ -7,10 +7,7 @@
             @php
                 $remainingAmounts = getRemainingAmounts();
             @endphp
-
-            <p>Total Remaining: {{ $remainingAmounts['total'] }}</p>
-            <p>Current Month Remaining: {{ $remainingAmounts['currentMonth'] }}</p>
-            <p>Overdue Remaining: {{ $remainingAmounts['overdue'] }}</p>
+            <p>Total Remaining: <strong>{{ $remainingAmounts['total'] }}</strong> | Current Month Remaining: <strong>{{ $remainingAmounts['currentMonth'] }}</strong> | Pending Except Current Month: <strong>{{ $remainingAmounts['pendingExceptCurrentMonth'] }}</strong> </p>
         </div>
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}

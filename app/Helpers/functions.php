@@ -64,15 +64,21 @@ if (!function_exists('getRemainingAmounts')) {
         // Define the status values
         $statuses = ['pending', 'over_due'];
 
-        // Retrieve the total, current month, and overdue remaining amounts
+        // Retrieve the total, current month, and pending remaining amounts
         $totalRemaining = StudentFee::whereIn('status', $statuses)->sum('amount');
         $currentMonthRemaining = StudentFee::currentMonth()->whereIn('status', $statuses)->sum('amount');
-        $overdueRemaining = StudentFee::where('status', 'over_due')->sum('amount');
+        $pendingExceptCurrentMonth = StudentFee::where('status', 'pending')
+            ->whereYear('date', '!=', now()->year)
+            ->orWhere(function ($query) {
+                $query->whereMonth('date', '!=', now()->month)
+                    ->whereYear('date', now()->year);
+            })
+            ->sum('amount');
 
         return [
             'total' => $totalRemaining,
             'currentMonth' => $currentMonthRemaining,
-            'overdue' => $overdueRemaining,
+            'pendingExceptCurrentMonth' => $pendingExceptCurrentMonth,
         ];
     }
 }
