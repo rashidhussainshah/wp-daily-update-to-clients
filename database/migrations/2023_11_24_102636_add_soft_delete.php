@@ -16,9 +16,6 @@ class AddSoftDelete extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->softDeletes();
         });
-        Schema::table('student_fees', function (Blueprint $table) {
-            $table->softDeletes();
-        });
     }
 
     /**
@@ -29,9 +26,6 @@ class AddSoftDelete extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes();
-        });
-        Schema::table('student_fees', function (Blueprint $table) {
             $table->dropSoftDeletes();
         });
     }
