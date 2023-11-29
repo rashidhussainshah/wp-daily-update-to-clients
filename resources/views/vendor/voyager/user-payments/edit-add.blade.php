@@ -219,7 +219,13 @@
 
         // Add a focus-out event listener to the total earning input field
         currentCurrencyRateInput.addEventListener("blur", autofillFields);
-        clientSourceSelect.addEventListener("change", autofillFields);
+        // Using Select2's event binding to detect changes
+        $(clientSourceSelect).on('select2:select', function (e) {
+            autofillFields();
+        });
+            const userPercentage = {{ Auth::user()->percentage ?? 0.35 }}; // Fetch the percentage value for the logged-in user
+            // console.log(userPercentage);
+            // console.log(typeof userPercentage);
         function autofillFields() {
             // Get references to the input fields by name
             const totalEarningInput = document.querySelector('input[name="total_earning"]');
@@ -231,11 +237,12 @@
 
             // Get the selected client source
             const selectedClientSource = clientSourceSelect.value;
-
+            // console.log(selectedClientSource)
             // Get the total earning value
             const totalEarning = parseFloat(totalEarningInput.value);
             const currentCurrencyRate = parseFloat(currentCurrencyRateInput.value);
-
+            // console.log(totalEarning)
+            // console.log(currentCurrencyRate)
             if (!isNaN(totalEarning)) {
                 let devEarning = 0;
 
@@ -249,10 +256,14 @@
                     // Assign total earning for Payonner and Other without deductions
                     devEarning = totalEarning;
                 }
-
-                // Calculate 35% of devEarning
-                const devNetEarning = devEarning * 0.35;
+                // console.log('devEarning');
+                // console.log(devEarning);
+                // Calculate percentage of employee
+                const devNetEarning = devEarning * userPercentage;
                 // devEarning -= devNetEarning;
+                // console.log('devNetEarning');
+                // console.log(devNetEarning);
+
 
                 // Update the dev earning input field with the calculated value
                 devEarningInput.value = devNetEarning.toFixed(2); // Format the result to two decimal places
