@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Fine extends Model
 {
     use HasFactory;
+    protected $fillable = ['amount', 'user_id', 'reason', 'date', 'note'];
 }

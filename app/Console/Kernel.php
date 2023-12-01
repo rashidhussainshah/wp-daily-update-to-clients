@@ -15,6 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
+        $schedule->command('eod:check')
+            ->timezone('Asia/Karachi') // Set timezone to Pakistan Standard Time
+            ->dailyAt('22:00'); // Run daily at 10 PM (22:00)
         // $schedule->command('inspire')->hourly();
     }
 
