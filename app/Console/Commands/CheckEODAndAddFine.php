@@ -30,7 +30,7 @@ class CheckEODAndAddFine extends Command
 
             if (!$leaveExists) {
                 // Check if there's no EOD entry for the developer for today
-                $eod = EOD::where('developer_id', $developer->id)
+                $eod = Eod::where('developer_id', $developer->id)
                     ->whereDate('created_at', $today)
                     ->first();
 
