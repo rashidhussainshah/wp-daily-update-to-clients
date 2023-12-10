@@ -19,6 +19,12 @@ class CheckEODAndAddFine extends Command
     public function handle()
     {
         Log::info('inside check eod and add fine');
+        // Skip execution on Sundays (dayOfWeek = 0 for Sunday)
+        if (Carbon::today()->dayOfWeek === Carbon::SUNDAY) {
+            $this->info('Skipping execution on Sunday.');
+            return;
+        }
+
         $developers = User::onlyDeveloper()->active()->get();
         $today = Carbon::today();
 
