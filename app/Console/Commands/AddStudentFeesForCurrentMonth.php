@@ -19,6 +19,7 @@ class AddStudentFeesForCurrentMonth extends Command
 
     public function handle()
     {
+
         // Get the current month and year
         $currentMonth = Carbon::now()->format('F');
         $currentYear = Carbon::now()->year;

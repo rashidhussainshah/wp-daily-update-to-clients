@@ -67,6 +67,10 @@ class User extends \TCG\Voyager\Models\User
     {
         return $query->where('role_id', $this->CLIENT_ROLE_ID);
     }
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
 
     /**
      * @param $query
