@@ -11,7 +11,7 @@ class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
     public $disable_export = true;
-
+    protected $dates = ['deleted_at'];
 
     const ADMINISTRATOR_ROLE_NAME = 'Administrator';
     const ACCOUNTANT_ROLE_NAME = 'Accountant';
