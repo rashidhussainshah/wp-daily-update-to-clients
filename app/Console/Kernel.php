@@ -17,8 +17,8 @@ class Kernel extends ConsoleKernel
     {
         $schedule->command('eod:check')
             ->timezone('Asia/Karachi') // Set timezone to Pakistan Standard Time
-//            ->dailyAt('22:00'); // Run daily at 10 PM (22:00)
-            ->everyMinute(); // Run daily at 10 PM (22:00)
+            ->dailyAt('22:00'); // Run daily at 10 PM (22:00)
+//            ->everyMinute(); // Run daily at 10 PM (22:00)
         // $schedule->command('inspire')->hourly();
     }
 
