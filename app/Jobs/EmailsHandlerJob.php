@@ -35,7 +35,7 @@ class EmailsHandlerJob implements ShouldQueue
      */
     public function handle()
     {
-        try {
+//        try {
             switch ($this->data['mail_name']) {
                 //============== User Emails ==============\\
                 case 'UserLoginMail':
@@ -65,9 +65,9 @@ class EmailsHandlerJob implements ShouldQueue
                     \Log::info('EmailsHandlerJob ('.$this->data['mail_name'].'): No matching email found');
                     break;
             }
-        } catch (Exception $exception) {
-            $log = "EmailsHandlerJob ErrorMessage => " . $exception;
-            \Log::info($log);
-        }
+//        } catch (Exception $exception) {
+//            $log = "EmailsHandlerJob ErrorMessage => " . $exception;
+//            \Log::info($log);
+//        }
     }
 }

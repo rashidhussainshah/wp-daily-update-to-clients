@@ -23,7 +23,6 @@ class VoyagerUserController extends \TCG\Voyager\Http\Controllers\VoyagerUserCon
             'to' => $request->email,
             'password' => $request->password,
         ]);
-        dd($request->all());
-        parent::store($request);
+        return parent::store($request);
     }
 }

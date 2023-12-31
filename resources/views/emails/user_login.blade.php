@@ -15,6 +15,10 @@
     <p><strong>{{ __('email.email_label') }}</strong> {{ $email }}</p>
     <p><strong>{{ __('email.password_label') }}</strong> {{$password}}</p>
     <p>{{ __('email.login_instruction') }} <a href="{{ url('admin/login')}}">{{ __('email.here') }}</a>.</p>
-    <p>{{ __('email.questions_message') }}</p>
+    @if(setting('user-confirmation-email.contact_us_email'))
+        <p>{!! __('email.questions_message', ['contact_us_email' => setting('user-confirmation-email.contact_us_email')]) !!}</p>
+    @else
+        <p>{{ __('email.contact_us_text') }}</p>
+    @endif
     <p>{{ __('email.thank_you_message') }}</p>
 @stop

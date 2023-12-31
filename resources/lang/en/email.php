@@ -9,6 +9,7 @@ return [
     'password_label' => 'Password:',
     'here' => 'here',
     'login_instruction' => 'You can now log in to your account',
-    'questions_message' => 'If you have any questions, feel free to contact us.',
+    'questions_message' => 'If you have any questions, feel free to <a href="mailto:subject">contact us</a>.',
+    'contact_us_text' => 'If you have any questions, feel free to contact us.',
     'thank_you_message' => 'Thank you!',
 ];
