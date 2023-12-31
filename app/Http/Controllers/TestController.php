@@ -8,11 +8,12 @@ use Illuminate\Http\Request;
 
 class TestController extends Controller
 {
-    public function testEmail($emailName = '', $toEmail = '', $sendEmail = false)
+    public function testEmail($emailName = '', $toEmail = 'developer@webpenter.com', $sendEmail = true)
     {
+//        dd(setting('user-confirmation-email.user_registration_confirmation_email_logo'));
         $data = [
-            'appName' => 'BfmrLocal',
-            'siteUrl' => 'http://www.bfmr.local/',
+            'appName' => 'Portal',
+            'siteUrl' => 'http://ps.loal/',
             'email_user_full_name' => 'Test User',
         ];
         $view = null;
@@ -23,7 +24,8 @@ class TestController extends Controller
             if ($emailName == 'user_login') {
                 $data = [
                     'mail_name' => 'SignupSuccess',
-                    'to' => 'developer@webpenter.com ',
+                    'to' => $toEmail,
+                    'password' => 'password',
                     'site_url' => config('app.url'),
                     'login_link' => config('app.url') . '/login',
                     'loginLink' => config('app.url') . '/login',

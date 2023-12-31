@@ -2,7 +2,6 @@
 
 namespace App\Mail;
 
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\SerializesModels;
@@ -11,9 +10,15 @@ class UserLogin extends BaseEmail implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $loginLink;
-    public $user;
     public $password;
+    /**
+     * @var mixed
+     */
+    public $name;
+    /**
+     * @var mixed
+     */
+    public $email;
 
     /**
      * Create a new message instance.
@@ -24,12 +29,8 @@ class UserLogin extends BaseEmail implements ShouldQueue
     {
         parent::__construct($data);
 
-        if (isset($data['login_link'])) {
-            $this->loginLink = $data['login_link'];
-        } else {
-            $this->loginLink = $this->siteUrl . '/admin/login';
-        }
-        $this->user = $data['to'] ? User::where('email',  $data['to'])->first() : '';
+        $this->name = $data['name'];
+        $this->email = $data['to'];
         $this->password = $data['password'];
     }
 
@@ -38,9 +39,16 @@ class UserLogin extends BaseEmail implements ShouldQueue
      *
      * @return $this
      */
-    public function build()
+    public function build(): UserLogin
     {
-        return $this->subject('Sign up successful')->replyTo($this->reply_to)
-            ->view('emails.user_login');
+        $replyTo = setting('user-confirmation-email.user_confirmation_reply_to_email');
+        if ($replyTo) {
+            return $this->subject(setting('user-confirmation-email.email_subject'))
+                ->replyTo(setting('user-confirmation-email.user_confirmation_reply_to_email'))
+                ->view('emails.user_login');
+        } else {
+            return $this->subject(setting('user-confirmation-email.email_subject'))
+                ->view('emails.user_login');
+        }
     }
 }

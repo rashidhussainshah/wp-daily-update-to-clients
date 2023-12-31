@@ -3,10 +3,7 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Jobs\EmailsHandlerJob;
-use App\Models\Project;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Eod -> End of Day Email Controller
@@ -22,10 +19,11 @@ class VoyagerUserController extends \TCG\Voyager\Http\Controllers\VoyagerUserCon
     {
         EmailsHandlerJob::dispatch([
             'mail_name' => 'UserLoginMail',
-            'to' => 'developer@webpenter.com',
-            'password' => 'abcd',
-            'site_url' => config('app.url'),
+            'name' => $request->name,
+            'to' => $request->email,
+            'password' => $request->password,
         ]);
-//        parent::store($request);
+        dd($request->all());
+        parent::store($request);
     }
 }
