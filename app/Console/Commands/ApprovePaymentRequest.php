@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 class ApprovePaymentRequest extends Command
 {
     use EmailTrait;
+
     /**
      * The name and signature of the console command.
      *
@@ -42,7 +43,11 @@ class ApprovePaymentRequest extends Command
     public function handle()
     {
         $this->info('The command was successful!');
-        $upq = UserPayment::whereDeveloperId($this->argument('user_id'))->approved()->get();
+        $upq = UserPayment::whereDeveloperId($this->argument('user_id'))
+            ->where(function ($query) {
+                $query->approved()->whereNull('paid');
+            })
+            ->get();
         if (!$upq->isEmpty()) {
             $this->info('processing started');
             foreach ($upq as $pq) {
