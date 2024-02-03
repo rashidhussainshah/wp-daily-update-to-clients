@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Contract extends Model
+class ShortListCandidates extends Model
 {
     use HasFactory, SoftDeletes;
     protected $dates = ['deleted_at'];
+
 }
