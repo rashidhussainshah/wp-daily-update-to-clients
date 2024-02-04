@@ -13,13 +13,21 @@ class MakeClientIdNullableInClientInformationTable extends Migration
      */
     public function up()
     {
-        Schema::table('client_information', function (Blueprint $table) {
-            // Drop the existing foreign key constraint
-            $table->dropForeign(['client_id']);
+        // Check if the column exists before modifying it
+        if (Schema::hasColumn('client_information', 'client_id')) {
+            Schema::table('client_information', function (Blueprint $table) {
+                // Drop the existing foreign key constraint
+                $table->dropForeign(['client_id']);
 
-            // Modify 'client_id' column to be nullable
-            $table->unsignedBigInteger('client_id')->nullable()->change();
-        });
+                // Modify 'client_id' column to be nullable
+                $table->unsignedBigInteger('client_id')->nullable()->change();
+            });
+        } else {
+            // If the column doesn't exist, create it
+            Schema::table('client_information', function (Blueprint $table) {
+                $table->unsignedBigInteger('client_id')->nullable();
+            });
+        }
     }
 
     /**
@@ -29,8 +37,10 @@ class MakeClientIdNullableInClientInformationTable extends Migration
      */
     public function down()
     {
+        // Reversing the migration can be complex, you may need to adjust this based on your actual requirements
+        // For now, this is an example of dropping the nullable constraint
         Schema::table('client_information', function (Blueprint $table) {
-            //
+            $table->unsignedBigInteger('client_id')->change();
         });
     }
 }
