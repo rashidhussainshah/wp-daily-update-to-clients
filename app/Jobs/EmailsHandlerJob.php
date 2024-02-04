@@ -42,18 +42,21 @@ class EmailsHandlerJob implements ShouldQueue
                 //============== User Emails ==============\\
                 case 'EndOfDayReport':
                     $mail = new EndOfDayReport($this->data);
-                    if (isset($this->data['cc']) && isset($this->data['bcc'])) {
-                        \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
-                            ->bcc(explode(',', $this->data['bcc']))->send($mail);
-                    } elseif (isset($this->data['cc'])) {
-                        \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
-                            ->send($mail);
-                    } elseif (isset($this->data['bcc'])) {
-                        \Mail::to($this->data['to'])->bcc(explode(',', $this->data['bcc']))
-                            ->send($mail);
-                    } else {
-                        \Mail::to($this->data['to'])->send($mail);
+                    if ($this->data['is_send_email']) {  // only send email if enable defualt value is 1 we can disable this in case of slack channel notification
+                        if (isset($this->data['cc']) && isset($this->data['bcc'])) {
+                            \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
+                                ->bcc(explode(',', $this->data['bcc']))->send($mail);
+                        } elseif (isset($this->data['cc'])) {
+                            \Mail::to($this->data['to'])->cc(explode(',', $this->data['cc']))
+                                ->send($mail);
+                        } elseif (isset($this->data['bcc'])) {
+                            \Mail::to($this->data['to'])->bcc(explode(',', $this->data['bcc']))
+                                ->send($mail);
+                        } else {
+                            \Mail::to($this->data['to'])->send($mail);
+                        }
                     }
+
                     $dynamicEodContent = strip_tags($this->data['dynamic_eod_content']);
                     $planForTomorrow = strip_tags($this->data['plan_for_tomorrow']);
                     $msg = $dynamicEodContent . 'Plan For tomorrow:'. $planForTomorrow;

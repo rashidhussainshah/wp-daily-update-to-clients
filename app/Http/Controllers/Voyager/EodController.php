@@ -69,6 +69,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
             'signature' => $project->eodConfiguration->signature,
             'to' => $project->eodConfiguration->client->email,
             'enable_slack' => $project->eodConfiguration->enable_slack,
+            'is_send_email' => $project->eodConfiguration->is_send_email,
             'slack_webhook_url' => $project->eodConfiguration->slack_webhook_url,
             'subject' => $project->eodConfiguration->subject,
             'cc' => $project->eodConfiguration->cc,
