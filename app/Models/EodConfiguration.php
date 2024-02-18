@@ -32,4 +32,8 @@ class EodConfiguration extends Model
     {
         return $this->belongsTo(User::class, 'developer_id');
     }
+    public function scopeDefaultSettingForEod($query, $val = true)
+    {
+        return $query->where('is_default_setting_for_eod', $val);
+    }
 }
