@@ -45,7 +45,7 @@ class ApprovePaymentRequest extends Command
         $this->info('The command was successful!');
         $upq = UserPayment::whereDeveloperId($this->argument('user_id'))
             ->where(function ($query) {
-                $query->approved()->whereNull('paid');
+                $query->whereNull('paid');
             })
             ->get();
         if (!$upq->isEmpty()) {
