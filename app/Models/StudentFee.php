@@ -40,4 +40,9 @@ class StudentFee extends Model
                 });
         });
     }
+    // Define the belongsTo relationship with User model
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
 }
