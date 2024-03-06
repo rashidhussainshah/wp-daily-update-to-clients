@@ -55,9 +55,19 @@ class GetStudentFeesByMonth extends Command
         }
         $fees = $query->get();
 
-        // Output the fees
+        // Calculate totals
+        $totalPaidFees = StudentFee::whereMonth('date', $month)->with('student')->where('status', 'paid')->count();
+        $totalPendingFees = StudentFee::whereMonth('date', $month)->with('student')->where('status', 'pending')->count();
+        $totalPaidAmount = StudentFee::whereMonth('date', $month)->with('student')->where('status', 'paid')->sum('amount');
+        $totalPendingAmount = StudentFee::whereMonth('date', $month)->with('student')->where('status', 'pending')->sum('amount');
+
+        // Output the fees and totals
         $statusMessage = $status ? ucfirst($status) : 'All';
         $this->info("$statusMessage Fees for month $month:");
+        $this->line("Total Paid Fees: $totalPaidFees");
+        $this->line("Total Pending Fees: $totalPendingFees");
+        $this->line("Total Paid Amount: $totalPaidAmount");
+        $this->line("Total Pending Amount: $totalPendingAmount");
         foreach ($fees as $fee) {
             $this->line("- Student Name: {$fee->student->name}, Batch: {$fee->batch}, Amount: {$fee->amount}, Status: {$fee->status}");
         }
