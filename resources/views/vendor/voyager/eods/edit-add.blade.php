@@ -3,8 +3,10 @@
 
 @section('javascript')
     <script type="text/javascript">
-        var eodConfiguration = @json($eodConfiguration);
 
+        var eodConfiguration = @json($eodConfiguration);
+        var $example = $(".select2-ajax").select2();
+        $example.select2("open");
         function fetchDataAndUpdateDropdown(projectId) {
             // Check if eodConfiguration is not empty
             if (eodConfiguration) {
