@@ -91,7 +91,7 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
      */
     public function store(Request $request)
     {
-        dd($request);
+//        dd($request);
         $project = Project::find($request->project_id);
         $vError = false;
         if (!isset($project->eodConfiguration)) {
