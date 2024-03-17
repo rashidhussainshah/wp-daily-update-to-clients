@@ -20,7 +20,7 @@ class AddTotalContractAmountToProjectsTable extends Migration
     public function up()
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->timestamp('expected_delivery_date')->nullable()->change();
+            $table->dateTime('expected_delivery_date')->nullable()->change();
             $table->string('total_contract_amount')->nullable()->after('payment_mode');
         });
     }
@@ -33,7 +33,7 @@ class AddTotalContractAmountToProjectsTable extends Migration
     public function down()
     {
         Schema::table('projects', function (Blueprint $table) {
-            $table->timestamp('expected_delivery_date')->nullable(false)->change();
+            $table->dateTime('expected_delivery_date')->nullable(false)->change();
             $table->dropColumn('total_contract_amount');
         });
     }
