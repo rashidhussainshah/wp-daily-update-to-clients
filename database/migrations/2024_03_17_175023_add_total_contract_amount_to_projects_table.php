@@ -12,14 +12,17 @@ class AddTotalContractAmountToProjectsTable extends Migration
      *
      * @return void
      */
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
         Schema::table('projects', function (Blueprint $table) {
+            $table->timestamp('expected_delivery_date')->nullable()->change();
             $table->string('total_contract_amount')->nullable()->after('payment_mode');
         });
-
-        // Modify the default value for expected_delivery_date
-        DB::statement("ALTER TABLE projects MODIFY expected_delivery_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL");
     }
 
     /**
@@ -30,6 +33,7 @@ class AddTotalContractAmountToProjectsTable extends Migration
     public function down()
     {
         Schema::table('projects', function (Blueprint $table) {
+            $table->timestamp('expected_delivery_date')->nullable(false)->change();
             $table->dropColumn('total_contract_amount');
         });
     }
