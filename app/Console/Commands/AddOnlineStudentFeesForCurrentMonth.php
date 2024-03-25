@@ -2,15 +2,16 @@
 
 namespace App\Console\Commands;
 
+use App\Models\OnlineStudentFee;
 use Illuminate\Console\Command;
 use App\Models\StudentFee;
 use App\Models\User;
 use Carbon\Carbon;
 
-class AddStudentFeesForCurrentMonth extends Command
+class AddOnlineStudentFeesForCurrentMonth extends Command
 {
-    protected $signature = 'add:fees';
-    protected $description = 'Add student fees for the current month';
+    protected $signature = 'add:fees-online';
+    protected $description = 'Add student fees of online students for the current month';
 
     public function __construct()
     {
@@ -24,27 +25,26 @@ class AddStudentFeesForCurrentMonth extends Command
         $currentMonth = Carbon::now()->format('F');
         $currentYear = Carbon::now()->year;
 
-        // Fetch student id from admin panel setting academy menu
-        $students = User::where('role_id', setting('academy.student_role_id'))->where('no_fee', false)->get();
+        $students = User::where('role_id', setting('academy.online_student_role_id'))->where('no_fee', false)->get();
 
         foreach ($students as $student) {
             // Replace 'your_batch_name' with the appropriate batch name
-            $batchName = setting('academy.student_batch_name');
+            $batchName = setting('academy.online_student_batch_name');
 
             // Check if a fee record for the current month and year already exists
-            $existingFee = StudentFee::where('student_id', $student->id)
+            $existingFee = OnlineStudentFee::where('student_id', $student->id)
                 ->whereMonth('date', '=', Carbon::now()->month)
                 ->whereYear('date', '=', $currentYear)
                 ->first();
 
             if (!$existingFee) {
                 // Create a new StudentFee record for the current student
-                StudentFee::create([
+                OnlineStudentFee::create([
                     'batch' => $batchName,
                     'date' => Carbon::now(),
                     'student_id' => $student->id,
-                    'notes' => setting('academy.student_fee_note'),
-                    'amount' => setting('academy.student_fee_amount'),
+                    'notes' => setting('academy.online_student_fee_note'),
+                    'amount' => setting('academy.online_student_fee_amount'),
                     'status' => 'pending',
                     // You can set other fields as needed
                 ]);

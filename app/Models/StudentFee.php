@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class StudentFee extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $fillable = ['batch', 'date', 'student_id', 'receiver_id', 'amount', 'status'];
+    protected $fillable = ['batch', 'date', 'student_id', 'receiver_id', 'amount', 'status', 'notes'];
     // Scope to get data for the current month
     // Scope to get data for the current month
     public function scopeCurrentMonth($query)
