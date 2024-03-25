@@ -78,14 +78,18 @@ class User extends \TCG\Voyager\Models\User
      */
     public function scopeOnlyDeveloper($query)
     {
-        return $query->where('role_id', $this->DEVELOPER_ROLE_ID);
+        return $query->where('role_id', setting('admin.developer_role_id') ?? $this->DEVELOPER_ROLE_ID);
     }
     public function scopeOnlyAdministrator($query)
     {
-        return $query->where('role_id', $this->ADMINISTRATOR_ROLE_ID);
+        return $query->where('role_id', setting('admin.administrator_role_id') ?? $this->ADMINISTRATOR_ROLE_ID);
     }
     public function scopeOnlyStudent($query)
     {
-        return $query->where('role_id', $this->STUDENT_ROLE_ID);
+        return $query->where('role_id', setting('academy.student_role_id'));
+    }
+    public function scopeOnlineOnlyStudent($query)
+    {
+        return $query->where('role_id', setting('academy.online_student_role_id'));
     }
 }
