@@ -20,6 +20,12 @@ return [
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
     ],
 
+    'google' => [
+        'client_id' => env('217946652701-ccf3cjv13tujg9e7lj4t87v53nrgiao7.apps.googleusercontent.com'),
+        'client_secret' => env('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'),
+        'redirect' => env('http://127.0.0.1:8000/login/google/callback'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

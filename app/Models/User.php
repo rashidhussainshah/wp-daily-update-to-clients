@@ -26,6 +26,11 @@ class User extends \TCG\Voyager\Models\User
         'name',
         'email',
         'password',
+        'google_id',
+        'google_name',
+        'google_email',
+        'google_token',
+        'google_refresh_token',
     ];
 
     /**

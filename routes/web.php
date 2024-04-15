@@ -3,6 +3,7 @@
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Auth\GoogleLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,3 +28,7 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Voyager::routes();
 });
+Route::get('/login/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('login.google');
+
+// Route::get('/login/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('/login/google/callback', [GoogleLoginController::class, 'handleCallback'])->name('google.callback');
