@@ -49,6 +49,8 @@ class ApprovePaymentRequest extends Command
             $this->info("User: ({$userId}) not found");
             return 0;
         }
+        Log::info("Processing started for user {$user->name}");
+        $this->info("Processing started for user {$user->name}");
         $upq = UserPayment::whereDeveloperId($userId)
             ->whereNull('paid')
             ->where('status', UserPayment::REQUESTED_STATUS)
@@ -87,8 +89,8 @@ class ApprovePaymentRequest extends Command
                 $totalPaid += $pq->paid;
 
                 $this->sendPaymentReqApproveEmail($pq);
-                Log::info("ID: ({$pq->id})| Paid: {$pq->paid} | Name: {$pq->developer->name} |Notes: {$pq->notes}");
-                $this->info("ID: ({$pq->id})| Paid: {$pq->paid} | Name: {$pq->developer->name} |Notes: {$pq->notes}");
+                Log::info("ID: ({$pq->id})| Paid: {$pq->paid} | Project: {$pq->project->name} | Notes: {$pq->notes}");
+                $this->info("ID: ({$pq->id})| Paid: {$pq->paid} | Project: {$pq->project->name} | Notes: {$pq->notes}");
 
             }
             // Print total paid amount

@@ -60,8 +60,8 @@ class GetPaymentDetailByUserIdAndStatus extends Command
         if (!$upq->isEmpty()) {
             $totalPayable = $upq->sum('payable');
             foreach ($upq as $pq) {
-                Log::info("ID: ({$pq->id})| payable: {$pq->payable} | Notes: {$pq->notes}");
-                $this->info("ID: ({$pq->id})| payable: {$pq->payable} | Notes: {$pq->notes}");
+                Log::info("ID: ({$pq->id})| payable: {$pq->payable} | Project: {$pq->project->name} | Notes: {$pq->notes}");
+                $this->info("ID: ({$pq->id})| payable: {$pq->payable} | Project: {$pq->project->name} | Notes: {$pq->notes}");
             }
             $this->info("Total Payable: {$totalPayable}");
         } else {
