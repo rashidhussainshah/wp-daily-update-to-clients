@@ -137,6 +137,9 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             }
             $up->generated_by_system =true;
             $up->save();
+            $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->find($up->id);
+            $this->sendEmail($ayubPayment);
+
 
         }
     }

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\User;
 use App\Models\UserPayment;
 use App\utils\traits\EmailTrait;
 use Illuminate\Console\Command;
@@ -42,14 +43,19 @@ class ApprovePaymentRequest extends Command
      */
     public function handle()
     {
-        $this->info('The command was successful!');
-        $upq = UserPayment::whereDeveloperId($this->argument('user_id'))
-            ->where(function ($query) {
-                $query->whereNull('paid');
-            })
+        $userId = $this->argument('user_id');
+        $user = User::find($userId);
+        if (!$user) {
+            $this->info("User: ({$userId}) not found");
+            return 0;
+        }
+        $upq = UserPayment::whereDeveloperId($userId)
+            ->whereNull('paid')
+            ->where('status', UserPayment::REQUESTED_STATUS)
             ->get();
         if (!$upq->isEmpty()) {
             $this->info('processing started');
+            $totalPaid = 0; // Initialize total paid amount
             foreach ($upq as $pq) {
                 $pq->paid = $pq->payable;
                 $pq->update_by_command = true;
@@ -76,9 +82,19 @@ class ApprovePaymentRequest extends Command
 
                 $pq->updated_at = now();
                 $pq->save();
+
+                // Add the paid amount to total paid
+                $totalPaid += $pq->paid;
+
                 $this->sendPaymentReqApproveEmail($pq);
+                Log::info("ID: ({$pq->id})| Paid: {$pq->paid} | Name: {$pq->developer->name} |Notes: {$pq->notes}");
+                $this->info("ID: ({$pq->id})| Paid: {$pq->paid} | Name: {$pq->developer->name} |Notes: {$pq->notes}");
+
             }
+            // Print total paid amount
+            $this->info("Total Paid: {$totalPaid}");
+        } else {
+            $this->info("No pending UserPayments found for user {$user->name}");
         }
         return 0;
-    }
-}
+    }}
