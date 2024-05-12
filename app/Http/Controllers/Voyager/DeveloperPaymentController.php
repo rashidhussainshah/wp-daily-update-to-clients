@@ -143,6 +143,38 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         }
     }
+    private function updateAyubKhokarUserPayment($request, $developerPaymentReq)
+    {
+        $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->where('second_entry_id', $developerPaymentReq->id)->first();
+        if ($ayubPayment && $ayubPayment->developer_id == User::AYUB_USER_ID) {
+            if ($ayubPayment->status == UserPayment::REQUESTED_STATUS); {
+                $totalEarning = $ayubPayment->total_earning;
+                $currentCurrencyRate = $request->input('currency_current_rate');
+
+                if (!empty($totalEarning) && is_numeric($totalEarning)) {
+
+                    // Calculate the payable amount by multiplying devNetEarning with the currency rate
+                    if ($currentCurrencyRate) {
+                        $payableAmount = $ayubPayment->dev_earning * $currentCurrencyRate;
+                    }
+
+                    if ($currentCurrencyRate && $payableAmount) {
+                        $ayubPayment->payable = $payableAmount;
+                    }
+
+                    $ayubPayment->fee = $request->fee;
+                    $ayubPayment->currency_current_rate = $request->currency_current_rate;
+                    $ayubPayment->status = UserPayment::APPROVED_STATUS;
+                    $notes = $request->input('notes');
+                    $notes .= "\nAutomatically approved and calculate payable by system";
+                    $ayubPayment->notes = $notes;
+                    $ayubPayment->updated_at = now();
+                    $ayubPayment->save();
+                    $this->sendEmail($ayubPayment, true);
+                }
+            }
+        }
+    }
 
     // POST BR(E)AD
     public function update(Request $request, $id)
@@ -186,15 +218,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         event(new BreadDataUpdated($dataType, $data));
         if ($data->status == UserPayment::APPROVED_STATUS) {
             $this->sendEmail($data, true);
-            $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->where('second_entry_id', $data->id)->first();
-            if ($ayubPayment && $ayubPayment->developer_id == User::AYUB_USER_ID) {
-                if ($ayubPayment->status == UserPayment::REQUESTED_STATUS); {
-                    $ayubPayment->status = UserPayment::APPROVED_STATUS;
-                    $ayubPayment->save();
-                    $this->sendEmail($ayubPayment, true);
-                }
-            }
-
+            $this->updateAyubKhokarUserPayment($request, $data);
         }
         if (auth()->user()->can('browse', app($dataType->model_name))) {
             $redirect = redirect()->route("voyager.{$dataType->slug}.index");
