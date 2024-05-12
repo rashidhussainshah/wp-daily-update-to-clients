@@ -10,6 +10,8 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    const AYUB_USER_ID = 3;
     public $disable_export = true;
     protected $dates = ['deleted_at'];
 
