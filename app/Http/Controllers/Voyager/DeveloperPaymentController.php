@@ -187,7 +187,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         if ($data->status == UserPayment::APPROVED_STATUS) {
             $this->sendEmail($data, true);
             $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->where('second_entry_id', $data->id)->first();
-            if ($ayubPayment && $ayubPayment->user_id == User::AYUB_USER_ID) {
+            if ($ayubPayment && $ayubPayment->developer_id == User::AYUB_USER_ID) {
                 if ($ayubPayment->status == UserPayment::REQUESTED_STATUS); {
                     $ayubPayment->status = UserPayment::APPROVED_STATUS;
                     $ayubPayment->save();
