@@ -23,7 +23,7 @@ class LeaveController extends VoyagerBaseController
         $startDate = $request->input('start_date');
         $endDate = $request->input('end_date');
         $reason = $request->input('reason');
-        $user = User::find($request->input('user_id'));
+        $user = User::find(Auth::user()->id);
         $message = "$user->name has requested leave from $startDate to $endDate for the following reason: $reason.";
         // Retrieve the Slack webhook URL from the environment
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
