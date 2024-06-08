@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 class Eod extends Model
 {
     use HasFactory, CommonRelationship;
+    public $disable_export = true;
+
     /**
      * Set the developer_id.
      *

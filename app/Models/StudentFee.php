@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class StudentFee extends Model
+{
+    use HasFactory, SoftDeletes;
+    protected $fillable = ['batch', 'date', 'student_id', 'receiver_id', 'amount', 'status', 'notes'];
+    // Scope to get data for the current month
+    // Scope to get data for the current month
+    public function scopeCurrentMonth($query)
+    {
+        return $query->whereMonth('date', now()->month);
+    }
+
+    // Scope to get data where status is Paid
+    public function scopePaidStatus($query)
+    {
+        return $query->where('status', 'paid');
+    }
+
+    // Scope to get data where status is Pending
+    public function scopePendingStatus($query)
+    {
+        return $query->where('status', 'pending');
+    }
+
+    // Combined scope to get data for the current month without Paid status or where status is Pending
+    public function scopeCurrentMonthOrPendingStatus($query)
+    {
+        return $query->where(function ($query) {
+            $query->currentMonth()
+                ->whereNotIn('status', ['paid'])
+                ->orWhere(function ($query) {
+                    $query->pendingStatus();
+                });
+        });
+    }
+    // Define the belongsTo relationship with User model
+    public function student()
+    {
+        return $this->belongsTo(User::class, 'student_id');
+    }
+}

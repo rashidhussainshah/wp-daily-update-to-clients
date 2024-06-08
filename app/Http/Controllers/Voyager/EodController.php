@@ -3,34 +3,84 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Jobs\EmailsHandlerJob;
+use App\Models\EodConfiguration;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use TCG\Voyager\Facades\Voyager;
 
 /**
  * Eod -> End of Day Email Controller
  */
 class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
+    //***************************************
+    //
+    //                   /\
+    //                  /  \
+    //                 / /\ \
+    //                / ____ \
+    //               /_/    \_\
+    //
+    //
+    // Add a new item of our Data Type BRE(A)D
+    //
+    //****************************************
+
+    public function create(Request $request)
+    {
+        $slug = $this->getSlug($request);
+
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        // Check permission
+        $this->authorize('add', app($dataType->model_name));
+
+        $dataTypeContent = (strlen($dataType->model_name) != 0)
+            ? new $dataType->model_name()
+            : false;
+
+        foreach ($dataType->addRows as $key => $row) {
+            $dataType->addRows[$key]['col_width'] = $row->details->width ?? 100;
+        }
+
+        // If a column has a relationship associated with it, we do not want to show that field
+        $this->removeRelationshipField($dataType, 'add');
+
+        // Check if BREAD is Translatable
+        $isModelTranslatable = is_bread_translatable($dataTypeContent);
+
+        // Eagerload Relations
+        $this->eagerLoadRelations($dataTypeContent, $dataType, 'add', $isModelTranslatable);
+
+        $view = 'voyager::bread.edit-add';
+        if (view()->exists("voyager::$slug.edit-add")) {
+            $view = "voyager::$slug.edit-add";
+        }
+        $eodConfiguration = EodConfiguration::whereDeveloperId(Auth::user()->id)->defaultSettingForEod()->first();
+        return Voyager::view($view, compact('dataType', 'dataTypeContent', 'isModelTranslatable', 'eodConfiguration'));
+    }
+
     /**
      * Get Today Target tasks with configuration
      * to send in email
+     * @param Request $request
      * @return JsonResponse
      */
     public function eodContent(Request $request): JsonResponse
     {
         $project = Project::with(['targets' => function ($targetQry) {
-                                $targetQry->whereHas('tasks', function ($targetTaskQry){
-                                        $targetTaskQry->whereDeveloperId(Auth::user()->id);
-                                    });
-                            }, 'eodConfiguration' => function($eodConfQry) {
-                                $eodConfQry->whereDeveloperId(Auth::user()->id);
-                                }, 'targets.tasks' => function ($query)
-                                {
-                                    $query->whereDeveloperId(Auth::user()->id);
-                                    $query->today();
-                                }])->find($request->project_id);
+            $targetQry->whereHas('tasks', function ($targetTaskQry){
+                $targetTaskQry->whereDeveloperId(Auth::user()->id);
+            });
+        }, 'eodConfiguration' => function($eodConfQry) {
+            $eodConfQry->whereDeveloperId(Auth::user()->id);
+        }, 'targets.tasks' => function ($query)
+        {
+            $query->whereDeveloperId(Auth::user()->id);
+            $query->today();
+        }])->find($request->project_id);
         return response()->json(['data'=> $project]);
     }
 
@@ -41,16 +91,16 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
      */
     public function store(Request $request)
     {
-
+//        dd($request);
         $project = Project::find($request->project_id);
         $vError = false;
         if (!isset($project->eodConfiguration)) {
-                $vErrorMessage = __('eod.configuration_not_found');
-                $vError = true;
+            $vErrorMessage = __('eod.configuration_not_found');
+            $vError = true;
         }
         elseif (!isset($project->eodConfiguration->client)) {
             $vErrorMessage = __('eod.client_not_found');
-                $vError = true;
+            $vError = true;
         }
         if ($vError) {
             return redirect()->back()->with([
@@ -62,7 +112,15 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
         EmailsHandlerJob::dispatch([
             'mail_name' => 'EndOfDayReport',
             'dynamic_eod_content' => $request->email,
+            'plan_for_tomorrow' => $request->plan_for_tomorrow,
+            'developer_name' => Auth::user()->name,
+            'client_name' => $project->eodConfiguration->client->name,
+            'project_name' => $project->name,
+            'signature' => $project->eodConfiguration->signature,
             'to' => $project->eodConfiguration->client->email,
+            'enable_slack' => $project->eodConfiguration->enable_slack,
+            'is_send_email' => $project->eodConfiguration->is_send_email,
+            'slack_webhook_url' => $project->eodConfiguration->slack_webhook_url,
             'subject' => $project->eodConfiguration->subject,
             'cc' => $project->eodConfiguration->cc,
             'bcc' => $project->eodConfiguration->bcc,

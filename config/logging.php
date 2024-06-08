@@ -50,7 +50,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['daily'],
+            'channels' => ['daily', 'slack'],
             'ignore_exceptions' => false,
         ],
 
@@ -73,6 +73,14 @@ return [
             'username' => 'Laravel Log',
             'emoji' => ':boom:',
             'level' => env('LOG_LEVEL', 'critical'),
+        ],
+        // slackEODNotificationLog is a custom name
+        'slackEODNotificationLog' => [
+            'driver' => 'slack',
+            'url' => env('LOG_EOD_SLACK_WEBHOOK_URL'),
+            'username' => 'Portal Updates',
+            'emoji' => ':boom:',
+            // some other configuration if you need as a key-pair value
         ],
 
         'papertrail' => [

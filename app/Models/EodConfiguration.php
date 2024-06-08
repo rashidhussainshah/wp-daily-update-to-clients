@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class EodConfiguration extends Model
 {
     use HasFactory, CommonRelationship;
+    public $disable_export = true;
 
     /*
      *  Accessors & Mutators
@@ -30,5 +31,9 @@ class EodConfiguration extends Model
     public function developer(): belongsTo
     {
         return $this->belongsTo(User::class, 'developer_id');
+    }
+    public function scopeDefaultSettingForEod($query, $val = true)
+    {
+        return $query->where('is_default_setting_for_eod', $val);
     }
 }

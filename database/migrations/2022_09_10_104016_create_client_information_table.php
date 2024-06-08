@@ -23,6 +23,14 @@ class CreateClientInformationTable extends Migration
             $table->string('git_repo_link')->nullable();
             $table->string('skype')->nullable();
             $table->string('slack')->nullable();
+            $table->foreignId('user_id');
+            $table->string('phone')->nullable();
+            $table->string('website_url');
+            $table->string('website_email_or_username')->comment('website login admin email/username');
+            $table->string('website_login_password')->comment('website login admin password');
+            $table->string('git_repo_link')->nullable();
+            $table->string('jira_project_link')->nullable();
+            $table->string('skype')->nullable();
             $table->text('server_login_information')->nullable()->comment('SSH or FTP or Cpanel login');
             $table->text('server_login_files')->nullable()->comment('.ssh or .ppk or any other file');
 

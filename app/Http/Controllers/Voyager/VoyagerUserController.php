@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Voyager;
 
 use App\Jobs\EmailsHandlerJob;
+use App\Models\Project;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Eod -> End of Day Email Controller
