@@ -125,7 +125,8 @@ class EodController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
             'cc' => $project->eodConfiguration->cc,
             'bcc' => $project->eodConfiguration->bcc,
         ]);
-
+        // Merge client_id into the request
+        $request->merge(['client_id' => $project->eodConfiguration->client->id]);
         return parent::store($request);
     }
 }

@@ -20,6 +20,20 @@ use Spatie\SlackAlerts\Facades\SlackAlert;
 Route::get('/mail/{email_name}/{to_email?}/{send_email?}', [\App\Http\Controllers\TestController::class, 'testEmail']);
 Route::get('/slack-test', function () {
     try {
+        SlackAlert::blocks([
+            [
+                "type" => "input",
+                "element" => [
+                    "type" => "plain_text_input"
+                ],
+                "label" => [
+                    "type" => "plain_text",
+                    "text" => "Label",
+                    "emoji" => true
+                ]
+            ]
+        ]);
+        return 'test';
         \Artisan::call('optimize');
         $text = '<p style="padding-left: 40px;">Hi&nbsp;<strong>Web Penter,<br /></strong>Today work report</p>
 <p>&nbsp;</p>

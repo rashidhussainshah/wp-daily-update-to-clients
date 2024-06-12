@@ -11,7 +11,7 @@ class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    const AYUB_USER_ID = 3;
+    const CLIENT_ID = 4;
     public $disable_export = true;
     protected $dates = ['deleted_at'];
 
@@ -52,6 +52,7 @@ class User extends \TCG\Voyager\Models\User
      */
     private $ADMINISTRATOR_ROLE_ID = 1;
     private $STUDENT_ROLE_ID = 12;
+    private $ONLINE_STUDENT_ROLE_ID = 41;
     /**
      * The attributes that should be cast.
      *
@@ -88,10 +89,10 @@ class User extends \TCG\Voyager\Models\User
     }
     public function scopeOnlyStudent($query)
     {
-        return $query->where('role_id', setting('academy.student_role_id'));
+        return $query->where('role_id', setting('academy.student_role_id') ?? $this->STUDENT_ROLE_ID);
     }
     public function scopeOnlineOnlyStudent($query)
     {
-        return $query->where('role_id', setting('academy.online_student_role_id'));
+        return $query->where('role_id', setting('academy.online_student_role_id') ?? $this->ONLINE_STUDENT_ROLE_ID);
     }
 }

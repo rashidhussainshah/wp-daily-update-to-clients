@@ -21,4 +21,12 @@ class Eod extends Model
     {
         $this->attributes['developer_id'] = Auth::user()->id;
     }
+    public function scopeCurrentDeveloperORClient($query)
+    {
+        if (Auth::user() && Auth::user()->role_id == User::CLIENT_ID) {
+            return $query->where('client_id', Auth::user()->id);
+        } else {
+            return $query->where('developer_id', Auth::user()->id);
+        }
+    }
 }

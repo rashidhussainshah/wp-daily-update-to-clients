@@ -35,6 +35,11 @@
         <div style="clear:both"></div>
         <p><a href="javascript:void(0)" onclick="fillAdminCredentials()" id="admin-login" data-login="{{ __('generic.login_as_admin') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_admin') }} </p>
         <p><a href="javascript:void(0)" onclick="fillDeveloperCredentials()" id="developer-login" data-login="{{ __('generic.login_as_developer') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_developer') }} </p>
+        <p><a href="javascript:void(0)" onclick="fillClientCredentials()" id="client-login" data-login="{{ __('generic.login_as_client') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_client') }} </p>
+        <p><a href="javascript:void(0)" onclick="fillStudentManagerCredentials()" id="student-manager-login" data-login="{{ __('generic.login_as_student_manager') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_student_manager') }} </p>
+        <p><a href="javascript:void(0)" onclick="fillHRCredentials()" id="hr-manager-login" data-login="{{ __('generic.login_as_hr_manager') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_hr_manager') }} </p>
+        <p><a href="javascript:void(0)" onclick="fillBdCredentials()" id="bd-manager-login" data-login="{{ __('generic.login_as_bd') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_bd') }} </p>
+        <p><a href="javascript:void(0)" onclick="fillAccountantCredentials()" id="accountant-manager-login" data-login="{{ __('generic.login_as_accountant') }}">{{ __('generic.click_to') }}</a> {{ __('generic.login_as_accountant') }} </p>
 
         @if(!$errors->isEmpty())
             <div class="alert alert-red">
@@ -94,6 +99,41 @@
             email.value = '{{ env('DEMO_DEVELOPER_EMAIL') }}';
             password.value = '{{ env('DEMO_DEVELOPER_PASSWORD') }}';
             const e = document.getElementById('developer-login');
+            btn.textContent = e.dataset.login;
+            form.submit();
+        }
+        function fillClientCredentials() {
+            email.value = '{{ env('DEMO_CLIENT_EMAIL') }}';
+            password.value = '{{ env('DEMO_CLIENT_PASSWORD') }}';
+            const e = document.getElementById('client-login');
+            btn.textContent = e.dataset.login;
+            form.submit();
+        }
+        function fillStudentManagerCredentials() {
+            email.value = '{{ env('DEMO_STUDENT_MANAGER_EMAIL') }}';
+            password.value = '{{ env('DEMO_STUDENT_MANAGER_PASSWORD') }}';
+            const e = document.getElementById('student-manager-login');
+            btn.textContent = e.dataset.login;
+            form.submit();
+        }
+        function fillHRCredentials() {
+            email.value = '{{ env('DEMO_HR_EMAIL') }}';
+            password.value = '{{ env('DEMO_HR_PASSWORD') }}';
+            const e = document.getElementById('hr-manager-login');
+            btn.textContent = e.dataset.login;
+            form.submit();
+        }
+        function fillBdCredentials() {
+            email.value = '{{ env('DEMO_BD_EMAIL') }}';
+            password.value = '{{ env('DEMO_BD_PASSWORD') }}';
+            const e = document.getElementById('bd-manager-login');
+            btn.textContent = e.dataset.login;
+            form.submit();
+        }
+        function fillAccountantCredentials() {
+            email.value = '{{ env('DEMO_ACCOUNTANT_EMAIL') }}';
+            password.value = '{{ env('DEMO_ACCOUNTANT_PASSWORD') }}';
+            const e = document.getElementById('accountant-manager-login');
             btn.textContent = e.dataset.login;
             form.submit();
         }
