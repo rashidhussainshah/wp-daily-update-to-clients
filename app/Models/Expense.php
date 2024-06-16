@@ -12,6 +12,8 @@ class Expense extends Model
     use HasFactory, CommonRelationship, SoftDeletes;
 
     const CREDIT_TO_DEV_STATUS = 'credit_to_dev';
+
+    protected $dates = ['deleted_at'];
     public $allow_export_all = true;
 
 }
