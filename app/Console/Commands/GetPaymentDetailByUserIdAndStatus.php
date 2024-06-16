@@ -56,6 +56,7 @@ class GetPaymentDetailByUserIdAndStatus extends Command
 
         $upq = UserPayment::whereDeveloperId($userId)
             ->where('status', $status)
+            ->whereNull('paid')
             ->get();
         if (!$upq->isEmpty()) {
             $totalPayable = $upq->sum('payable');
