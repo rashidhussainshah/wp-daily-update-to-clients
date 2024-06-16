@@ -23,17 +23,19 @@ class TotalPayableDimmer extends BaseDimmer
      */
     public function run(Request $request)
     {
+        $totalPayable = 0 ;
         if ($request->query('user_id')) {
-            $count = UserPayment::where('developer_id',$request->query('user_id'))->sum('payable');
-        } else {
-            $count = UserPayment::currentDeveloper()->sum('payable');
+            $totalPayable = UserPayment::getPayable($request->query('user_id'));
         }
-        $string = trans_choice('eod.total_payable', $count);
+//        else {
+//            $totalPayable = UserPayment::currentDeveloper()->sum('payable');
+//        }
+        $string = trans_choice('eod.total_payable', $totalPayable);
         $currency  = setting('admin.currency');
         return view('voyager::dimmer', array_merge($this->config, [
             'icon'   => 'voyager-credit-cards',
-            'title'  => " {$string} {$currency} {$count}",
-            'text'   => __('eod.payable_text', ['currency' => $currency, 'count' => $count]),
+            'title'  => " {$string} {$currency} {$totalPayable}",
+            'text'   => __('eod.payable_text', ['currency' => $currency, 'count' => $totalPayable]),
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),

@@ -27,18 +27,22 @@ class TotalRemainingDimmer extends BaseDimmer
     public function run(Request $request)
     {
         $advanceGivenPayment = 0;
+        $advanceGivenPaymentInUsd = 0;
+        $countPaid = 0;
+        $count = 0;
         if ($request->query('user_id')) {
-            $countPayable = UserPayment::where('developer_id',$request->query('user_id'))->sum('payable');
-            $countPaid = UserPayment::where('developer_id',$request->query('user_id'))->approved()->sum('paid');
-            $advanceGivenPayment = Expense::where('developer_id',$request->query('user_id'))->where('purpose', Expense::CREDIT_TO_DEV_STATUS)/*->where('amount_in', 'pkr')*/->sum('amount'); // payment that given advance
+            $countPayable = UserPayment::getPayable($request->query('user_id'));
+            $countPaid = UserPayment::getPaid($request->query('user_id'));
+            $advanceGivenPayment = Expense::getAdvance($request->query('user_id'), Expense::IN_PKR);
             $count = ($countPayable - $advanceGivenPayment ) - $countPaid;
-
-        } else {
-            $countPayable = UserPayment::currentDeveloper()->sum('payable');
-            $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
-            $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
-            $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
+            $advanceGivenPaymentInUsd = Expense::getAdvance($request->query('user_id'), Expense::IN_USD);
         }
+//        else {
+//            $countPayable = UserPayment::currentDeveloper()->sum('payable');
+//            $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
+//            $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
+//            $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
+//        }
 
 
         $string = trans_choice('eod.total_remaining', $count);
@@ -46,7 +50,7 @@ class TotalRemainingDimmer extends BaseDimmer
         return view('voyager::dimmer', array_merge($this->config, [
             'icon'   => 'voyager-truck',
             'title'  => " {$string} {$currency} {$count}",
-            'text'   => __('eod.remaining_text', ['currency' => $currency, 'count' => $count, 'advance' => $advanceGivenPayment]),
+            'text'   => __('eod.remaining_text', ['currency' => $currency, 'count' => $count, 'advance' => $advanceGivenPayment, 'advance_in_usd' => $advanceGivenPaymentInUsd]),
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),

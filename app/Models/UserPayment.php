@@ -28,10 +28,26 @@ class UserPayment extends Model
 //
 //        }
 //    }
+    public static function getPayable($selectedUserId)
+    {
+        return UserPayment::where('developer_id', $selectedUserId)->approved()->notPaid()->sum('payable');
+    }
+    public static function getPaid($selectedUserId)
+    {
+        return UserPayment::where('developer_id', $selectedUserId)->approved()->paid()->sum('payable');
+    }
 
     public function scopeApproved($query)
     {
         return $query->where('status', UserPayment::APPROVED_STATUS);
+    }
+    public function scopePaid($query)
+    {
+        return $query->whereNotNull('paid');
+    }
+    public function scopeNotPaid($query)
+    {
+        return $query->whereNull('paid');
     }
 
     public function scopeRequested($query)
