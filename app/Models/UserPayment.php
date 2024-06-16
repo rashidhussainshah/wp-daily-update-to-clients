@@ -30,11 +30,11 @@ class UserPayment extends Model
 //    }
     public static function getPayable($selectedUserId)
     {
-        return UserPayment::where('developer_id', $selectedUserId)->approved()->notPaid()->sum('payable');
+        return UserPayment::where('developer_id', $selectedUserId)->approved()/*->notPaid()*/->sum('payable');
     }
     public static function getPaid($selectedUserId)
     {
-        return UserPayment::where('developer_id', $selectedUserId)->approved()->paid()->sum('payable');
+        return UserPayment::where('developer_id', $selectedUserId)->approved()/*->paid()*/->sum('paid');
     }
 
     public function scopeApproved($query)
