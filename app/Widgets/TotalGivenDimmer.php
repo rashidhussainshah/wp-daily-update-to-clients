@@ -28,6 +28,7 @@ class TotalGivenDimmer extends BaseDimmer
     {
         $advanceGivenPayment = 0;
         $advanceGivenPaymentInUsd = 0;
+        $paidThroughUserPayment = 0;
         if ($request->query('user_id')) {
             $paidThroughUserPayment = UserPayment::getPaid($request->query('user_id'));
             $advanceGivenPayment = Expense::where('developer_id',$request->query('user_id'))->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
