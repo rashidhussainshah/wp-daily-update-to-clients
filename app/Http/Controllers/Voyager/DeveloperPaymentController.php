@@ -243,6 +243,23 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         $userPayment->paid = $userPayment->payable;
         $userPayment->status = UserPayment::APPROVED_STATUS;
+        $userPayment->mark_paid_through_btn = true;
+        // Retrieve the existing text from the specific field
+        $oldText = $userPayment->notes;
+        // New string to append
+        $newString = "Approved through mark paid button";
+        $currentDateTime = date('Y-m-d H:i:s'); // Getting the current date and time in the format "YYYY-MM-DD HH:MM:SS"
+        $newString = $newString . ' on ' . $currentDateTime;
+        // Check if the specific field already contains text
+        if (!empty($oldText)) {
+            // Add a line break and append the new string
+            $newText = $oldText . PHP_EOL . $newString;
+        } else {
+            // Set the new string as the initial text
+            $newText = $newString;
+        }
+        // Save the updated text back into the specific field
+        $userPayment->notes = $newText;
         $userPayment->save();
 
         // Redirect the user

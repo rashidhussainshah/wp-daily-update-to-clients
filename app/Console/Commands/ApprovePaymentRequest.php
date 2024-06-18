@@ -67,6 +67,8 @@ class ApprovePaymentRequest extends Command
                 $oldText = $pq->notes;
                 // New string to append
                 $newString = "Approved through command";
+                $currentDateTime = date('Y-m-d H:i:s'); // Getting the current date and time in the format "YYYY-MM-DD HH:MM:SS"
+                $newString = $newString . ' on ' . $currentDateTime;
                 // Check if the specific field already contains text
                 if (!empty($oldText)) {
                     // Add a line break and append the new string
