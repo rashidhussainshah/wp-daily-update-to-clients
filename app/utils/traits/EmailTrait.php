@@ -29,10 +29,10 @@ trait EmailTrait
             'paid' => $data->paid,
             'client_source' => $data->client_source,
             'current_currency_rate' => $data->current_currency_rate,
-            'currency_current_rate' => $data->currency_current_rate,
             'fee' => $data->fee,
             'notes' => $data->notes,
             'is_payment_approve_req' => $updateReq,
+            'attachments' => $data->attachments,
         ]);
     }
     public function sendPaymentReqApproveEmail($data): void
