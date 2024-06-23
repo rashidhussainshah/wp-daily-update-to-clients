@@ -66,8 +66,8 @@
         </tr>
         </tbody>
     </table>
-    @if(isset($attachments))
-        @foreach($attachments as $attachment)
+    @if(isset($data['attachments']))
+        @foreach($data['attachments'] as $attachment)
             <div class="img_settings_container" style="float:left;padding-right:15px;">
                 <img src="{{ Voyager::image($attachment) }}" style="max-width:200px; height:auto; clear:both; display:block; padding:2px; border:1px solid #ddd; margin-bottom:5px;">
             </div>
