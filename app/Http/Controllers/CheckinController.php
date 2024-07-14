@@ -33,7 +33,6 @@ class CheckinController extends Controller
                 ],
             ],
         ];
-        dd($blocks);
 
         // Send the message to Slack using blocks
         SlackAlert::blocks($blocks);
@@ -68,7 +67,6 @@ class CheckinController extends Controller
 
         // Calculate shortfall in hours
         $hoursShort = $totalOfficeHours - $hoursSpent;
-        dd($checkinAt, $checkoutAt, $totalOfficeHours, $hoursShort);
 
         // Add short time with message if hours are insufficient
         $message = "*Check-out done for " . $user->name . " at " . $currentTime . "*\n\n*EOD Report:*\n" . $endOfDayReport . "\n\n";
@@ -79,7 +77,6 @@ class CheckinController extends Controller
 
             $message .= "*Short by " . "*" . $hoursShort . " hours and " . $minutesShort . " minutes.*";
         }
-        dd($message);
 
         $blocks = [
             [
