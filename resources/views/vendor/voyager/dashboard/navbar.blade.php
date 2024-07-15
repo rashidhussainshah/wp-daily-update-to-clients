@@ -127,6 +127,10 @@
                         <label for="end_of_day_report">End of Day Report</label>
                         <textarea id="end_of_day_report" name="end_of_day_report" class="form-control" required rows="10" cols="400"></textarea>
                     </div>
+                    <div class="form-group">
+                        <label for="tomorrow_work_plan">Plan for Tomorrow</label>
+                        <textarea id="tomorrow_work_plan" name="tomorrow_work_plan" class="form-control" required rows="5"></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>

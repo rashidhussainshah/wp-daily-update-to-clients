@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Checkin extends Model
 {
     use HasFactory;
-    protected $fillable = ['developer_id', 'checkin_at', 'checkout_at', 'today_work_plan', 'end_of_day_report'];
+    protected $fillable = ['developer_id', 'checkin_at', 'checkout_at', 'today_work_plan', 'end_of_day_report', 'tomorrow_work_plan'];
 
     public function developer()
     {

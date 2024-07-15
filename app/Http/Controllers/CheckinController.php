@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\EmailsHandlerJob;
 use App\Models\Checkin;
+use App\Models\EodConfiguration;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,11 +51,13 @@ class CheckinController extends Controller
         if (!$checkin) {
             return redirect()->back()->with('error', 'No check-in information found for today. Please check-in first.');
         }
+        $tomorrowWorkPlan = $request->input('tomorrow_work_plan');
 
-//        $checkin->update([
-//            'checkout_at' => now(),
-//            'end_of_day_report' => $request->input('end_of_day_report'),
-//        ]);
+        $checkin->update([
+            'checkout_at' => now(),
+            'end_of_day_report' => $request->input('end_of_day_report'),
+            'tomorrow_work_plan' => $tomorrowWorkPlan,
+        ]);
 
         $user = Auth::user();
         $endOfDayReport = $request->input('end_of_day_report');
@@ -69,7 +73,7 @@ class CheckinController extends Controller
         $hoursShort = $totalOfficeHours - $hoursSpent;
 
         // Add short time with message if hours are insufficient
-        $message = "*Check-out done for " . $user->name . " at " . $currentTime . "*\n\n*EOD Report:*\n" . $endOfDayReport . "\n\n";
+        $message = "*Check-out done for " . $user->name . " at " . $currentTime . "*\n\n*EOD Report:*\n" . $endOfDayReport . "\n\n*Plan for Tomorrow:*\n" . $tomorrowWorkPlan . "\n\n";
         if ($hoursShort > 0) {
             $minutesSpent = $checkinAt->diffInMinutes($checkoutAt) % 60;
             $minutesShort = 60 - $minutesSpent;
@@ -88,9 +92,25 @@ class CheckinController extends Controller
             ],
         ];
 
-        SlackAlert::blocks($blocks);
-        return redirect()->back()->with('success', 'Check-out message sent to Slack!');
+        $eod = EodConfiguration::where('developer_id', Auth::id())->latest()->first();
+        SlackAlert::to($eod->slack_webhook_url)->blocks($blocks);
 
-        return redirect()->back()->with('success', 'Checked out successfully!');
+//        EmailsHandlerJob::dispatch([
+//            'mail_name' => 'EndOfDayReport',
+//            'dynamic_eod_content' => $request->email,
+//            'plan_for_tomorrow' => $request->plan_for_tomorrow,
+//            'developer_name' => Auth::user()->name,
+//            'client_name' => $project->eodConfiguration->client->name,
+//            'project_name' => $project->name,
+//            'signature' => $project->eodConfiguration->signature,
+//            'to' => $project->eodConfiguration->client->email,
+//            'enable_slack' => $project->eodConfiguration->enable_slack,
+//            'is_send_email' => $project->eodConfiguration->is_send_email,
+//            'slack_webhook_url' => $project->eodConfiguration->slack_webhook_url,
+//            'subject' => $project->eodConfiguration->subject,
+//            'cc' => $project->eodConfiguration->cc,
+//            'bcc' => $project->eodConfiguration->bcc,
+//        ]);
+        return redirect()->back()->with('success', 'Check-out message sent to Slack!');
     }
 }
