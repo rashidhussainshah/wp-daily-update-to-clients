@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\utils\traits\CommonRelationship;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Checkin extends Model
 {
-    use HasFactory;
+    use HasFactory, CommonRelationship;
     protected $fillable = ['developer_id', 'checkin_at', 'checkout_at', 'today_work_plan', 'end_of_day_report', 'tomorrow_work_plan'];
 
     public function developer()
