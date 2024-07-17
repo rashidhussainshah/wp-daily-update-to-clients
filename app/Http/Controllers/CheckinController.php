@@ -24,9 +24,7 @@ class CheckinController extends Controller
         // Check if the CheckinConfiguration exists for the current user
         $checkinConfig = CheckinConfiguration::where('developer_id', $userId)->first();
         if (!$checkinConfig) {
-            dd($userId);
-            return redirect()->back()->with('error', 'No Slack configuration found for the user.');
-
+            return redirect()->back()->with($this->getErrorMsg('No Slack configuration found for the user.'));
         }
 
         // Check if there is already a check-in for the current user and today's date
@@ -35,9 +33,8 @@ class CheckinController extends Controller
             ->first();
 
         if ($existingCheckin) {
-            dd('record already exist');
             // If a check-in record already exists for today, return an error message
-            return redirect()->back()->with('error', 'Check-in information already exists for today.');
+            return redirect()->back()->with($this->getErrorMsg('Check-in information already exists for today.'));
         }
 
         // Create a new check-in record
@@ -65,8 +62,7 @@ class CheckinController extends Controller
 
         // Send the message to Slack using blocks
         $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
-
-        return redirect()->back()->with('success', 'Check-in message sent to Slack!');
+        return redirect()->back()->with($this->getSuccessMsg('Check-in message sent to Slack!'));
     }
 
     public function storeCheckout(Request $request)
@@ -85,7 +81,7 @@ class CheckinController extends Controller
             ->latest()->first();
 
         if (!$checkin) {
-            return redirect()->back()->with('error', 'No check-in information found for today. Please check-in first.');
+            return redirect()->back()->with($this->getErrorMsg('No check-in information found for today. Please check-in first.'));
         }
         $tomorrowWorkPlan = $request->input('tomorrow_work_plan');
 
@@ -147,7 +143,7 @@ class CheckinController extends Controller
 //            'cc' => $project->eodConfiguration->cc,
 //            'bcc' => $project->eodConfiguration->bcc,
 //        ]);
-        return redirect()->back()->with('success', 'Check-out message sent to Slack!');
+        return redirect()->back()->with($this->getSuccessMsg('Check-out message sent to Slack!'));
     }
 
     /**
@@ -156,5 +152,25 @@ class CheckinController extends Controller
     public function sendTxtToSlack($blocks, $slackWebhookUrl)
     {
         SlackAlert::to($slackWebhookUrl)->blocks($blocks);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getErrorMsg($msg): array
+    {
+        $data = [
+            'message' => $msg,
+            'alert-type' => 'error',
+        ];
+        return $data;
+    }
+    public function getSuccessMsg($msg): array
+    {
+        $data = [
+            'message' => $msg,
+            'alert-type' => 'success',
+        ];
+        return $data;
     }
 }
