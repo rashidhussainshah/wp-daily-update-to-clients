@@ -96,6 +96,12 @@
             <form action="{{ route('checkin.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
+                    <!-- Display yesterday's work plan -->
+                    <div class="form-group">
+                        <label>Yesterday's Work Plan</label>
+                        <textarea id="yesterdaysWorkPlan" class="form-control" readonly rows="5"></textarea>
+
+                    </div>
                     <div class="form-group">
                         <label for="today_work_plan">Today's Work Plan</label>
                         <textarea id="today_work_plan" name="today_work_plan" class="form-control" required rows="10" cols="400"></textarea>
@@ -141,11 +147,32 @@
     </div>
 </div>
 
+<!-- Example script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
+
+    // jQuery code using $(document).ready()
+    $(document).ready(function() {
+        // AJAX request inside $(document).ready()
+        $('#checkinModal').on('show.bs.modal', function (event) {
+            // Fetch yesterday's work plan via AJAX
+            $.ajax({
+                url: '{{ route('get.yesterdays.plan') }}', // Replace with your route to fetch yesterday's plan
+                type: 'GET',
+                success: function(response) {
+                    $('#yesterdaysWorkPlan').val(response.yesterdaysWorkPlan);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error fetching yesterday\'s work plan:', error);
+                }
+            });
+        });
+    });
+
     function focusTextarea(id) {
         setTimeout(function () {
             $('#' + id).focus();
-        }, 1000); // 1000 milliseconds = 1 seconds
+        }, 1000); // 1000 milliseconds = 1 second
     }
-
 </script>

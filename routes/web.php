@@ -62,6 +62,7 @@ Route::permanentRedirect('/', 'admin/login');
 //});
 
 Route::group(['prefix' => 'admin'], function () {
+    Route::get('/get-yesterdays-plan', [CheckinController::class, 'getYesterdaysPlan'])->name('get.yesterdays.plan');
     Route::post('/checkin', [CheckinController::class, 'storeCheckin'])->name('checkin.store');
     Route::post('/checkout', [CheckinController::class, 'storeCheckout'])->name('checkout.store');
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');

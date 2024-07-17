@@ -145,7 +145,23 @@ class CheckinController extends Controller
 //        ]);
         return redirect()->back()->with($this->getSuccessMsg('Check-out message sent to Slack!'));
     }
+    public function getYesterdaysPlan()
+    {
+        // Calculate yesterday's date
+        $yesterdayDate = now()->subDay()->format('Y-m-d');
 
+        // Query for the check-in of the previous day
+        $previousDayCheckin = Checkin::whereDate('checkin_at', $yesterdayDate)
+            ->where('developer_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $yesterdaysWorkPlan = $previousDayCheckin ? $previousDayCheckin->tomorrow_work_plan : '';
+
+        return response()->json([
+            'yesterdaysWorkPlan' => $yesterdaysWorkPlan
+        ]);
+    }
     /**
      * @return mixed
      */
