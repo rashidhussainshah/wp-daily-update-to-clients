@@ -14,7 +14,7 @@ class AddIsDevelopmentTeamMemberToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('is_development_team_member')->default(false);
+            $table->boolean('is_development_team_member')->after('id')->default(false);
         });
     }
 
