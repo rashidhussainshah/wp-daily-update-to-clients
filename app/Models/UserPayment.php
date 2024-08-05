@@ -58,9 +58,9 @@ class UserPayment extends Model
     public function scopeCurrentUserAndManagement($query)
     {
         if (Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME)) {
-            return $query;
+            return $query->orderBy('created_at', 'desc');
         } else {
-            return $query->where('developer_id', Auth::user()->id);
+            return $query->where('developer_id', Auth::user()->id)->orderBy('created_at', 'desc');
         }
     }
 
