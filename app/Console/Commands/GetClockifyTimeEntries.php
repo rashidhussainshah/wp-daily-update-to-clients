@@ -5,6 +5,7 @@ use Illuminate\Console\Command;
 use App\Models\User;
 use App\Services\ClockifyService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class GetClockifyTimeEntries extends Command
 {
@@ -31,9 +32,16 @@ class GetClockifyTimeEntries extends Command
 
         // Get today's time entries from Clockify
         $clockifyService = app(ClockifyService::class);
-        $startDate = Carbon::today();
-        $endDate = Carbon::now();
+        // Format the start and end dates to the required UTC format
+        $startDate = Carbon::today()->startOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T00:00:00Z';
+        $endDate = Carbon::today()->endOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T23:59:59Z';
 
+        // Log the formatted dates
+        Log::info('Fetching time entries from Clockify', [
+            'user_id' => $user->clockify_user_id,
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ]);
         try {
             $timeEntries = $clockifyService->getUserTimeEntries($user->clockify_user_id, $startDate, $endDate);
 

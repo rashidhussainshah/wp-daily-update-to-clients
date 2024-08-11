@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 
 class ClockifyService
@@ -56,12 +57,28 @@ class ClockifyService
                 'X-Api-Key' => $this->apiKey,
             ],
             'query' => [
-                'start' => $startDate->toIso8601String(),
-                'end' => $endDate->toIso8601String(),
+                'start' => $startDate,
+                'end' => $endDate,
             ],
         ]);
 
         return json_decode($response->getBody(), true);
+    }
+    /**
+     * Format start and end dates to UTC format.
+     *
+     * @param Carbon $date
+     * @return array
+     */
+    public function formatDateRange($date)
+    {
+        $startDate = $date->startOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T00:00:00Z';
+        $endDate = $date->endOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T23:59:59Z';
+
+        return [
+            'start' => $startDate,
+            'end' => $endDate,
+        ];
     }
 }
 

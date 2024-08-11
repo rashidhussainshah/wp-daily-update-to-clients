@@ -6,6 +6,7 @@ use App\Services\ClockifyService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ClockifyController extends Controller
 {
@@ -18,8 +19,16 @@ class ClockifyController extends Controller
         }
 
         $clockifyService = app(ClockifyService::class);
-        $startDate = Carbon::today();
-        $endDate = Carbon::now();
+        // Format the start and end dates to the required UTC format
+        $startDate = Carbon::today()->startOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T00:00:00Z';
+        $endDate = Carbon::today()->endOfDay()->setTimezone('UTC')->format('Y-m-d') . 'T23:59:59Z';
+
+        // Log the formatted dates
+        Log::info('Fetching time entries from Clockify', [
+            'user_id' => $user->clockify_user_id,
+            'start_date' => $startDate,
+            'end_date' => $endDate
+        ]);
 
         try {
             $timeEntries = $clockifyService->getUserTimeEntries($user->clockify_user_id, $startDate, $endDate);
@@ -27,18 +36,30 @@ class ClockifyController extends Controller
             if (empty($timeEntries)) {
                 return response()->json(['entries' => 'No time entries found for today.']);
             }
-
+            // Format the time entries
             $formattedEntries = [];
             foreach ($timeEntries as $entry) {
                 $description = $entry['description'] ?? 'No description';
                 $start = Carbon::parse($entry['timeInterval']['start']);
                 $end = Carbon::parse($entry['timeInterval']['end']);
-                $durationMinutes = $start->diffInMinutes($end);
+                $durationSeconds = $start->diffInSeconds($end);
+                $hours = intdiv($durationSeconds, 3600);
+                $minutes = intdiv($durationSeconds % 3600, 60);
+                $seconds = $durationSeconds % 60;
 
-                $hours = intdiv($durationMinutes, 60);
-                $minutes = $durationMinutes % 60;
+                // Format time spent based on hours, minutes, and seconds
+                $timeSpent = '';
+                if ($hours > 0) {
+                    $timeSpent .= $hours . 'h ';
+                }
+                if ($minutes > 0) { // Include minutes if hours are present or minutes alone
+                    $timeSpent .= $minutes . 'm ';
+                }
+                if ($seconds > 0) { // Include seconds if minutes or hours are present
+                    $timeSpent .= $seconds . 's';
+                }
 
-                $formattedEntries[] = $description . $hours . 'h ' . $minutes . 'm';
+                $formattedEntries[] = $description . ' | ' . $timeSpent;
             }
 
             return response()->json(['entries' => implode("\n", $formattedEntries)]);
