@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\ClockifyService;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -10,7 +11,17 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+    protected static function booted()
+    {
+        static::created(function ($user) {
+            $clockifyService = app(ClockifyService::class);
+            $clockifyUser = $clockifyService->createUser($user->email, $user->name);
 
+            // Save the Clockify user ID
+            $user->clockify_user_id = $clockifyUser['id'];
+            $user->save();
+        });
+    }
     const AYUB_USER_ID = 3;
     public $disable_export = true;
     protected $dates = ['deleted_at'];

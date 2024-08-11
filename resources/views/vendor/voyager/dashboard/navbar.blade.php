@@ -174,5 +174,18 @@
         setTimeout(function () {
             $('#' + id).focus();
         }, 1000); // 1000 milliseconds = 1 second
+        // Perform an AJAX request to get today's Clockify entries
+        fetch('/admin/clockify/today-entries')
+            .then(response => response.json())
+            .then(data => {
+                if (data.entries) {
+                    document.getElementById('end_of_day_report').value = data.entries;
+                } else if (data.error) {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching Clockify entries:', error);
+            });
     }
 </script>
