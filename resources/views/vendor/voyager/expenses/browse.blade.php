@@ -3,9 +3,9 @@
 @section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural'))
 @section('page_header')
     <div class="container-fluid">
-        <div>
-            <p>{!! getExpenseDetails() !!}</p>
-        </div>
+{{--        <div>--}}
+{{--            <p>{!! getExpenseDetails() !!}</p>--}}
+{{--        </div>--}}
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
         </h1>
