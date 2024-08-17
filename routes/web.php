@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CheckinController;
+use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +78,10 @@ Route::permanentRedirect('/', 'admin/login');
 //});
 
 Route::group(['prefix' => 'admin'], function () {
+    Route::get('clockify/today-entries', [ClockifyController::class, 'getTodayEntries'])->name('clockify.today-entries');
+    Route::get('/get-yesterdays-plan', [CheckinController::class, 'getYesterdaysPlan'])->name('get.yesterdays.plan');
+    Route::post('/checkin', [CheckinController::class, 'storeCheckin'])->name('checkin.store');
+    Route::post('/checkout', [CheckinController::class, 'storeCheckout'])->name('checkout.store');
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Route::get('mark-user-payment-paid/{id}', [DeveloperPaymentController::class, 'markUserPaymentPaid'])->name('mark-user-payment-paid');
     Voyager::routes();

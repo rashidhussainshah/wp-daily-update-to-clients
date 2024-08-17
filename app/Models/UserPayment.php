@@ -28,10 +28,26 @@ class UserPayment extends Model
 //
 //        }
 //    }
+    public static function getPayable($selectedUserId)
+    {
+        return UserPayment::where('developer_id', $selectedUserId)->approved()/*->notPaid()*/->sum('payable');
+    }
+    public static function getPaid($selectedUserId)
+    {
+        return UserPayment::where('developer_id', $selectedUserId)->approved()/*->paid()*/->sum('paid');
+    }
 
     public function scopeApproved($query)
     {
         return $query->where('status', UserPayment::APPROVED_STATUS);
+    }
+    public function scopePaid($query)
+    {
+        return $query->whereNotNull('paid');
+    }
+    public function scopeNotPaid($query)
+    {
+        return $query->whereNull('paid');
     }
 
     public function scopeRequested($query)
@@ -42,9 +58,9 @@ class UserPayment extends Model
     public function scopeCurrentUserAndManagement($query)
     {
         if (Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME)) {
-            return $query;
+            return $query->orderBy('created_at', 'desc');
         } else {
-            return $query->where('developer_id', Auth::user()->id);
+            return $query->where('developer_id', Auth::user()->id)->orderBy('created_at', 'desc');
         }
     }
 

@@ -1,0 +1,211 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Jobs\EmailsHandlerJob;
+use App\Models\Checkin;
+use App\Models\CheckinConfiguration;
+use App\Models\EodConfiguration;
+use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use PHPUnit\Exception;
+use Spatie\SlackAlerts\Facades\SlackAlert;
+
+/**
+ *
+ */
+class CheckinController extends Controller
+{
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function storeCheckin(Request $request): RedirectResponse
+    {
+        try {
+            date_default_timezone_set('Asia/Karachi');
+
+            // Retrieve today's date in the format 'Y-m-d'
+            $todayDate = Carbon::today()->toDateString();
+            $userId = Auth::id();
+
+            // Check if the CheckinConfiguration exists for the current user
+            $checkinConfig = CheckinConfiguration::where('developer_id', $userId)->first();
+            if (!$checkinConfig) {
+                return redirect()->back()->with($this->getErrorMsg('No Slack configuration found for the user.'));
+            }
+
+            // Check if there is already a check-in for the current user and today's date
+            $existingCheckin = Checkin::where('developer_id', $userId)
+                ->whereDate('checkin_at', $todayDate)
+                ->first();
+
+            if ($existingCheckin) {
+                // If a check-in record already exists for today, return an error message
+                return redirect()->back()->with($this->getErrorMsg('Check-in information already exists for today.'));
+            }
+
+            // Create a new check-in record
+            Checkin::create([
+                'developer_id' => $userId,
+                'checkin_at' => now(),
+                'today_work_plan' => $request->input('today_work_plan'),
+            ]);
+
+            // Prepare the message with the user name, today's plan, and today's date
+            $user = Auth::user();
+            $todayWorkPlan = $request->input('today_work_plan');
+            $currentDate = Carbon::now()->format('Y-m-d'); // Format the date as 'Y-m-d'
+
+            // Create the block payload for Slack
+            $blocks = [
+                [
+                    'type' => 'section',
+                    'text' => [
+                        'type' => 'mrkdwn',
+                        'text' => "*Check-in on " . $currentDate . "*\n\n*Today's Plan:*\n" . $todayWorkPlan . "\n\n*" . $user->name . " : " . $checkinConfig->designation . "*",
+                    ],
+                ],
+            ];
+
+            // Send the message to Slack using blocks
+            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+            return redirect()->back()->with($this->getSuccessMsg('Check-in message sent to Slack!'));
+        } catch (Exception $exception) {
+            return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function storeCheckout(Request $request): RedirectResponse
+    {
+        try {
+            $user = Auth::user();
+            // Check if the CheckinConfiguration exists for the current user
+            $checkinConfig = CheckinConfiguration::where('developer_id', $user->id)->first();
+            if (!$checkinConfig) {
+                return redirect()->back()->with('error', 'No Slack configuration found for the user.');
+            }
+
+            $checkin = Checkin::where('developer_id', Auth::id())
+                ->whereNull('checkout_at')
+                ->whereDate('checkin_at', Carbon::today())
+                ->latest()->first();
+
+            if (!$checkin) {
+                return redirect()->back()->with($this->getErrorMsg('No check-in information found for today. Please check-in first.'));
+            }
+            $tomorrowWorkPlan = $request->input('tomorrow_work_plan');
+
+            $checkin->update([
+                'checkout_at' => now(),
+                'end_of_day_report' => $request->input('end_of_day_report'),
+                'tomorrow_work_plan' => $tomorrowWorkPlan,
+            ]);
+
+            $endOfDayReport = $request->input('end_of_day_report');
+            $currentDate = Carbon::now()->format('Y-m-d'); // Format the date as 'Y-m-d'
+
+            $checkinAt = Carbon::parse($checkin->checkin_at);
+            $checkoutAt = Carbon::parse($checkin->checkout_at);
+            $hoursSpent = $checkinAt->diffInHours($checkoutAt);
+            $minutesSpent = $checkinAt->diffInMinutes($checkoutAt) % 60;
+
+            $message = "*Check-out on " . $currentDate . "*\n\n*EOD Report:*\n" . $endOfDayReport . "\n\n*Plan for Tomorrow:*\n" . $tomorrowWorkPlan . "*";
+
+            if (!$user->is_development_team_member) {
+                // Calculate total hours and minutes for students
+                $message .= "\n\n*Total time spent: " . $hoursSpent . " hours and " . $minutesSpent . " minutes.*";
+            } else {
+                // Calculate short or extra hours for development team members
+                $totalOfficeHours = $user->part_time ? 4.5 : 9;
+                $hoursShort = $totalOfficeHours - $hoursSpent;
+                $hoursExtra = $hoursSpent - $totalOfficeHours;
+
+                if ($hoursShort > 0) {
+                    $minutesShort = 60 - $minutesSpent;
+                    $hoursShort = $hoursShort - 1;
+                    $message .= "\n\n*Short by " . $hoursShort . " hours and " . $minutesShort . " minutes.*";
+                } elseif ($hoursExtra > 0) {
+                    $message .= "\n\n*Extra time worked: " . $hoursExtra . " hours and " . $minutesSpent . " minutes.*";
+                }
+            }
+
+            $message .= "\n\n*" . $user->name . " : " . $checkinConfig->designation . "*";
+
+            $blocks = [
+                [
+                    'type' => 'section',
+                    'text' => [
+                        'type' => 'mrkdwn',
+                        'text' => $message,
+                    ],
+                ],
+            ];
+
+            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+            return redirect()->back()->with($this->getSuccessMsg('Check-out message sent to Slack!'));
+        } catch (\Exception $exception) {
+            return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
+        }
+    }
+
+
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getYesterdaysPlan(): \Illuminate\Http\JsonResponse
+    {
+        // Calculate yesterday's date
+        $yesterdayDate = now()->subDay()->format('Y-m-d');
+
+        // Query for the check-in of the previous day
+        $previousDayCheckin = Checkin::whereDate('checkin_at', $yesterdayDate)
+            ->where('developer_id', Auth::id())
+            ->latest()
+            ->first();
+
+        $yesterdaysWorkPlan = $previousDayCheckin ? $previousDayCheckin->tomorrow_work_plan : '';
+
+        return response()->json([
+            'yesterdaysWorkPlan' => $yesterdaysWorkPlan
+        ]);
+    }
+    /**
+     * @return mixed
+     */
+    public function sendTxtToSlack($blocks, $slackWebhookUrl)
+    {
+        SlackAlert::to($slackWebhookUrl)->blocks($blocks);
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getErrorMsg($msg): array
+    {
+        $data = [
+            'message' => $msg,
+            'alert-type' => 'error',
+        ];
+        return $data;
+    }
+
+    /**
+     * @param $msg
+     * @return array
+     */
+    public function getSuccessMsg($msg): array
+    {
+        $data = [
+            'message' => $msg,
+            'alert-type' => 'success',
+        ];
+        return $data;
+    }
+}

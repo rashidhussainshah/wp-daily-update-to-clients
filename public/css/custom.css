@@ -1,0 +1,13 @@
+.floating-buttons {
+    position: fixed;
+    top: 15px; /* Adjust top positioning */
+    right: 60px; /* Adjust right positioning */
+    z-index: 1000;
+    display: flex;
+    justify-content: center; /* Center items horizontally */
+}
+
+.floating-buttons .btn {
+    width: 120px;
+    margin: 0 5px; /* Adjust margin between buttons */
+}
