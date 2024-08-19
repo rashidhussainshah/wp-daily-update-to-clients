@@ -80,7 +80,8 @@
 @stop
 
 @section('javascript')
-
+    @yield('chart-js-user-payments')
+    @yield('chart-js-top-earners')
     @if(isset($google_analytics_client_id) && !empty($google_analytics_client_id))
         <script>
             (function (w, d, s, g, js, fs) {
