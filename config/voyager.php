@@ -151,6 +151,7 @@ return [
             'App\\Widgets\\TotalGivenDimmer',
             'App\\Widgets\\TotalRemainingDimmer',
             'App\Widgets\UserPaymentsChart',
+            'App\Widgets\TopEarnersChart',
 //            'user_payments_chart',
         ],
 

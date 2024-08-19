@@ -11,3 +11,6 @@
     width: 120px;
     margin: 0 5px; /* Adjust margin between buttons */
 }
+.chart-heading-text {
+    color: black !important;
+}

@@ -80,8 +80,8 @@
 @stop
 
 @section('javascript')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @yield('chart-js') <!-- Include your custom scripts -->
+    @yield('chart-js-user-payments')
+    @yield('chart-js-top-earners')
     @if(isset($google_analytics_client_id) && !empty($google_analytics_client_id))
         <script>
             (function (w, d, s, g, js, fs) {

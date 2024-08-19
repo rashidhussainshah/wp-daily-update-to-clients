@@ -6,7 +6,36 @@ use App\Models\Income;
 use App\Models\StudentFee;
 use App\Models\User;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+
+/**
+ * Determine if the logged-in user is an administrator.
+ *
+ * @return bool
+ */
+if (!function_exists('isAdministrator')) {
+    function isAdministrator()
+    {
+        $user = Auth::user();
+
+        // Get the administrator role ID from settings
+        $adminRoleId = setting('admin.administrator_role_id');
+
+        // Check if the user has the administrator role using the role_id
+        if (isset($user->role_id) && $user->role_id == $adminRoleId) {
+            return true;
+        }
+
+        // Check if the user has the administrator role using the roles relation
+        if (isset($user->roles) && $user->roles()->where('id', $adminRoleId)->exists()) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
 
 if (!function_exists('d')) {
     function d($data, $exit = true)
@@ -99,6 +128,6 @@ if (!function_exists('getRandomQuote')) {
 if (!function_exists('getMailFromAddress')) {
     function getMailFromAddress(): string
     {
-        return setting('email-configuration.from')?? 'test' ;
+        return setting('email-configuration.from') ?? '';
     }
 }

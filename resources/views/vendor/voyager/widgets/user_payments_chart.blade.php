@@ -2,7 +2,7 @@
      style="margin-bottom:0;overflow:hidden;background-image:url({{ voyager_asset('images/widget-backgrounds/02.png') }});">
     <div class="panel-content">
         <div class="d-flex justify-content-between">
-            <h4>User Payments Chart</h4>
+            <h4 class="chart-heading-text">User Payments Chart</h4>
             <form method="GET" class="d-flex">
                 <select name="user_id" onchange="this.form.submit()">
                     <option value="">Select User</option>
@@ -16,7 +16,7 @@
     </div>
 </div>
 
-@section('chart-js')
+@section('chart-js-user-payments')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         var ctx = document.getElementById('paymentsChart').getContext('2d');
@@ -54,7 +54,7 @@
         };
 
         var paymentsChart = new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: chartData,
             options: {
                 scales: {
