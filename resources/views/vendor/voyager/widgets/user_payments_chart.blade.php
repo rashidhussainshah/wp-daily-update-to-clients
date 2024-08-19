@@ -54,7 +54,7 @@
         };
 
         var paymentsChart = new Chart(ctx, {
-            type: 'bar',
+            type: 'line',
             data: chartData,
             options: {
                 scales: {
