@@ -1,6 +1,7 @@
 @extends('voyager::master')
 
 @section('content')
+{{setting('demo-1.demo1_sidebar_color')}}
     <div class="page-content">
         @include('voyager::alerts')
         @include('voyager::dimmers')
