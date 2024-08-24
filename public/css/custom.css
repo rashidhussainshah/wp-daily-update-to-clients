@@ -1,16 +1,26 @@
 .floating-buttons {
     position: fixed;
-    top: 15px; /* Adjust top positioning */
-    right: 60px; /* Adjust right positioning */
+    top: 15px;
+    /* Adjust top positioning */
+    right: 60px;
+    /* Adjust right positioning */
     z-index: 1000;
     display: flex;
-    justify-content: center; /* Center items horizontally */
+    justify-content: center;
+    /* Center items horizontally */
 }
 
 .floating-buttons .btn {
     width: 120px;
-    margin: 0 5px; /* Adjust margin between buttons */
+    margin: 0 5px;
+    /* Adjust margin between buttons */
 }
+
 .chart-heading-text {
     color: black !important;
+}
+
+.side-menu.sidebar-inverse .navbar li>a:hover {
+    color: #6FAAF5 !important;
+    background: #001b3e !important;
 }

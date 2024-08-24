@@ -1,8 +1,8 @@
 <div class="side-menu sidebar-inverse">
-    <nav class="navbar navbar-default" role="navigation">
-        <div class="side-menu-container">
-            <div class="navbar-header">
-                <a class="navbar-brand" href="{{ route('voyager.dashboard') }}">
+    <nav class="navbar navbar-default" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" role="navigation">
+        <div class="side-menu-container" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" >
+            <div class="navbar-header" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" >
+                <a class="navbar-brand"  href="{{ route('voyager.dashboard') }}">
                     <div class="logo-icon-container">
                         <?php $admin_logo_img = Voyager::setting('admin.icon_image', ''); ?>
                         @if($admin_logo_img == '')
@@ -16,8 +16,8 @@
             </div><!-- .navbar-header -->
 
             <div class="panel widget center bgimage"
-                 style="background-image:url({{ Voyager::image( Voyager::setting('admin.bg_image'), voyager_asset('images/bg.jpg') ) }}); background-size: cover; background-position: 0px;">
-                <div class="dimmer"></div>
+                 style=" background-color: {{ Voyager::setting('demo-1.sidebar_color') }}; background-size: cover; background-position: 0px;">
+                <div class=""></div>
                 <div class="panel-content">
                     <img src="{{ $user_avatar }}" class="avatar" alt="{{ Auth::user()->name }} avatar">
                     <h4>{{ ucwords(Auth::user()->name) }}</h4>
