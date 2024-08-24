@@ -18,9 +18,9 @@
             <div class="panel widget center bgimage"
                  style=" background-color: {{ Voyager::setting('demo-1.sidebar_color') }}; background-size: cover; background-position: 0px;">
                 <div class=""></div>
-                <div class="panel-content">
+                <div class="panel-content" style="cursor: pointer;">
                     <img src="{{ $user_avatar }}" class="avatar" alt="{{ Auth::user()->name }} avatar">
-                    <h4>{{ ucwords(Auth::user()->name) }}</h4>
+                    <h4><b class="wp_abs_admin" >{{ ucwords(Auth::user()->name) }}</b></h4>
                     <p>{{ Auth::user()->email }}</p>
 
                     <a href="{{ route('voyager.profile') }}" class="btn btn-primary">{{ __('voyager::generic.profile') }}</a>

@@ -23,4 +23,10 @@
 .side-menu.sidebar-inverse .navbar li>a:hover {
     color: #6FAAF5 !important;
     background: #001b3e !important;
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+}
+
+.side-menu.sidebar-inverse .navbar li.active>a {
+    color: #6FAAF5 !important;
+    background: #001b3e !important;
 }
