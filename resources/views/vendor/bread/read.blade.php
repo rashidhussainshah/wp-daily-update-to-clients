@@ -8,23 +8,27 @@
 
         @can('edit', $dataTypeContent)
             <a href="{{ route('voyager.'.$dataType->slug.'.edit', $dataTypeContent->getKey()) }}" class="btn btn-info">
-                <i class="glyphicon glyphicon-pencil"></i> <span class="hidden-xs hidden-sm">{{ __('voyager::generic.edit') }}</span>
+                <i class="glyphicon glyphicon-pencil"></i> 
+                <!-- <span class="hidden-xs hidden-sm">{{ __('voyager::generic.edit') }}</span> -->
             </a>
         @endcan
         @can('delete', $dataTypeContent)
             @if($isSoftDeleted)
                 <a href="{{ route('voyager.'.$dataType->slug.'.restore', $dataTypeContent->getKey()) }}" title="{{ __('voyager::generic.restore') }}" class="btn btn-default restore" data-id="{{ $dataTypeContent->getKey() }}" id="restore-{{ $dataTypeContent->getKey() }}">
-                    <i class="voyager-trash"></i> <span class="hidden-xs hidden-sm">{{ __('voyager::generic.restore') }}</span>
+                    <i class="voyager-trash"></i> 
+                <!-- <span class="hidden-xs hidden-sm">{{ __('voyager::generic.restore') }}</span> -->
                 </a>
             @else
                 <a href="javascript:;" title="{{ __('voyager::generic.delete') }}" class="btn btn-danger delete" data-id="{{ $dataTypeContent->getKey() }}" id="delete-{{ $dataTypeContent->getKey() }}">
-                    <i class="voyager-trash"></i> <span class="hidden-xs hidden-sm">{{ __('voyager::generic.delete') }}</span>
+                    <i class="voyager-trash"></i>
+                 <!-- <span class="hidden-xs hidden-sm">{{ __('voyager::generic.delete') }}</span> -->
                 </a>
             @endif
         @endcan
         @can('browse', $dataTypeContent)
         <a href="{{ route('voyager.'.$dataType->slug.'.index') }}" class="btn btn-warning">
-            <i class="glyphicon glyphicon-list"></i> <span class="hidden-xs hidden-sm">{{ __('voyager::generic.return_to_list') }}</span>
+            <i class="glyphicon glyphicon-list"></i> 
+            <!-- <span class="hidden-xs hidden-sm">{{ __('voyager::generic.return_to_list') }}</span> -->
         </a>
         @endcan
     </h1>

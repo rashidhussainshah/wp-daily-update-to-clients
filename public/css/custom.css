@@ -30,3 +30,7 @@
     color: #6FAAF5 !important;
     background: #001b3e !important;
 }
+.hidden-xs .hidden-sm{
+    display:none !important;
+}
+nxnanda
