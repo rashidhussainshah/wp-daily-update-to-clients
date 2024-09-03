@@ -8,7 +8,7 @@
         @if ($action->shouldActionDisplayOnRow($data))
             <a href="{{ $action->getRoute($dataType->name) }}" title="{{ $action->getTitle() }}" {!! $action->convertAttributesToHtml() !!}>
                 <i class="{{ $action->getIcon() }}"></i>
-                 <!-- <span class="hidden-xs hidden-sm">{{ $action->getTitle() }}</span> -->
+                 <span class="hidden-xs hidden-sm">{{ $action->getTitle() }}</span>
             </a>
         @endif
     @endcan

@@ -9,7 +9,7 @@ class ViewUserPaymentDetailAction extends AbstractAction
 {
     public function getTitle()
     {
-        // return 'View Payment';
+        return 'Payment';
     }
 
     public function getIcon()

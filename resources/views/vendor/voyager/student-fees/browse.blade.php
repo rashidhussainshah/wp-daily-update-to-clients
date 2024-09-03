@@ -80,7 +80,7 @@
                             </form>
                         @endif
                         <div class="table-responsive">
-                            <table id="dataTable" class="table table-hover">
+                            <table id="dataTable" class="table">
                                 <thead>
                                     <tr>
                                         @if($showCheckboxColumn)
@@ -255,7 +255,7 @@
                                                 @endif
                                             </td>
                                         @endforeach
-                                        <td class="no-sort no-click bread-actions">
+                                        <td class="no-sort no-click bread-actions" style="display: flex;" >
                                             @foreach($actions as $action)
                                                 @if (!method_exists($action, 'massAction'))
                                                     @include('voyager::bread.partials.actions', ['action' => $action])

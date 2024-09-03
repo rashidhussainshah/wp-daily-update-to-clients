@@ -30,7 +30,36 @@
     color: #6FAAF5 !important;
     background: #001b3e !important;
 }
-.hidden-xs .hidden-sm{
-    display:none !important;
+
+.hidden-xs .hidden-sm {
+    display: none !important;
 }
-nxnanda
+
+.navbar .navbar-default {
+    background: #0B0428;
+}
+
+.app-container {
+    background: #7164A5;
+}
+
+.panel,
+#dataTable {
+    background: #B1A8D6 !important;
+}
+
+tr {
+    background: #B1A8D6 !important;
+}
+
+.bread-actions {
+    display: flex;
+    justify-content: space-evenly;
+    color: white;
+    font-weight: 600;
+}
+
+.page-title,
+.voyager-person {
+    color: white;
+}
