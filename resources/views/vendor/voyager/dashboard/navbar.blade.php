@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<nav class="navbar navbar-default navbar-fixed-top navbar-top" style="background: #7164A5;" >
+<nav class="navbar navbar-default navbar-fixed-top navbar-top" style="background:#004891;" >
     <div class="container-fluid">
         <div class="navbar-header">
             <button class="hamburger btn-link">

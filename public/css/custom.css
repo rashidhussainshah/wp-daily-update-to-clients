@@ -40,16 +40,17 @@
 }
 
 .app-container {
-    background: #7164A5;
+    background: #004891;
 }
 
 .panel,
 #dataTable {
-    background: #B1A8D6 !important;
+    background: #f7f7f7 !important;
 }
 
 tr {
-    background: #B1A8D6 !important;
+    background: #f7f7f7 !important;
+    text-align: justify;
 }
 
 .bread-actions {
@@ -61,5 +62,46 @@ tr {
 
 .page-title,
 .voyager-person {
-    color: white;
+    color: #f7f7f7;
+}
+
+.hamburger-inner:before,
+.hamburger-inner,
+.hamburger-inner:after {
+    background: #f7f7f7;
+}
+
+td {
+    font-weight: 600;
+    color: #001b3e;
+    align-content: center;
+}
+
+.breadcrumb {
+    background-color: #f7f7f7;
+}
+
+.wp_abs_admin {
+    text-decoration: wavy;
+    font-weight: 900;
+    color: #004891;
+}
+
+.select_all {
+    width: 20px;
+    height: 20px;
+}
+
+input[type=checkbox] {
+    transform: scale(1.5);
+    accent-color: #001b3e;
+}
+
+.pagination .active span,
+.voyager .pagination .active>a,
+.voyager .pagination .active>a:focus,
+.voyager .pagination .active>a:hover,
+.voyager .pagination .active>span:focus,
+.voyager .pagination .active>span:hover {
+    background-color: #004891;
 }
