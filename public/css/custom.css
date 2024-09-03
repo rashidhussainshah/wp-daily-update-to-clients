@@ -57,7 +57,7 @@ tr {
     display: flex;
     justify-content: space-evenly;
     color: white;
-    font-weight: 600;
+    font-weight: 500;
 }
 
 .page-title,
@@ -105,3 +105,28 @@ input[type=checkbox] {
 .voyager .pagination .active>span:hover {
     background-color: #004891;
 }
+
+.dt-not-orderable {
+    padding: 5px 12px !important;
+}
+
+th , .actions {
+    font-weight: 900 !important;
+    font-size: 16px;
+    color: #004891 !important;
+}
+.input-sm select {
+    /* ... */
+    background-color: #000;
+    color: #fff;
+  }
+  
+  .input-sm::before {
+    /* ... */
+    border-bottom: var(--size) solid #fff;
+  }
+  
+  .input-sm::after {
+    /* ... */
+    border-top: var(--size) solid #fff;
+  }
