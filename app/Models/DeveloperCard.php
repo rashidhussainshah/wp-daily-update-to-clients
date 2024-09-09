@@ -14,6 +14,22 @@ class DeveloperCard extends Model
         'designation',
         'expertises',
     ];
+    // Automatically append this attribute to the model's JSON form
+    protected $appends = ['image_url'];
+
+    /**
+     * Accessor for the complete image URL.
+     *
+     * @return string
+     */
+    public function getImageUrlAttribute()
+    {
+        if ($this->profile) {
+            return url('storage/' . $this->profile);
+        }
+
+        return null; // or a default image path
+    }
 
     public function developerCategory()
     {
