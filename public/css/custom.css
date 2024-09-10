@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css?family=Raleway");
+
 .floating-buttons {
     position: fixed;
     top: 15px;
@@ -11,7 +13,7 @@
 }
 
 .floating-buttons .btn {
-    width: 120px;
+    width: 125px;
     margin: 0 5px;
     /* Adjust margin between buttons */
 }
@@ -36,20 +38,15 @@
 }
 
 .navbar .navbar-default {
-    background: #0B0428;
+    background: #f7f7f7;
 }
 
 .app-container {
-    background: #004891;
-}
-
-.panel,
-#dataTable {
-    background: #f7f7f7 !important;
+    background: #f7f7f7;
 }
 
 tr {
-    background: #f7f7f7 !important;
+    background: white !important;
     text-align: justify;
 }
 
@@ -60,15 +57,19 @@ tr {
     font-weight: 500;
 }
 
-.page-title,
-.voyager-person {
-    color: #f7f7f7;
+.container-fluid .page-title .voyager-person {
+    color: #001b3e;
+}
+
+.voyager .breadcrumb a {
+    color: #001b3e !important;
+    font-weight: 600;
 }
 
 .hamburger-inner:before,
 .hamburger-inner,
 .hamburger-inner:after {
-    background: #f7f7f7;
+    background: #001b3e;
 }
 
 td {
@@ -78,7 +79,7 @@ td {
 }
 
 .breadcrumb {
-    background-color: #f7f7f7;
+    font-size: 12px;
 }
 
 .wp_abs_admin {
@@ -110,23 +111,42 @@ input[type=checkbox] {
     padding: 5px 12px !important;
 }
 
-th , .actions {
+th,
+.actions {
     font-weight: 900 !important;
     font-size: 16px;
     color: #004891 !important;
 }
+
 .input-sm select {
     /* ... */
     background-color: #000;
     color: #fff;
-  }
-  
-  .input-sm::before {
+}
+
+.input-sm::before {
     /* ... */
     border-bottom: var(--size) solid #fff;
-  }
-  
-  .input-sm::after {
+}
+
+.input-sm::after {
     /* ... */
     border-top: var(--size) solid #fff;
-  }
+}
+
+th {
+    background: rgb(239, 239, 239) !important;
+}
+
+.check-btn {
+    background: #001b3e !important;
+    background: linear-gradient(45deg, #353d47, #21292e);
+    font-weight: 500;
+    transition: ease-in 0.2s;
+}
+
+.check-btn:hover {
+    background: #f7f7f7 !important;
+    color: #001b3e !important;
+    box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+}

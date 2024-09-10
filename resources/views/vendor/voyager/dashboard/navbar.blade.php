@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-<nav class="navbar navbar-default navbar-fixed-top navbar-top" style="background:#004891;" >
+<nav class="navbar navbar-default navbar-fixed-top navbar-top" style="background:white;" >
     <div class="container-fluid">
         <div class="navbar-header">
             <button class="hamburger btn-link">
@@ -81,8 +81,8 @@
 
 <!-- Floating Buttons -->
 <div class="floating-buttons">
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#checkinModal"  onclick="focusTextarea('today_work_plan')">Check In</button>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#checkoutModal" onclick="focusTextarea('end_of_day_report')">Check Out</button>
+    <button type="button" class="btn btn-primary check-btn" data-toggle="modal" data-target="#checkinModal"  onclick="focusTextarea('today_work_plan')">Check In</button>
+    <button type="button" class="btn btn-primary check-btn" data-toggle="modal" data-target="#checkoutModal" onclick="focusTextarea('end_of_day_report')">Check Out</button>
 </div>
 
 <!-- Check-in Modal -->

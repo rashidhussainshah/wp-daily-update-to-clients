@@ -1,7 +1,9 @@
 <div class="side-menu sidebar-inverse">
-    <nav class="navbar navbar-default" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" role="navigation">
+    <nav class="navbar navbar-default" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};
+" role="navigation">
         <div class="side-menu-container" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" >
-            <div class="navbar-header" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};" >
+            <div class="navbar-header" style="background-color: {{ Voyager::setting('demo-1.sidebar_color') }};
+" >
                 <a class="navbar-brand"  href="{{ route('voyager.dashboard') }}">
                     <div class="logo-icon-container">
                         <?php $admin_logo_img = Voyager::setting('admin.icon_image', ''); ?>
@@ -16,7 +18,7 @@
             </div><!-- .navbar-header -->
 
             <div class="panel widget center bgimage"
-                 style=" background-color: {{ Voyager::setting('demo-1.sidebar_color') }}; background-size: cover; background-position: 0px;">
+                 style="background-color: #f7f7f7; background-size: cover; background-position: 0px;">
                 <div class=""></div>
                 <div class="panel-content" style="cursor: pointer;">
                     <img src="{{ $user_avatar }}" class="avatar" alt="{{ Auth::user()->name }} avatar">
