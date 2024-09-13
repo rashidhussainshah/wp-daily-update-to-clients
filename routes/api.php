@@ -15,8 +15,11 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get('developer-categories', [DeveloperCategoryController::class, 'index']);
-Route::get('developer-categories/{id}/developers', [DeveloperCategoryController::class, 'show']);
+Route::middleware('verify.api.source')->group(function () {
+    Route::get('developer-categories', [DeveloperCategoryController::class, 'index']);
+    Route::get('developer-categories/{id}/developers', [DeveloperCategoryController::class, 'show']);
+});
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

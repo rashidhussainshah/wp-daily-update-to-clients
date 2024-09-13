@@ -27,9 +27,15 @@ class DeveloperCategoryController extends Controller
     public function show($id)
     {
         try {
-            $developers = DeveloperCard::where('developer_category_id', $id)
-                ->with('expertises')
-                ->get();
+            if ($id === 'all') { // If the user passes 'all' as the key
+                $developers = DeveloperCard::where('for_all_filter', true)
+                    ->with('expertises')
+                    ->get();
+            } else {
+                $developers = DeveloperCard::where('developer_category_id', $id)
+                    ->with('expertises')
+                    ->get();
+            }
 
             if ($developers->isEmpty()) {
                 return $this->errorResponse('No developers found for the specified category', 404);
