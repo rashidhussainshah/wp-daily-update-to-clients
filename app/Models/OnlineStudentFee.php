@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Auth;
 
 class OnlineStudentFee extends Model
 {
@@ -32,7 +33,7 @@ class OnlineStudentFee extends Model
     // Combined scope to get data for the current month without Paid status or where status is Pending
     public function scopeCurrentMonthOrPendingStatus($query)
     {
-        return $query->where(function ($query) {
+        return $query->where('student_id', Auth::user()->id)->where(function ($query) {
             $query->currentMonth()
                 ->whereNotIn('status', ['paid'])
                 ->orWhere(function ($query) {
