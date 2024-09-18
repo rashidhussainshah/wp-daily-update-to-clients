@@ -3,12 +3,14 @@
 @section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural'))
 @section('page_header')
     <div class="container-fluid">
-        <div>
-            @php
-                $remainingAmounts = getRemainingAmounts();
-            @endphp
-            <p>Total Remaining: <strong>{{ $remainingAmounts['total'] }}</strong> | Current Month Remaining: <strong>{{ $remainingAmounts['currentMonth'] }}</strong> | Pending Except Current Month: <strong>{{ $remainingAmounts['pendingExceptCurrentMonth'] }}</strong> </p>
-        </div>
+        @if(isAdministrator())
+            <div>
+                @php
+                    $remainingAmounts = getRemainingAmounts();
+                @endphp
+                <p>Total Remaining: <strong>{{ $remainingAmounts['total'] }}</strong> | Current Month Remaining: <strong>{{ $remainingAmounts['currentMonth'] }}</strong> | Pending Except Current Month: <strong>{{ $remainingAmounts['pendingExceptCurrentMonth'] }}</strong> </p>
+            </div>
+        @endif
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
         </h1>
