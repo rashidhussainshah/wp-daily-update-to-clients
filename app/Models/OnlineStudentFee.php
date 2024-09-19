@@ -33,13 +33,23 @@ class OnlineStudentFee extends Model
     // Combined scope to get data for the current month without Paid status or where status is Pending
     public function scopeCurrentMonthOrPendingStatus($query)
     {
-        return $query->where('student_id', Auth::user()->id)->where(function ($query) {
-            $query->currentMonth()
-                ->whereNotIn('status', ['paid'])
-                ->orWhere(function ($query) {
-                    $query->pendingStatus();
-                });
-        });
+        if (Auth::user()->role && (Auth::user()->role->id == setting('academy.online_student_role_id'))) {
+            return $query->where('student_id', Auth::user()->id)->where(function ($query) {
+                $query->currentMonth()
+                    ->whereNotIn('status', ['paid'])
+                    ->orWhere(function ($query) {
+                        $query->pendingStatus();
+                    });
+            });
+        }else {
+            return $query->where(function ($query) {
+                $query->currentMonth()
+                    ->whereNotIn('status', ['paid'])
+                    ->orWhere(function ($query) {
+                        $query->pendingStatus();
+                    });
+            });
+        }
     }
     // Define the belongsTo relationship with User model
     public function student()
