@@ -34,7 +34,7 @@ class StudentFee extends Model
     public function scopeCurrentMonthOrPendingStatus($query)
     {
         if (Auth::user()->role && (Auth::user()->role->id == setting('academy.student_role_id'))) {
-            return $query->where('student_id', Auth::user()->id)->where(function ($query) {
+            return $query/*->where('student_id', Auth::user()->id)-*/>where(function ($query) {
                 $query->currentMonth()
                     ->whereNotIn('status', ['paid'])
                     ->orWhere(function ($query) {
