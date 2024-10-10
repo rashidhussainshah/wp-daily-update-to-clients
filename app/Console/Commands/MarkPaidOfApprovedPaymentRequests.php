@@ -52,6 +52,7 @@ class MarkPaidOfApprovedPaymentRequests extends Command
         Log::info("Processing started for user {$user->name}");
         $this->info("Processing started for user {$user->name}");
         $upq = UserPayment::whereDeveloperId($userId)
+            ->whereNotNull('payable')
             ->whereNull('paid')
             ->where('status', UserPayment::APPROVED_STATUS)
             ->get();
