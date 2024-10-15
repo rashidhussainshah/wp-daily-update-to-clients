@@ -46,9 +46,10 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             $this->sendEmail($data);
 
             if ( auth() && auth()->user() && auth()->user()->email) {
-                if (auth()->user()->email != 'ayubkhokar786@gmail.com') {
+                if (auth()->user()->email != 'ayubkhokhar786@gmail.com') {
                     // Add an entry for "ayubkhokar786@gmail.com" after the data is saved
                     $this->addEntryForAyubKhokar($request, $data->id);
+                } else {
                 }
             }
 

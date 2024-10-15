@@ -64,15 +64,20 @@
             <th>Notes:</th>
             <td>{{$data['notes'] ?? ''}}</td>
         </tr>
+        <tr>
+            <th>Attachment:</th>
+            <td>
+                @if(isset($data['attachments']) && is_array($data['attachments']))
+                    @foreach($data['attachments'] as $attachment)
+                        <div class="img_settings_container" style="float:left;padding-right:15px;">
+                            <img src="{{ Voyager::image($attachment) }}" style="max-width:200px; height:auto; clear:both; display:block; padding:2px; border:1px solid #ddd; margin-bottom:5px;">
+                        </div>
+                    @endforeach
+                @endif
+            </td>
+        </tr>
         </tbody>
     </table>
-    @if(isset($data['attachments']))
-        @foreach($data['attachments'] as $attachment)
-            <div class="img_settings_container" style="float:left;padding-right:15px;">
-                <img src="{{ Voyager::image($attachment) }}" style="max-width:200px; height:auto; clear:both; display:block; padding:2px; border:1px solid #ddd; margin-bottom:5px;">
-            </div>
-        @endforeach
-    @endif
     <div class="clearfix"></div>
     <a href="{{ route('voyager.user-payments.show', ['id' => $data['id']]) }}">Click here</a> to view the payment request details.
     <p>{{ getRandomQuote() }}</p>

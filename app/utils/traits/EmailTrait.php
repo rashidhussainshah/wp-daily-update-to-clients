@@ -32,7 +32,7 @@ trait EmailTrait
             'fee' => $data->fee,
             'notes' => $data->notes,
             'is_payment_approve_req' => $updateReq,
-            'attachments' => $data->attachments,
+            'attachments' => json_decode($data['attachments'], true),
         ]);
     }
     public function sendPaymentReqApproveEmail($data): void
