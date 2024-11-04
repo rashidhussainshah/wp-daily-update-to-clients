@@ -223,7 +223,7 @@
         $(clientSourceSelect).on('select2:select', function (e) {
             autofillFields();
         });
-            const userPercentage = {{ Auth::user()->percentage ?? 0.35 }}; // Fetch the percentage value for the logged-in user
+            const userPercentage = {{ Auth::user()->percentage ?? 0.375 }}; // Fetch the percentage value for the logged-in user
             // console.log(userPercentage);
             // console.log(typeof userPercentage);
         function autofillFields() {

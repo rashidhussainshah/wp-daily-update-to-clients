@@ -103,7 +103,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             }
 
             // Calculate percentage of employee
-            $devNetEarning = $devEarning * $ayubUser->percentage ?? 0.03;
+            $devNetEarning = $devEarning * ($ayubUser->percentage ?? 0.04);
 
             // Calculate the payable amount by multiplying devNetEarning with the currency rate
             if ($currentCurrencyRate) {
