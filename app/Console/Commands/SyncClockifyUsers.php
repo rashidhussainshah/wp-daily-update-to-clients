@@ -22,7 +22,7 @@ class SyncClockifyUsers extends Command
         $clockifyUsers = $clockifyService->getAllUsers();
 
         foreach ($clockifyUsers as $clockifyUser) {
-            $portalUser = User::where('email', $clockifyUser['email'])->first();
+            $portalUser = User::where('email', $clockifyUser['email'])->whereNull('clockify_user_id')->first();
 
             if ($portalUser) {
                 $portalUser->clockify_user_id = $clockifyUser['id'];
