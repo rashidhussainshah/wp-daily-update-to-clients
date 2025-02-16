@@ -71,7 +71,7 @@ class CheckinController extends Controller
             ];
 
             // Send the message to Slack using blocks
-            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+//            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
             return redirect()->back()->with($this->getSuccessMsg('Check-in message sent to Slack!'));
         } catch (Exception $exception) {
             return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
@@ -86,12 +86,14 @@ class CheckinController extends Controller
     {
         try {
             $user = Auth::user();
+
             // Check if the CheckinConfiguration exists for the current user
             $checkinConfig = CheckinConfiguration::where('developer_id', $user->id)->first();
             if (!$checkinConfig) {
                 return redirect()->back()->with('error', 'No Slack configuration found for the user.');
             }
 
+            // Fetch check-in record for today
             $checkin = Checkin::where('developer_id', Auth::id())
                 ->whereNull('checkout_at')
                 ->whereDate('checkin_at', Carbon::today())
@@ -100,29 +102,52 @@ class CheckinController extends Controller
             if (!$checkin) {
                 return redirect()->back()->with($this->getErrorMsg('No check-in information found for today. Please check-in first.'));
             }
+
+            // Get work plan input
             $tomorrowWorkPlan = $request->input('tomorrow_work_plan');
 
-            $checkin->update([
-                'checkout_at' => now(),
-                'end_of_day_report' => $request->input('end_of_day_report'),
-                'tomorrow_work_plan' => $tomorrowWorkPlan,
-            ]);
-
+            // Calculate time spent
             $endOfDayReport = $request->input('end_of_day_report');
-            $currentDate = Carbon::now()->format('Y-m-d'); // Format the date as 'Y-m-d'
-
             $checkinAt = Carbon::parse($checkin->checkin_at);
-            $checkoutAt = Carbon::parse($checkin->checkout_at);
+            $checkoutAt = Carbon::parse(now());
             $hoursSpent = $checkinAt->diffInHours($checkoutAt);
             $minutesSpent = $checkinAt->diffInMinutes($checkoutAt) % 60;
 
+            // Determine required work hours based on the day of the week
+            $currentDay = Carbon::now()->dayOfWeek;
+            $requiredHours = ($currentDay == Carbon::SATURDAY) ? 4.5 : 9; // 4.5 for Saturday, 9 for weekdays
+
+            // Calculate remaining hours and minutes
+            $remainingHours = $requiredHours - $hoursSpent;
+            $remainingMinutes = 60 - $minutesSpent;
+
+            // If the user has not worked the required hours, show an error with remaining time
+            if ($hoursSpent < $requiredHours) {
+                if ($remainingHours < 0) {
+                    $remainingHours = 0;
+                    $remainingMinutes = 0;
+                }
+
+                $remainingMessage = "*You still need to work: " . $remainingHours . " hours and " . $remainingMinutes . " minutes.*";
+                return redirect()->back()->with('error', 'You cannot checkout yet. ' . $remainingMessage);
+            }
+
+            // If hours are sufficient, update the check-in record with checkout time, EOD report, and work plan
+            $checkin->update([
+                'checkout_at' => now(),
+                'end_of_day_report' => $endOfDayReport,
+                'tomorrow_work_plan' => $tomorrowWorkPlan,
+            ]);
+
+            // Format the message to be sent to Slack
+            $currentDate = Carbon::now()->format('Y-m-d'); // Format the date as 'Y-m-d'
             $message = "*Check-out on " . $currentDate . "*\n\n*EOD Report:*\n" . $endOfDayReport . "\n\n*Plan for Tomorrow:*\n" . $tomorrowWorkPlan . "*";
 
+            // Add time spent for non-development team members
             if (!$user->is_development_team_member) {
-                // Calculate total hours and minutes for students
                 $message .= "\n\n*Total time spent: " . $hoursSpent . " hours and " . $minutesSpent . " minutes.*";
             } else {
-                // Calculate short or extra hours for development team members
+                // For development team members, calculate short or extra hours
                 $totalOfficeHours = $user->part_time ? 4.5 : 9;
                 $hoursShort = $totalOfficeHours - $hoursSpent;
                 $hoursExtra = $hoursSpent - $totalOfficeHours;
@@ -136,8 +161,10 @@ class CheckinController extends Controller
                 }
             }
 
+            // Add user and designation information
             $message .= "\n\n*" . $user->name . " : " . $checkinConfig->designation . "*";
 
+            // Send the message to Slack
             $blocks = [
                 [
                     'type' => 'section',
@@ -148,7 +175,9 @@ class CheckinController extends Controller
                 ],
             ];
 
-            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+            // Send the message to Slack
+//            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+
             return redirect()->back()->with($this->getSuccessMsg('Check-out message sent to Slack!'));
         } catch (\Exception $exception) {
             return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
