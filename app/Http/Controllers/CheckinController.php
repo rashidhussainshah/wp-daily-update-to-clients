@@ -71,7 +71,7 @@ class CheckinController extends Controller
             ];
 
             // Send the message to Slack using blocks
-            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+//            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
             return redirect()->back()->with($this->getSuccessMsg('Check-in message sent to Slack!'));
         } catch (Exception $exception) {
             return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
