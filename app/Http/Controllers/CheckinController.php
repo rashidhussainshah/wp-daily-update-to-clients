@@ -114,8 +114,13 @@ class CheckinController extends Controller
 
             // Determine required work time in minutes
             $currentDay = Carbon::now()->dayOfWeek;
-            $requiredMinutes = ($currentDay == Carbon::SATURDAY) ? 4.5 * 60 : 9 * 60; // 4.5 hours for Saturday, 9 hours for weekdays
+            $weekdayHours = (float) setting('checkin.weekday_hours'); // Convert to float
+            $saturdayHours = (float) setting('checkin.saturday_hours'); // Convert to float
 
+            $requiredMinutes = ($currentDay == Carbon::SATURDAY)
+                ? $saturdayHours * 60
+                : $weekdayHours * 60;
+            $requiredMinutes = (int) $requiredMinutes;
             // Calculate remaining time
             $remainingMinutes = $requiredMinutes - $totalMinutesSpent;
 
