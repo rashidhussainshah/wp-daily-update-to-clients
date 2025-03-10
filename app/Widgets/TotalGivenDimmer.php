@@ -35,9 +35,10 @@ class TotalGivenDimmer extends BaseDimmer
             $advanceGivenPaymentInUsd = Expense::where('developer_id',$request->query('user_id'))->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
         }
         else {
-            $paidThroughUserPayment = UserPayment::currentDeveloper()->approved()->sum('payable');
-            $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
-            $advanceGivenPaymentInUsd = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
+            $loggedInUser = Auth::id();
+            $paidThroughUserPayment = UserPayment::getPaid($loggedInUser);
+            $advanceGivenPayment = Expense::where('developer_id', $loggedInUser)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
+            $advanceGivenPaymentInUsd = Expense::where('developer_id',$loggedInUser)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
 
         }
         $totalPaid = $paidThroughUserPayment + $advanceGivenPayment;

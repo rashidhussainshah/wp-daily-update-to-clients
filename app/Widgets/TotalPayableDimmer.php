@@ -28,7 +28,8 @@ class TotalPayableDimmer extends BaseDimmer
             $totalPayable = UserPayment::getPayable($request->query('user_id'));
         }
         else {
-            $totalPayable = UserPayment::currentDeveloper()->sum('payable');
+            $loggedInUserId = Auth::id();
+            $totalPayable = UserPayment::getPayable($loggedInUserId);
         }
         $string = trans_choice('eod.total_payable', $totalPayable);
         $currency  = setting('admin.currency');
