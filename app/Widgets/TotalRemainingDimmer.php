@@ -38,7 +38,7 @@ class TotalRemainingDimmer extends BaseDimmer
             $advanceGivenPaymentInUsd = Expense::getAdvance($request->query('user_id'), Expense::IN_USD);
         }
         else {
-            $countPayable = UserPayment::currentDeveloper()->sum('payable');
+            $countPayable = UserPayment::currentDeveloper()->approved()->sum('payable');
             $countPaid = UserPayment::currentDeveloper()->approved()->sum('paid');
             $advanceGivenPayment = Expense::currentDeveloper()->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', 'pkr')->sum('amount'); // payment that given advance
             $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
