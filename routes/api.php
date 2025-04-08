@@ -5,6 +5,8 @@ use App\Http\Controllers\DeveloperCategoryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\ClientPortfolioController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,4 +25,15 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+
+
+// Define the routes with Sanctum authentication
+Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    Route::get('client-portfolios', [ClientPortfolioController::class, 'index']);
+    Route::post('client-portfolios', [ClientPortfolioController::class, 'store']);
+    Route::get('client-portfolios/{id}', [ClientPortfolioController::class, 'show']);
+    Route::put('client-portfolios/{id}', [ClientPortfolioController::class, 'update']);
+    Route::delete('client-portfolios/{id}', [ClientPortfolioController::class, 'destroy']);
 });
