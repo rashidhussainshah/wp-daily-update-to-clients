@@ -29,8 +29,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 
 
-// Define the routes with Sanctum authentication
-Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+// Define the routes without Sanctum authentication (public access)
+Route::prefix('v1')->group(function () {
     Route::get('client-portfolios', [ClientPortfolioController::class, 'index']);
     Route::post('client-portfolios', [ClientPortfolioController::class, 'store']);
     Route::get('client-portfolios/{id}', [ClientPortfolioController::class, 'show']);

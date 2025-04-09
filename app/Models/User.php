@@ -14,12 +14,12 @@ class User extends \TCG\Voyager\Models\User
     protected static function booted()
     {
         static::created(function ($user) {
-//            $clockifyService = app(ClockifyService::class);
-//            $clockifyUser = $clockifyService->createUser($user->email, $user->name);
-//
-//            // Save the Clockify user ID
-//            $user->clockify_user_id = $clockifyUser['id'];
-//            $user->save();
+            $clockifyService = app(ClockifyService::class);
+            $clockifyUser = $clockifyService->createUser($user->email, $user->name);
+
+            // Save the Clockify user ID
+            $user->clockify_user_id = $clockifyUser['id'];
+            $user->save();
         });
     }
     const AYUB_USER_ID = 3;
