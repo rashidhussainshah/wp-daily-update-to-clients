@@ -42,27 +42,24 @@ class ClientPortfolio extends Model
         'client_review' => 'array', // Ensure it's cast to an array
     ];
 
-    // Define relationship with Expertise model (many-to-many)
+    // Relationships
     public function expertises()
     {
-        return $this->belongsToMany(Expertise::class);
+        return $this->belongsToMany(Expertise::class, 'client_portfolio_expertise');
     }
 
-    // Define relationship with DeveloperCategory model (many-to-many)
     public function developerCategories()
     {
-        return $this->belongsToMany(DeveloperCategory::class);
+        return $this->belongsToMany(DeveloperCategory::class, 'client_portfolio_developer_category');
     }
 
-    // Define relationship with DeveloperCard model (many-to-many)
     public function developerCards()
     {
-        return $this->belongsToMany(DeveloperCard::class);
+        return $this->belongsToMany(DeveloperCard::class, 'client_portfolio_developer_card');
     }
 
-    // Define relationship with DeveloperCardExpertise model (many-to-many)
     public function developerCardExpertises()
     {
-        return $this->belongsToMany(DeveloperCardExpertise::class);
+        return $this->belongsToMany(DeveloperCardExpertise::class, 'client_portfolio_developer_card_expertise');
     }
 }
