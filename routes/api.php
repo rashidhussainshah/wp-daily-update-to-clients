@@ -18,16 +18,8 @@ use App\Http\Controllers\ClientPortfolioController;
 |
 */
 //Route::middleware('verify.api.source')->group(function () {
-// Wrap your existing routes with CORS middleware
-Route::middleware(function ($request, $next) {
-    return $next($request)
-        ->header('Access-Control-Allow-Origin', 'https://webpenter.com')
-        ->header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-        ->header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-})->group(function () {
     Route::get('developer-categories', [DeveloperCategoryController::class, 'index']);
     Route::get('developer-categories/{id}/developers', [DeveloperCategoryController::class, 'show']);
-});
 //});
 
 
