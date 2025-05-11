@@ -41,6 +41,11 @@ class DeveloperCard extends Model
         return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
     }
 
+    public function categories()
+    {
+        return $this->belongsToMany(DeveloperCategory::class, 'developer_card_categories');
+    }
+
     // Define inverse relationship with ClientPortfolio model
     public function clientPortfolios()
     {

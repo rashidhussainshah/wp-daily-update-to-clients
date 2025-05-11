@@ -29,11 +29,12 @@ class DeveloperCategoryController extends Controller
         try {
             if ($id === 'all') { // If the user passes 'all' as the key
                 $developers = DeveloperCard::where('for_all_filter', true)
-                    ->with('expertises')
+                    ->with(['expertises', 'categories'])
                     ->get();
             } else {
-                $developers = DeveloperCard::where('developer_category_id', $id)
-                    ->with('expertises')
+                $category = DeveloperCategory::findOrFail($id);
+                $developers = $category->developerCards()
+                    ->with(['expertises', 'categories'])
                     ->get();
             }
 

@@ -13,4 +13,9 @@ class DeveloperCategory extends Model
     {
         return $this->belongsToMany(ClientPortfolio::class);
     }
+
+    public function developerCards()
+    {
+        return $this->belongsToMany(DeveloperCard::class, 'developer_card_categories');
+    }
 }
