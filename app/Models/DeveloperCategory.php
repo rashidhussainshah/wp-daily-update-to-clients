@@ -16,6 +16,7 @@ class DeveloperCategory extends Model
 
     public function developerCards()
     {
-        return $this->belongsToMany(DeveloperCard::class, 'developer_card_categories');
+        return $this->belongsToMany(DeveloperCard::class, 'developer_card_categories')
+            ->using(DeveloperCardCategory::class);
     }
 }

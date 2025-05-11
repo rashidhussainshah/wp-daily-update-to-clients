@@ -43,7 +43,8 @@ class DeveloperCard extends Model
 
     public function categories()
     {
-        return $this->belongsToMany(DeveloperCategory::class, 'developer_card_categories');
+        return $this->belongsToMany(DeveloperCategory::class, 'developer_card_categories')
+            ->using(DeveloperCardCategory::class);
     }
 
     // Define inverse relationship with ClientPortfolio model
