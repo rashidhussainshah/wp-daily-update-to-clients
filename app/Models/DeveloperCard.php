@@ -36,14 +36,20 @@ class DeveloperCard extends Model
         return $this->belongsTo(DeveloperCategory::class, 'developer_category_id');
     }
 
-    public function expertises()
+    // public function expertises()
+    // {
+    //     return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
+    // }
+
+    public function categories()
     {
-        return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
+        return $this->belongsToMany(DeveloperCategory::class, 'developer_card_categories')
+            ->using(DeveloperCardCategory::class);
     }
 
-    // Define inverse relationship with ClientPortfolio model
-    public function clientPortfolios()
-    {
-        return $this->belongsToMany(ClientPortfolio::class);
-    }
+    // // Define inverse relationship with ClientPortfolio model
+    // public function clientPortfolios()
+    // {
+    //     return $this->belongsToMany(ClientPortfolio::class);
+    // }
 }
