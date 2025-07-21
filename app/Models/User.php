@@ -66,6 +66,8 @@ class User extends \TCG\Voyager\Models\User
     private $STUDENT_ROLE_ID = 12;
     private $RYK_STUDENT_ROLE_ID = 12;
     private $ONLINE_STUDENT_ROLE_ID = 41;
+    private $BUSINESS_DEVELOPER_ROLE_ID = 33;
+
     /**
      * The attributes that should be cast.
      *
@@ -111,6 +113,10 @@ class User extends \TCG\Voyager\Models\User
     public function scopeOnlineOnlyStudent($query)
     {
         return $query->where('role_id', setting('academy.online_student_role_id') ?? $this->ONLINE_STUDENT_ROLE_ID);
+    }
+    public function scopeBusinessDeveloper($query)
+    {
+        return $query->where('role_id', setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
     }
 
     public function clientPortfolios()
