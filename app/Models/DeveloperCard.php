@@ -36,10 +36,10 @@ class DeveloperCard extends Model
         return $this->belongsTo(DeveloperCategory::class, 'developer_category_id');
     }
 
-    // public function expertises()
-    // {
-    //     return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
-    // }
+     public function expertises()
+     {
+         return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
+     }
 
     public function categories()
     {
