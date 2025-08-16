@@ -29,13 +29,14 @@ trait ApiResponseTrait
      * @param int $code
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function errorResponse($message = 'Operation Failed', $code = 500)
+    protected function errorResponse($message = 'Operation Failed', $code = 500, $errors = null)
     {
         return response()->json([
             'success' => false,
             'data' => null,
             'message' => $message,
             'code' => $code,
+            'errors' => $errors,
         ], $code);
     }
 

@@ -44,7 +44,7 @@ class DeveloperCategoryController extends Controller
 
             return $this->successResponse($developers);
         } catch (Exception $e) {
-            return $this->errorResponse('Failed to retrieve developers');
+            return $this->errorResponse('Failed to retrieve developers', 500, $e->getMessage());
         }
     }
 }
