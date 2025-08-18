@@ -61,14 +61,13 @@ class TotalRemainingDimmer extends BaseDimmer
             'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
         ]));
     }
-
     /**
      * Determine if the widget should be displayed.
      *
      * @return bool
      */
-    public function shouldBeDisplayed()
+    public function shouldBeDisplayed(): bool
     {
-        return Auth::user()->can('browse', Voyager::model('Post'));
+        return isBusinessPartners();
     }
 }

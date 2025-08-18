@@ -61,8 +61,8 @@ class TotalGivenDimmer extends BaseDimmer
      *
      * @return bool
      */
-    public function shouldBeDisplayed()
+    public function shouldBeDisplayed(): bool
     {
-        return Auth::user()->can('browse', Voyager::model('Post'));
+        return isBusinessPartners();
     }
 }

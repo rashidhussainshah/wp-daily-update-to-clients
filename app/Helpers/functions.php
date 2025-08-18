@@ -131,3 +131,22 @@ if (!function_exists('getMailFromAddress')) {
         return setting('email-configuration.from') ?? '';
     }
 }
+if (!function_exists('isBusinessPartners')) {
+
+    /**
+     * @return bool
+     */
+     function isBusinessPartners(): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+        $allowedEmails = [
+            'ayubkhokhar786@gmail.com',
+            'sadiq@webpenter.com',
+            'waqar@webpenter.com',
+        ];
+        return in_array(strtolower($user->email), $allowedEmails, true);
+    }
+}
