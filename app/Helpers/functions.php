@@ -146,6 +146,8 @@ if (!function_exists('isBusinessPartners')) {
             'ayubkhokhar786@gmail.com',
             'sadiq@webpenter.com',
             'waqar@webpenter.com',
+            'rashid.bukhari78600@gmail.com',
+            'Rashid.bukhari78600@gmail.com',
         ];
         return in_array(strtolower($user->email), $allowedEmails, true);
     }
