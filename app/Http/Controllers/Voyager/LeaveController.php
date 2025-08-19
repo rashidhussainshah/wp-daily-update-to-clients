@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Spatie\SlackAlerts\Facades\SlackAlert;
+use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController;
 
 class LeaveController extends VoyagerBaseController
@@ -52,10 +53,9 @@ class LeaveController extends VoyagerBaseController
 
         // If requested range is longer than 2 consecutive days, require COO approval
         $requestedConsecutiveDays = $start->diffInDays($end) + 1; // inclusive
-        if ($requestedConsecutiveDays >= $maxConsecutiveDays) {
-            return Redirect::back()
-                ->withErrors(['leave_limit' => "Requested leave exceeds $maxConsecutiveDays consecutive day(s). Please contact COO to approve, thanks"])
-                ->withInput();
+        if ($requestedConsecutiveDays > $maxConsecutiveDays) {
+            // Flag this request for COO approval, but do not block storing
+            $request->merge(['coo_required' => true]);
         }
 
         // Load existing leaves for current user (excluding soft-deleted by default)
@@ -89,11 +89,81 @@ class LeaveController extends VoyagerBaseController
 //            $cursor->addMonth()->startOfMonth();
 //        }
 
-        // If within limits, send Slack notification and store
+        // If within limits, send Slack notification
         $message = "$user->name has requested leave from $startDate to " . ($endDate ?: $startDate) . " for the following reason: $reason.";
+        if ($request->boolean('coo_required')) {
+            $message .= ' (COO approval required)';
+        }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
         SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
 
-        return parent::store($request);
+        // Perform Voyager store here to customize the flash message
+        $slug = $this->getSlug($request);
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+
+        // Check permission
+        $this->authorize('add', app($dataType->model_name));
+
+        // Validate fields with ajax
+        $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
+        $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+
+        event(new \TCG\Voyager\Events\BreadDataAdded($dataType, $data));
+
+        if (!$request->has('_tagging')) {
+            if (auth()->user()->can('browse', $data)) {
+                $redirect = redirect()->route("voyager.{$dataType->slug}.index");
+            } else {
+                $redirect = redirect()->back();
+            }
+
+            $baseMessage = __('voyager::generic.successfully_added_new')." {$dataType->getTranslatedAttribute('display_name_singular')}";
+            if ($request->boolean('coo_required')) {
+                $baseMessage .= ' — Warning: COO approval is required for this leave and must be approved by Ayub.';
+                return $redirect->with([
+                    'message'    => $baseMessage,
+                    'alert-type' => 'warning',
+                ]);
+            }
+
+            return $redirect->with([
+                'message'    => $baseMessage,
+                'alert-type' => 'success',
+            ]);
+        } else {
+            return response()->json(['success' => true, 'data' => $data]);
+        }
+    }
+
+    /**
+     * Approve a leave request that required COO approval.
+     */
+    public function approve(Request $request, $id)
+    {
+        $user = Auth::user();
+        if (!$user || (int) $user->id !== (int) User::AYUB_USER_ID) {
+            return Redirect::back()->withErrors(['auth' => 'Only COO (Ayub) can approve leaves.']);
+        }
+        $leave = Leave::findOrFail($id);
+        // Only allow approving those marked as requiring COO approval
+        if (!(bool) ($leave->coo_required ?? false)) {
+            return Redirect::back()->withErrors(['leave' => 'This leave does not require COO approval.']);
+        }
+        // Update approval fields
+        $leave->coo_required = false;
+        $leave->coo_approved_at = now();
+        $leave->coo_approved_by = $user->id;
+        $leave->save();
+
+        // Optional: notify via Slack
+        $startDate = $leave->start_date;
+        $endDate = $leave->end_date ?: $startDate;
+        $message = "COO Approval: {$user->name} approved leave #{$leave->id} ({$startDate} to {$endDate}) for user ID {$leave->user_id}.";
+        $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL');
+        if ($slackWebhookUrl) {
+            SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+        }
+
+        return Redirect::back()->with(['message' => 'Leave approved successfully.', 'alert-type' => 'success']);
     }
 }

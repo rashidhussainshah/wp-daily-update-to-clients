@@ -3,6 +3,7 @@
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
+use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
 use Spatie\SlackAlerts\Facades\SlackAlert;
@@ -69,5 +70,6 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/checkout', [CheckinController::class, 'storeCheckout'])->name('checkout.store');
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Route::get('mark-user-payment-paid/{id}', [DeveloperPaymentController::class, 'markUserPaymentPaid'])->name('mark-user-payment-paid');
+    Route::get('leaves/{id}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
     Voyager::routes();
 });
