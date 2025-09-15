@@ -52,4 +52,19 @@ class DeveloperCard extends Model
     {
         return $this->belongsToMany(ClientPortfolio::class);
     }
+
+    public function developerClients()
+    {
+        return $this->belongsToMany(Client::class, 'developer_clients');
+    }
+
+    public function developerInformation()
+    {
+        return $this->hasOne(DeveloperInformation::class, 'id');
+    }
+
+    public function knowledge()
+    {
+        return $this->hasMany(Knowledge::class, 'user_id', 'id');
+    }
 }
