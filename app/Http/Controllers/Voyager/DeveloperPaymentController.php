@@ -46,7 +46,8 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             $this->sendEmail($data);
 
             if ( auth() && auth()->user() && auth()->user()->email) {
-                if (auth()->user()->email != 'ayubkhokhar786@gmail.com') {
+                $businessDevUser = \App\Models\User::find($request->select_business_developer_id);
+                if (auth()->user()->email != 'ayubkhokhar786@gmail.com' && $businessDevUser && $businessDevUser->email == 'ayubkhokhar786@gmail.com') {
                     // Add an entry for "ayubkhokar786@gmail.com" after the data is saved
                     $this->addEntryForAyubKhokar($request, $data->id);
                 } else {
@@ -137,6 +138,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
                 $up->second_entry_id = $firstEntry->id;
             }
             $up->generated_by_system =true;
+            $up->select_business_developer_id = $request->select_business_developer_id;
             $up->save();
             $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->find($up->id);
             $this->sendEmail($ayubPayment);
