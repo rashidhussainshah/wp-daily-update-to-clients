@@ -20,6 +20,7 @@ use App\Http\Controllers\ClientPortfolioController;
 //Route::middleware('verify.api.source')->group(function () {
     Route::get('developer-categories', [DeveloperCategoryController::class, 'index']);
     Route::get('developer-categories/{id}/developers', [DeveloperCategoryController::class, 'show']);
+    Route::get('developer-portfolios/{id}', [DeveloperCategoryController::class, 'developerPortfolios']);
 //});
 
 

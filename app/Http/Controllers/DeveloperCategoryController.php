@@ -47,4 +47,15 @@ class DeveloperCategoryController extends Controller
             return $this->errorResponse('Failed to retrieve developers', 500, $e->getMessage());
         }
     }
+
+    public function developerPortfolios($id)
+    {
+        try {
+            $developer = DeveloperCard::with(['expertises', 'categories', 'Knowledge', 'developerInformation', 'developerClients'])->findOrFail($id);
+
+            return $this->successResponse($developer);
+        } catch (Exception $e) {
+            return $this->errorResponse('Failed to retrieve developer portfolios');
+        }
+    }
 }

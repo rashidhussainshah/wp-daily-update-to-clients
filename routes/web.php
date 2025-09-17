@@ -7,6 +7,7 @@ use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
 use Spatie\SlackAlerts\Facades\SlackAlert;
+use TCG\Voyager\Facades\Voyager;
 
 
 /*

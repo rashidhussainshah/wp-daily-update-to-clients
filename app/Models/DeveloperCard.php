@@ -36,10 +36,10 @@ class DeveloperCard extends Model
         return $this->belongsTo(DeveloperCategory::class, 'developer_category_id');
     }
 
-     public function expertises()
-     {
-         return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
-     }
+    public function expertises()
+    {
+        return $this->belongsToMany(Expertise::class, 'developer_card_expertises');
+    }
 
     public function categories()
     {
@@ -47,9 +47,24 @@ class DeveloperCard extends Model
             ->using(DeveloperCardCategory::class);
     }
 
-    // // Define inverse relationship with ClientPortfolio model
-    // public function clientPortfolios()
-    // {
-    //     return $this->belongsToMany(ClientPortfolio::class);
-    // }
+    // Define inverse relationship with ClientPortfolio model
+    public function clientPortfolios()
+    {
+        return $this->belongsToMany(ClientPortfolio::class);
+    }
+
+    public function developerClients()
+    {
+        return $this->belongsToMany(Client::class, 'developer_clients');
+    }
+
+    public function developerInformation()
+    {
+        return $this->hasOne(DeveloperInformation::class, 'id');
+    }
+
+    public function knowledge()
+    {
+        return $this->hasMany(Knowledge::class, 'user_id', 'id');
+    }
 }
