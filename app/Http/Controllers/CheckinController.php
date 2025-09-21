@@ -6,6 +6,8 @@ use App\Jobs\EmailsHandlerJob;
 use App\Models\Checkin;
 use App\Models\CheckinConfiguration;
 use App\Models\EodConfiguration;
+use App\Models\Fine;
+use App\Models\Leave;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,52 +29,101 @@ class CheckinController extends Controller
         try {
             date_default_timezone_set('Asia/Karachi');
 
-            // Retrieve today's date in the format 'Y-m-d'
             $todayDate = Carbon::today()->toDateString();
             $userId = Auth::id();
+            $user = Auth::user();
 
-            // Check if the CheckinConfiguration exists for the current user
+            // Check if Slack Configuration exists
             $checkinConfig = CheckinConfiguration::where('developer_id', $userId)->first();
             if (!$checkinConfig) {
                 return redirect()->back()->with($this->getErrorMsg('No Slack configuration found for the user.'));
             }
 
-            // Check if there is already a check-in for the current user and today's date
+            // Prevent duplicate check-ins
             $existingCheckin = Checkin::where('developer_id', $userId)
                 ->whereDate('checkin_at', $todayDate)
                 ->first();
 
             if ($existingCheckin) {
-                // If a check-in record already exists for today, return an error message
                 return redirect()->back()->with($this->getErrorMsg('Check-in information already exists for today.'));
             }
 
-            // Create a new check-in record
+            $now = Carbon::now();
+            $fineApplied = false;
+            $fineAmount = 0;
+
+            $lateCheckinFineEnabled = setting('checkin.late_checkin_fine_enabled', false); // Default false
+            $isDevTeam = $user->is_development_team_member;
+
+            // Apply fine only if slot is enabled + dev team member
+            if ($lateCheckinFineEnabled && $isDevTeam) {
+                // Use user-defined time or default to 09:50
+                $checkinTime = $user->checkin_time ?? '09:50';
+
+                $allowedTime = Carbon::parse($todayDate . ' ' . $checkinTime);
+
+                if ($now->greaterThan($allowedTime)) {
+                    // Check if the user has leave for today
+//                    $hasLeaveToday = Leave::where('user_id', $user->id)
+//                        ->whereDate('start_date', '<=', $todayDate)
+//                        ->whereDate('end_date', '>=', $todayDate)
+//                        ->whereNull('deleted_at')
+//                        ->exists();
+
+//                    if (!$hasLeaveToday) {
+                        // Apply fine
+                        $fineAmount = setting('checkin.late_fine_amount_enabled'); // Voyager setting
+                        Fine::create([
+                            'user_id' => $user->id,
+                            'amount' => $fineAmount,
+                            'reason' => 'Late check-in',
+                            'note' => 'Fine applied due to late check-in',
+                            'date' => $now,
+                        ]);
+
+                        $fineApplied = true;
+//                    }
+                }
+            }
+
+            // Create check-in record
             Checkin::create([
                 'developer_id' => $userId,
-                'checkin_at' => now(),
+                'checkin_at' => $now,
                 'today_work_plan' => $request->input('today_work_plan'),
             ]);
 
-            // Prepare the message with the user name, today's plan, and today's date
-            $user = Auth::user();
+            // Prepare Slack message
             $todayWorkPlan = $request->input('today_work_plan');
-            $currentDate = Carbon::now()->format('Y-m-d'); // Format the date as 'Y-m-d'
+            $currentDate = $now->format('Y-m-d');
 
-            // Create the block payload for Slack
+            $slackMessage = "*Check-in on {$currentDate}*\n\n*Today's Plan:*\n{$todayWorkPlan}\n\n*{$user->name} : {$checkinConfig->designation}*";
+
+            if ($fineApplied) {
+                $slackMessage .= "\n\n:warning: *Late Check-in Fine Applied:* Rs. {$fineAmount}";
+            }
+
             $blocks = [
                 [
                     'type' => 'section',
                     'text' => [
                         'type' => 'mrkdwn',
-                        'text' => "*Check-in on " . $currentDate . "*\n\n*Today's Plan:*\n" . $todayWorkPlan . "\n\n*" . $user->name . " : " . $checkinConfig->designation . "*",
+                        'text' => $slackMessage,
                     ],
                 ],
             ];
 
-            // Send the message to Slack using blocks
-            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
-            return redirect()->back()->with($this->getSuccessMsg('Check-in message sent to Slack!'));
+//            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+
+            $msg = $fineApplied
+                ? "Check-in successful! A fine of Rs. {$fineAmount} was applied due to late check-in."
+                : "Check-in successful and sent to Slack!";
+            if ($fineApplied) {
+                return redirect()->back()->with($this->getSuccessMsg($msg, 'error'));
+            } else {
+                return redirect()->back()->with($this->getSuccessMsg($msg));
+            }
+
         } catch (Exception $exception) {
             return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
         }
@@ -229,12 +280,11 @@ class CheckinController extends Controller
      * @param $msg
      * @return array
      */
-    public function getSuccessMsg($msg): array
+    public function getSuccessMsg($msg, $alertType = 'success'): array
     {
-        $data = [
+        return [
             'message' => $msg,
-            'alert-type' => 'success',
+            'alert-type' => $alertType,
         ];
-        return $data;
     }
 }
