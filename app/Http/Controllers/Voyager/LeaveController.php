@@ -59,35 +59,76 @@ class LeaveController extends VoyagerBaseController
         }
 
         // Load existing leaves for current user (excluding soft-deleted by default)
-//        $leaves = Leave::where('user_id', $user->id)->get();
+        $leaves = Leave::where('user_id', $user->id)->get();
+
+        // Check for duplicate/overlapping leaves
+        $overlappingLeaves = [];
+        foreach ($leaves as $l) {
+            $lStart = Carbon::parse($l->start_date);
+            $lEnd = $l->end_date ? Carbon::parse($l->end_date) : $lStart->copy();
+
+            // Check if dates overlap: two date ranges overlap if one starts before the other ends
+            $hasOverlap = !($end->lt($lStart) || $start->gt($lEnd));
+
+            if ($hasOverlap) {
+                $dateRange = $lStart->format('M d, Y');
+                if (!$lStart->isSameDay($lEnd)) {
+                    $dateRange .= ' to ' . $lEnd->format('M d, Y');
+                }
+                $overlappingLeaves[] = "• {$dateRange}" . ($l->reason ? " - {$l->reason}" : "");
+            }
+        }
+
+        // If there are overlapping leaves, prevent duplicate submission
+        if (!empty($overlappingLeaves)) {
+            $requestedRange = $start->format('M d, Y');
+            if (!$start->isSameDay($end)) {
+                $requestedRange .= ' to ' . $end->format('M d, Y');
+            }
+            $overlappingInfo = "\n\nConflicting leave(s):\n" . implode("\n", $overlappingLeaves);
+            return Redirect::back()
+                ->withErrors(['duplicate_leave' => "You already have leave(s) that overlap with your requested dates ({$requestedRange}).{$overlappingInfo}"])
+                ->withInput();
+        }
 
         // Monthly check: count existing leave requests per month overlapped by the request
-//        $cursor = $start->copy()->startOfMonth();
-//        $endMonthStart = $end->copy()->startOfMonth();
-//        while ($cursor->lte($endMonthStart)) {
-//            $monthStart = $cursor->copy();
-//            $monthEnd = $cursor->copy()->endOfMonth();
-//
-//            // Count existing leave entries overlapping this month
-//            $existingRequestsThisMonth = 0;
-//            foreach ($leaves as $l) {
-//                $lStart = Carbon::parse($l->start_date);
-//                $lEnd = $l->end_date ? Carbon::parse($l->end_date) : $lStart->copy();
-//                $overlapsMonth = !$lEnd->lt($monthStart) && !$lStart->gt($monthEnd);
-//                if ($overlapsMonth) {
-//                    $existingRequestsThisMonth++;
-//                }
-//            }
-//
-//            if ($existingRequestsThisMonth > $maxMonthlyRequests) {
-//                $monthLabel = $monthStart->format('F Y');
-//                return Redirect::back()
-//                    ->withErrors(['leave_limit' => "Monthly leave request limit exceeded for $monthLabel. Allowed: $maxMonthlyRequests request(s) per month. You have already submitted $existingRequestsThisMonth."])
-//                    ->withInput();
-//            }
-//
-//            $cursor->addMonth()->startOfMonth();
-//        }
+        $cursor = $start->copy()->startOfMonth();
+        $endMonthStart = $end->copy()->startOfMonth();
+        while ($cursor->lte($endMonthStart)) {
+            $monthStart = $cursor->copy();
+            $monthEnd = $cursor->copy()->endOfMonth();
+
+            // Count existing leave entries overlapping this month
+            $existingRequestsThisMonth = 0;
+            $existingLeavesDetails = [];
+            foreach ($leaves as $l) {
+                $lStart = Carbon::parse($l->start_date);
+                $lEnd = $l->end_date ? Carbon::parse($l->end_date) : $lStart->copy();
+                $overlapsMonth = !$lEnd->lt($monthStart) && !$lStart->gt($monthEnd);
+                if ($overlapsMonth) {
+                    $existingRequestsThisMonth++;
+                    // Collect leave details for display
+                    $dateRange = $lStart->format('M d, Y');
+                    if (!$lStart->isSameDay($lEnd)) {
+                        $dateRange .= ' to ' . $lEnd->format('M d, Y');
+                    }
+                    $existingLeavesDetails[] = "• {$dateRange}" . ($l->reason ? " - {$l->reason}" : "");
+                }
+            }
+
+            // Check if adding this new request would exceed the monthly limit
+            if ($maxMonthlyRequests > 0 && $existingRequestsThisMonth >= $maxMonthlyRequests) {
+                $monthLabel = $monthStart->format('F Y');
+                $leavesInfo = !empty($existingLeavesDetails)
+                    ? "\n\nYour existing leaves in {$monthLabel}:\n" . implode("\n", $existingLeavesDetails)
+                    : "";
+                return Redirect::back()
+                    ->withErrors(['leave_limit' => "Monthly leave request limit exceeded for {$monthLabel}. Allowed: {$maxMonthlyRequests} request(s) per month. You have already submitted {$existingRequestsThisMonth}.{$leavesInfo}"])
+                    ->withInput();
+            }
+
+            $cursor->addMonth()->startOfMonth();
+        }
 
         // If within limits, send Slack notification
         $message = "$user->name has requested leave from $startDate to " . ($endDate ?: $startDate) . " for the following reason: $reason.";

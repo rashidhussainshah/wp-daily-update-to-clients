@@ -28,7 +28,6 @@ class CheckinController extends Controller
     {
         try {
             date_default_timezone_set('Asia/Karachi');
-
             $todayDate = Carbon::today()->toDateString();
             $userId = Auth::id();
             $user = Auth::user();
@@ -48,7 +47,7 @@ class CheckinController extends Controller
                 return redirect()->back()->with($this->getErrorMsg('Check-in information already exists for today.'));
             }
 
-            $now = Carbon::now();
+            $now = \Carbon\Carbon::now();
             $fineApplied = false;
             $fineAmount = 0;
 
