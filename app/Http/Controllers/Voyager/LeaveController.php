@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Spatie\SlackAlerts\Facades\SlackAlert;
+use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController;
 
@@ -148,7 +149,7 @@ class LeaveController extends VoyagerBaseController
         // Validate fields with ajax
         $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
 
-        event(new \TCG\Voyager\Events\BreadDataAdded($dataType, $data));
+        event(new BreadDataAdded($dataType, $data));
 
         if (!$request->has('_tagging')) {
             if (auth()->user()->can('browse', $data)) {
