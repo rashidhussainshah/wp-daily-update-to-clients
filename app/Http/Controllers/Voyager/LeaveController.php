@@ -137,7 +137,6 @@ class LeaveController extends VoyagerBaseController
         }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
         SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
-
         // Perform Voyager store here to customize the flash message
         $slug = $this->getSlug($request);
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
