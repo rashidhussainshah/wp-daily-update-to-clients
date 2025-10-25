@@ -137,6 +137,7 @@ class LeaveController extends VoyagerBaseController
         }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
         SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+
         // Perform Voyager store here to customize the flash message
         $slug = $this->getSlug($request);
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
@@ -145,7 +146,6 @@ class LeaveController extends VoyagerBaseController
         $this->authorize('add', app($dataType->model_name));
 
         // Validate fields with ajax
-        $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
         $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
 
         event(new \TCG\Voyager\Events\BreadDataAdded($dataType, $data));
