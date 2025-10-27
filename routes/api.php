@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\DeveloperCategoryController;
+use App\Http\Controllers\SalaryController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -29,3 +30,12 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('client-portfolios/{id}', [ClientPortfolioController::class, 'show']);
+
+// Salary Calculation API Routes
+Route::prefix('salary')->group(function () {
+    Route::get('user-summary', [SalaryController::class, 'getUserSalarySummary']);
+    Route::get('all-users-summary', [SalaryController::class, 'getAllUsersSalarySummary']);
+    Route::get('current-month', [SalaryController::class, 'getCurrentMonthSalaries']);
+    Route::get('invoice', [SalaryController::class, 'generateInvoice']);
+    Route::get('invoice-data', [SalaryController::class, 'getInvoiceData']);
+});

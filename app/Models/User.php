@@ -123,4 +123,9 @@ class User extends \TCG\Voyager\Models\User
     {
         return $this->hasMany(ClientPortfolio::class);
     }
+
+    public function contract()
+    {
+        return $this->hasOne(Contract::class);
+    }
 }
