@@ -10,7 +10,18 @@ use Illuminate\Support\Facades\Auth;
 class Leave extends Model
 {
     use HasFactory, SoftDeletes;
-    protected $dates = ['deleted_at'];
+
+    protected $fillable = [
+        'user_id',
+        'start_date',
+        'end_date',
+        'reason',
+        'coo_required',
+        'coo_approved_at',
+        'coo_approved_by',
+    ];
+
+    protected $dates = ['deleted_at', 'start_date', 'end_date', 'coo_approved_at'];
 
     protected static function booted()
     {
@@ -34,9 +45,14 @@ class Leave extends Model
         });
     }
 
-    public function setUserIdAttribute()
+    public function setUserIdAttribute($value)
     {
-        $this->attributes['user_id'] = Auth::user()->id;
+        // Only set from Auth if value is not provided
+        if (!$value && Auth::check()) {
+            $this->attributes['user_id'] = Auth::user()->id;
+        } else {
+            $this->attributes['user_id'] = $value;
+        }
     }
     public function scopeCurrentUser($query)
     {

@@ -93,6 +93,8 @@ class LeaveController extends VoyagerBaseController
         }
 
         // Monthly check: count existing leave requests per month overlapped by the request
+        $quotaExceeded = false;
+        $quotaExceededMessage = '';
         $cursor = $start->copy()->startOfMonth();
         $endMonthStart = $end->copy()->startOfMonth();
         while ($cursor->lte($endMonthStart)) {
@@ -119,22 +121,24 @@ class LeaveController extends VoyagerBaseController
 
             // Check if adding this new request would exceed the monthly limit
             if ($maxMonthlyRequests > 0 && $existingRequestsThisMonth >= $maxMonthlyRequests) {
+                $quotaExceeded = true;
                 $monthLabel = $monthStart->format('F Y');
                 $leavesInfo = !empty($existingLeavesDetails)
                     ? "\n\nYour existing leaves in {$monthLabel}:\n" . implode("\n", $existingLeavesDetails)
                     : "";
-                return Redirect::back()
-                    ->withErrors(['leave_limit' => "Monthly leave request limit exceeded for {$monthLabel}. Allowed: {$maxMonthlyRequests} request(s) per month. You have already submitted {$existingRequestsThisMonth}.{$leavesInfo}"])
-                    ->withInput();
+                $quotaExceededMessage = "Leave quota exceeded for {$monthLabel}. Allowed: {$maxMonthlyRequests} request(s) per month. You have already submitted {$existingRequestsThisMonth}.{$leavesInfo}\n\nThis will be recorded as extra leave beyond your monthly quota.";
             }
 
             $cursor->addMonth()->startOfMonth();
         }
 
-        // If within limits, send Slack notification
+        // Send Slack notification
         $message = "$user->name has requested leave from $startDate to " . ($endDate ?: $startDate) . " for the following reason: $reason.";
         if ($request->boolean('coo_required')) {
             $message .= ' (COO approval required)';
+        }
+        if ($quotaExceeded) {
+            $message .= ' ⚠️ NOTE: Extra leave - Monthly quota exceeded';
         }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
         SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
@@ -159,17 +163,19 @@ class LeaveController extends VoyagerBaseController
             }
 
             $baseMessage = __('voyager::generic.successfully_added_new')." {$dataType->getTranslatedAttribute('display_name_singular')}";
-            if ($request->boolean('coo_required')) {
+            $alertType = 'success';
+
+            if ($quotaExceeded) {
+                $baseMessage .= ' — ⚠️ WARNING: ' . $quotaExceededMessage;
+                $alertType = 'warning';
+            } elseif ($request->boolean('coo_required')) {
                 $baseMessage .= ' — Warning: COO approval is required for this leave and must be approved by Ayub.';
-                return $redirect->with([
-                    'message'    => $baseMessage,
-                    'alert-type' => 'warning',
-                ]);
+                $alertType = 'warning';
             }
 
             return $redirect->with([
                 'message'    => $baseMessage,
-                'alert-type' => 'success',
+                'alert-type' => $alertType,
             ]);
         } else {
             return response()->json(['success' => true, 'data' => $data]);
