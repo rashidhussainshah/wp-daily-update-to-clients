@@ -229,12 +229,12 @@
                 <p><strong>Email:</strong> {{ $data['user']['email'] }}</p>
 {{--                <p><strong>Employee ID:</strong> {{ $data['user']['id'] }}</p>--}}
             </div>
-            <div class="details-box">
-                <h3>Contract Information</h3>
-                <p><strong>Contract:</strong> {{ $data['contract']['title'] }}</p>
-                <p><strong>Monthly Salary:</strong> {{ $data['contract']['currency'] }} {{ number_format($data['contract']['monthly_salary'], 2) }}</p>
-                <p><strong>Daily Salary:</strong> {{ $data['contract']['currency'] }} {{ number_format($data['contract']['daily_salary'], 2) }}</p>
-            </div>
+{{--            <div class="details-box">--}}
+{{--                <h3>Contract Information</h3>--}}
+{{--                <p><strong>Contract:</strong> {{ $data['contract']['title'] }}</p>--}}
+{{--                <p><strong>Monthly Salary:</strong> {{ $data['contract']['currency'] }} {{ number_format($data['contract']['monthly_salary'], 2) }}</p>--}}
+{{--                <p><strong>Daily Salary:</strong> {{ $data['contract']['currency'] }} {{ number_format($data['contract']['daily_salary'], 2) }}</p>--}}
+{{--            </div>--}}
         </div>
 
         <!-- Salary Breakdown -->

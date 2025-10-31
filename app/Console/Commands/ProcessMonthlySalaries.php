@@ -375,7 +375,7 @@ class ProcessMonthlySalaries extends Command
         try {
             AdvanceSalary::where('user_id', $userId)
                 ->where('month', $this->currentMonth)
-                ->whereIn('status', ['approved', 'paid'])
+                ->whereIn('status', ['pending', 'approved', 'paid'])
                 ->update([
                     'status' => 'deducted',
                     'deducted_date' => now(),
