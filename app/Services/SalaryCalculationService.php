@@ -112,7 +112,7 @@ class SalaryCalculationService
         // Get advance salaries for the month
         $advances = AdvanceSalary::where('user_id', $userId)
             ->where('month', $month)
-            ->whereIn('status', ['approved', 'paid'])
+            ->whereIn('status', ['pending', 'approved', 'paid'])
             ->get();
 
         $totalAdvance = 0;
