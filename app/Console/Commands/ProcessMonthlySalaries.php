@@ -157,6 +157,19 @@ class ProcessMonthlySalaries extends Command
             // Display user header
             $this->displayUserHeader($user);
 
+            // Check if salary has already been processed and payment sent
+            $existingLog = $this->checkExistingPayment($user->id);
+            if ($existingLog) {
+                $this->error("⚠ DUPLICATE PAYMENT PREVENTION");
+                $this->error("Salary for {$user->name} has already been processed and payment sent for {$this->currentMonth}.");
+                $this->line("  Invoice Number: {$existingLog->invoice_number}");
+                $this->line("  Payment Sent At: {$existingLog->email_sent_at}");
+                $this->line("  Net Salary: {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
+                $this->error("Cannot process salary twice for the same month to prevent duplicate payments.");
+                $this->newLine();
+                return false;
+            }
+
             // Calculate initial salary
             $data = $this->calculateSalary($user->id);
             if (!$data) {
@@ -192,6 +205,21 @@ class ProcessMonthlySalaries extends Command
             $this->error("Error processing {$user->name}: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Check if salary has already been processed and payment sent for this month
+     *
+     * @param int $userId
+     * @return SalaryInvoiceLog|null Returns the log if payment already sent, null otherwise
+     */
+    protected function checkExistingPayment(int $userId): ?SalaryInvoiceLog
+    {
+        return SalaryInvoiceLog::where('user_id', $userId)
+            ->where('month', $this->currentMonth)
+            ->where('email_sent', true)
+            ->whereNotNull('email_sent_at')
+            ->first();
     }
 
     /**
@@ -282,12 +310,18 @@ class ProcessMonthlySalaries extends Command
     }
 
     /**
-     * Get pending advance salaries
+     * Get pending advance salaries for the specified month
      */
     protected function getPendingAdvances(int $userId)
     {
+        // Parse month to get date range
+        $date = Carbon::createFromFormat('Y-m', $this->currentMonth);
+        $monthStart = $date->copy()->startOfMonth();
+        $monthEnd = $date->copy()->endOfMonth();
+
+        // Filter by date range since month column stores complete dates
         return AdvanceSalary::where('user_id', $userId)
-            ->where('month', $this->currentMonth)
+            ->whereBetween('month', [$monthStart, $monthEnd])
             ->where('status', 'pending')
             ->get();
     }
@@ -368,13 +402,19 @@ class ProcessMonthlySalaries extends Command
     }
 
     /**
-     * Mark advances as deducted
+     * Mark advances as deducted for the specified month
      */
     protected function markAdvancesAsDeducted(int $userId): void
     {
         try {
+            // Parse month to get date range
+            $date = Carbon::createFromFormat('Y-m', $this->currentMonth);
+            $monthStart = $date->copy()->startOfMonth();
+            $monthEnd = $date->copy()->endOfMonth();
+
+            // Update advances using date range since month column stores complete dates
             AdvanceSalary::where('user_id', $userId)
-                ->where('month', $this->currentMonth)
+                ->whereBetween('month', [$monthStart, $monthEnd])
                 ->whereIn('status', ['pending', 'approved', 'paid'])
                 ->update([
                     'status' => 'deducted',

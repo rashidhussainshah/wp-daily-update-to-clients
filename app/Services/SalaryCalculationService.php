@@ -110,8 +110,9 @@ class SalaryCalculationService
         $unpaidFines = $totalFines - $totalFinesPaid;
 
         // Get advance salaries for the month
+        // Note: month field stores complete dates (e.g., 2025-10-15), so we filter by date range
         $advances = AdvanceSalary::where('user_id', $userId)
-            ->where('month', $month)
+            ->whereBetween('month', [$monthStart, $monthEnd])
             ->whereIn('status', ['pending', 'approved', 'paid'])
             ->get();
 
@@ -127,6 +128,7 @@ class SalaryCalculationService
                 'request_date' => $advance->request_date,
                 'approved_date' => $advance->approved_date,
                 'deducted_date' => $advance->deducted_date,
+                'created_at' => $advance->created_at ? $advance->created_at->format('Y-m-d H:i:s') : null,
             ];
         }
 
