@@ -107,7 +107,10 @@ class SalaryCalculationService
             ];
         }
 
+        // For salary calculation: deduct ALL fines from this month (paid or unpaid)
+        // This ensures fines paid during processing are included in the invoice
         $unpaidFines = $totalFines - $totalFinesPaid;
+        $finesForDeduction = $totalFines; // Use total fines instead of just unpaid
 
         // Get advance salaries for the month
         // Note: month field stores complete dates (e.g., 2025-10-15), so we filter by date range
@@ -132,11 +135,12 @@ class SalaryCalculationService
             ];
         }
 
-        // Calculate net salary (Gross - Fines only)
-        $netSalary = round($contract->monthly_salary - $unpaidFines, 2);
+        // Calculate net salary (Gross - ALL Fines from this month)
+        // This ensures fines paid during processing are shown in the invoice
+        $netSalary = round($contract->monthly_salary - $finesForDeduction, 2);
 
         // Calculate total deductions (for reference)
-        $totalDeductions = $leaveDeduction + $unpaidFines + $totalAdvance;
+        $totalDeductions = $leaveDeduction + $finesForDeduction + $totalAdvance;
 
         // Calculate final payable amount (Net Salary - Leaves - Advances)
         $finalPayable = round($netSalary - $leaveDeduction - $totalAdvance, 2);
@@ -170,6 +174,7 @@ class SalaryCalculationService
                 'total_fines' => $totalFines,
                 'total_paid' => $totalFinesPaid,
                 'unpaid_fines' => $unpaidFines,
+                'fines_for_deduction' => $finesForDeduction, // Total fines to deduct this month
                 'details' => $fineDetails,
             ],
             'advances' => [

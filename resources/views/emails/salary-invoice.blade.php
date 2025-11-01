@@ -123,10 +123,10 @@
                 <td>{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['gross_salary'], 2) }}</td>
             </tr>
 
-            @if($invoiceData['fines']['unpaid_fines'] > 0)
+            @if($invoiceData['fines']['fines_for_deduction'] > 0)
             <tr>
                 <td>Fines:</td>
-                <td style="color: #e74c3c;">- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['fines']['unpaid_fines'], 2) }}</td>
+                <td style="color: #e74c3c;">- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['fines']['fines_for_deduction'], 2) }}</td>
             </tr>
             @endif
 
@@ -188,34 +188,29 @@
         </table>
         @endif
 
-        @if($invoiceData['fines']['unpaid_fines'] > 0)
+        @if($invoiceData['fines']['fines_for_deduction'] > 0)
         <h3 style="color: #2c3e50; margin-top: 20px;">Fines Deducted This Month:</h3>
         <table class="summary-table" style="background: #fff;">
             <thead style="background: #e74c3c; color: white;">
                 <tr>
                     <th style="padding: 10px;">Date</th>
                     <th style="padding: 10px;">Reason</th>
-                    <th style="padding: 10px; text-align: right;">Amount Deducted</th>
+                    <th style="padding: 10px; text-align: right;">Amount</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($invoiceData['fines']['details'] as $fine)
-                @php
-                    $unpaid = $fine['amount'] - $fine['paid'];
-                @endphp
-                @if($unpaid > 0)
                 <tr>
                     <td style="padding: 8px;">{{ \Carbon\Carbon::parse($fine['date'])->format('M d, Y') }}</td>
                     <td style="padding: 8px;">{{ $fine['reason'] }}</td>
                     <td style="padding: 8px; text-align: right; color: #e74c3c; font-weight: bold;">
-                        {{ $invoiceData['contract']['currency'] }} {{ number_format($unpaid, 2) }}
+                        {{ $invoiceData['contract']['currency'] }} {{ number_format($fine['amount'], 2) }}
                     </td>
                 </tr>
-                @endif
                 @endforeach
                 <tr style="background: #f8f9fa; font-weight: bold; border-top: 2px solid #333;">
                     <td colspan="2" style="padding: 10px;">Total Fines Deducted:</td>
-                    <td style="padding: 10px; text-align: right; color: #e74c3c;">{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['fines']['unpaid_fines'], 2) }}</td>
+                    <td style="padding: 10px; text-align: right; color: #e74c3c;">{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['fines']['fines_for_deduction'], 2) }}</td>
                 </tr>
             </tbody>
         </table>
