@@ -8,7 +8,7 @@ class DownloadSalaryInvoicePdfAction extends AbstractAction
 {
     public function getTitle()
     {
-        return '<i class="voyager-download"></i> <span>Download PDF</span>';
+        return 'Download PDF';
     }
 
     public function getIcon()
