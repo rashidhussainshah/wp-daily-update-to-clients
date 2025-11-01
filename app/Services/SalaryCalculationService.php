@@ -132,11 +132,14 @@ class SalaryCalculationService
             ];
         }
 
-        // Calculate total deductions
+        // Calculate net salary (Gross - Fines only)
+        $netSalary = round($contract->monthly_salary - $unpaidFines, 2);
+
+        // Calculate total deductions (for reference)
         $totalDeductions = $leaveDeduction + $unpaidFines + $totalAdvance;
 
-        // Calculate final salary
-        $finalSalary = round($contract->monthly_salary - $totalDeductions, 2);
+        // Calculate final payable amount (Net Salary - Leaves - Advances)
+        $finalPayable = round($netSalary - $leaveDeduction - $totalAdvance, 2);
 
         return [
             'user' => [
@@ -175,8 +178,9 @@ class SalaryCalculationService
             ],
             'summary' => [
                 'gross_salary' => $contract->monthly_salary,
+                'net_salary' => $netSalary, // Gross - Fines only
                 'total_deductions' => $totalDeductions,
-                'net_salary' => $finalSalary,
+                'final_payable' => $finalPayable, // Net - Leaves - Advances
             ],
         ];
     }
