@@ -8,7 +8,7 @@ class ViewSalaryInvoiceHtmlAction extends AbstractAction
 {
     public function getTitle()
     {
-        return '<i class="voyager-world"></i> <span>View HTML</span>';
+        return 'View HTML';
     }
 
     public function getIcon()
