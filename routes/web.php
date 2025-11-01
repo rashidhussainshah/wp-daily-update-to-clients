@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\ClockifyController;
+use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
@@ -72,5 +73,10 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Route::get('mark-user-payment-paid/{id}', [DeveloperPaymentController::class, 'markUserPaymentPaid'])->name('mark-user-payment-paid');
     Route::get('leaves/{id}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
+
+    // Salary Invoice routes
+    Route::get('salary-invoice/pdf', [SalaryInvoiceController::class, 'viewPdf'])->name('salary-invoice.pdf');
+    Route::get('salary-invoice/html', [SalaryInvoiceController::class, 'viewHtml'])->name('salary-invoice.html');
+
     Voyager::routes();
 });

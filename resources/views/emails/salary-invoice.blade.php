@@ -123,17 +123,30 @@
                 <td>{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['gross_salary'], 2) }}</td>
             </tr>
 
-            @if($invoiceData['leaves']['exceeded_leave_days'] > 0)
-            <tr>
-                <td>Extra Leave Days ({{ $invoiceData['leaves']['exceeded_leave_days'] }} days):</td>
-                <td style="color: #e74c3c;">- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['leaves']['leave_deduction'], 2) }}</td>
-            </tr>
-            @endif
-
             @if($invoiceData['fines']['unpaid_fines'] > 0)
             <tr>
                 <td>Fines:</td>
                 <td style="color: #e74c3c;">- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['fines']['unpaid_fines'], 2) }}</td>
+            </tr>
+            @endif
+
+            <tr style="border-top: 2px solid #333;">
+                <td style="font-weight: bold;">Net Salary:</td>
+                <td style="font-weight: bold;">{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['net_salary'], 2) }}</td>
+            </tr>
+        </table>
+
+        <div class="total">
+            NET SALARY: {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['net_salary'], 2) }}
+        </div>
+
+        @if($invoiceData['leaves']['exceeded_leave_days'] > 0 || ($invoiceData['advances']['total_advance'] ?? 0) > 0)
+        <h3 style="margin-top: 20px;">Additional Deductions:</h3>
+        <table class="summary-table">
+            @if($invoiceData['leaves']['exceeded_leave_days'] > 0)
+            <tr>
+                <td>Extra Leave Days ({{ $invoiceData['leaves']['exceeded_leave_days'] }} days):</td>
+                <td style="color: #e74c3c;">- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['leaves']['leave_deduction'], 2) }}</td>
             </tr>
             @endif
 
@@ -144,15 +157,12 @@
             </tr>
             @endif
 
-            <tr style="border-top: 2px solid #333;">
-                <td>Total Adjustments:</td>
-                <td>- {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['total_deductions'], 2) }}</td>
+            <tr style="border-top: 2px solid #333; background: #f0f0f0;">
+                <td style="font-weight: bold;">Final Payable Amount:</td>
+                <td style="font-weight: bold; color: #27ae60;">{{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['final_payable'], 2) }}</td>
             </tr>
         </table>
-
-        <div class="total">
-            NET SALARY: {{ $invoiceData['contract']['currency'] }} {{ number_format($invoiceData['summary']['net_salary'], 2) }}
-        </div>
+        @endif
 
         @if(($invoiceData['advances']['total_advance'] ?? 0) > 0)
         <h3 style="color: #2c3e50; margin-top: 20px;">Advance Salary Details:</h3>
