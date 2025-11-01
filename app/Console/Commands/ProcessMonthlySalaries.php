@@ -158,17 +158,17 @@ class ProcessMonthlySalaries extends Command
             $this->displayUserHeader($user);
 
             // Check if salary has already been processed and payment sent
-//            $existingLog = $this->checkExistingPayment($user->id);
-//            if ($existingLog) {
-//                $this->error("⚠ DUPLICATE PAYMENT PREVENTION");
-//                $this->error("Salary for {$user->name} has already been processed and payment sent for {$this->currentMonth}.");
-//                $this->line("  Invoice Number: {$existingLog->invoice_number}");
-//                $this->line("  Payment Sent At: {$existingLog->email_sent_at}");
-//                $this->line("  Net Salary: {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
-//                $this->error("Cannot process salary twice for the same month to prevent duplicate payments.");
-//                $this->newLine();
-//                return false;
-//            }
+            $existingLog = $this->checkExistingPayment($user->id);
+            if ($existingLog) {
+                $this->error("⚠ DUPLICATE PAYMENT PREVENTION");
+                $this->error("Salary for {$user->name} has already been processed and payment sent for {$this->currentMonth}.");
+                $this->line("  Invoice Number: {$existingLog->invoice_number}");
+                $this->line("  Payment Sent At: {$existingLog->email_sent_at}");
+                $this->line("  Net Salary: {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
+                $this->error("Cannot process salary twice for the same month to prevent duplicate payments.");
+                $this->newLine();
+                return false;
+            }
 
             // Calculate initial salary
             $data = $this->calculateSalary($user->id);
