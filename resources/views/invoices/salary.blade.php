@@ -405,12 +405,12 @@
 
         <!-- Motivational Quote -->
         <div class="quote-box">
-            💡 {{ \App\Helpers\MotivationalQuotes::random() }}
+             {{ \App\Helpers\MotivationalQuotes::random() }}
         </div>
 
         <!-- Website Link -->
         <div class="website-link">
-            🌐 Visit us at: <a href="https://www.webpenter.com">www.webpenter.com</a>
+             Visit us at: <a href="https://www.webpenter.com">www.webpenter.com</a>
         </div>
 
         <!-- Footer -->
