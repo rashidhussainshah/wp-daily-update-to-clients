@@ -295,7 +295,7 @@
         @endif
 
         <!-- Fine Details -->
-        @if($data['fines']['unpaid_fines'] > 0)
+        @if($data['fines']['fines_for_deduction'] > 0)
         <h3 style="color: #2c3e50; margin-top: 20px; margin-bottom: 10px;">Fines Deducted This Month</h3>
         <table>
             <thead>
@@ -307,22 +307,17 @@
             </thead>
             <tbody>
                 @foreach($data['fines']['details'] as $fine)
-                @php
-                    $unpaid = $fine['amount'] - $fine['paid'];
-                @endphp
-                @if($unpaid > 0)
                 <tr>
                     <td>{{ \Carbon\Carbon::parse($fine['date'])->format('M d, Y') }}</td>
                     <td>{{ $fine['reason'] }}</td>
                     <td class="amount-cell" style="color: #e74c3c; font-weight: bold;">
-                        {{ number_format($unpaid, 2) }}
+                        {{ number_format($fine['amount'], 2) }}
                     </td>
                 </tr>
-                @endif
                 @endforeach
                 <tr style="background: #f8f9fa; font-weight: bold; border-top: 2px solid #333;">
                     <td colspan="2"><strong>Total Fines Deducted:</strong></td>
-                    <td class="amount-cell" style="color: #e74c3c;"><strong>{{ number_format($data['fines']['unpaid_fines'], 2) }}</strong></td>
+                    <td class="amount-cell" style="color: #e74c3c;"><strong>{{ number_format($data['fines']['fines_for_deduction'], 2) }}</strong></td>
                 </tr>
             </tbody>
         </table>
@@ -358,13 +353,13 @@
         @endif
 
         <!-- Warning if deductions exist -->
-        @if($data['leaves']['exceeded_leave_days'] > 0 || $data['fines']['unpaid_fines'] > 0)
+        @if($data['leaves']['exceeded_leave_days'] > 0 || $data['fines']['fines_for_deduction'] > 0)
         <div class="warning-box">
             @if($data['leaves']['exceeded_leave_days'] > 0)
             <p><strong>Extra Leave Days:</strong> You have taken {{ $data['leaves']['exceeded_leave_days'] }} extra leave day(s) beyond your monthly quota of {{ $data['leaves']['allowed_monthly_leaves'] }} days.</p>
             @endif
-            @if($data['fines']['unpaid_fines'] > 0)
-            <p><strong>Unpaid Fines:</strong> Total unpaid fines amount to {{ $data['contract']['currency'] }} {{ number_format($data['fines']['unpaid_fines'], 2) }}.</p>
+            @if($data['fines']['fines_for_deduction'] > 0)
+            <p><strong>Fines Deducted:</strong> Total fines deducted this month amount to {{ $data['contract']['currency'] }} {{ number_format($data['fines']['fines_for_deduction'], 2) }}.</p>
             @endif
         </div>
         @endif
@@ -381,10 +376,10 @@
                 <span>- {{ $data['contract']['currency'] }} {{ number_format($data['leaves']['leave_deduction'], 2) }}</span>
             </div>
             @endif
-            @if($data['fines']['unpaid_fines'] > 0)
+            @if($data['fines']['fines_for_deduction'] > 0)
             <div class="summary-row deduction">
                 <span>Fines:</span>
-                <span>- {{ $data['contract']['currency'] }} {{ number_format($data['fines']['unpaid_fines'], 2) }}</span>
+                <span>- {{ $data['contract']['currency'] }} {{ number_format($data['fines']['fines_for_deduction'], 2) }}</span>
             </div>
             @endif
             @if($data['advances']['total_advance'] > 0)
