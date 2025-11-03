@@ -10,7 +10,11 @@ use Illuminate\Support\Facades\Auth;
 class Fine extends Model
 {
     use HasFactory, CommonRelationship;
-    protected $fillable = ['amount', 'user_id', 'reason', 'date', 'note', 'paid'];
+    protected $fillable = ['amount', 'user_id', 'reason', 'date', 'note', 'paid', 'status', 'paid_at'];
+
+    protected $casts = [
+        'paid_at' => 'datetime',
+    ];
     public function scopeCurrentUserAndManagement($query)
     {
         if (Auth::user()->role && (Auth::user()->role->name == USER::ADMINISTRATOR_ROLE_NAME || Auth::user()->role->name == USER::ACCOUNTANT_ROLE_NAME)) {

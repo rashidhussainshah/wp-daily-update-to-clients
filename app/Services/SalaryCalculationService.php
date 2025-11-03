@@ -86,31 +86,25 @@ class SalaryCalculationService
         // Calculate leave deduction
         $leaveDeduction = round($exceededLeaveDays * $dailySalary, 2);
 
-        // Get all fines for the month
-        $fines = Fine::where('user_id', $userId)
+        // Get only DEDUCTED fines for the month
+        $deductedFines = Fine::where('user_id', $userId)
             ->whereBetween('date', [$monthStart, $monthEnd])
+            ->where('status', 'deducted')
             ->get();
 
-        $totalFines = 0;
-        $totalFinesPaid = 0;
+        $finesForDeduction = 0;
         $fineDetails = [];
-        foreach ($fines as $fine) {
-            $totalFines += $fine->amount;
-            $totalFinesPaid += $fine->paid ?? 0;
+        foreach ($deductedFines as $fine) {
+            $finesForDeduction += $fine->amount;
             $fineDetails[] = [
                 'id' => $fine->id,
                 'date' => $fine->date,
                 'amount' => $fine->amount,
-                'paid' => $fine->paid ?? 0,
                 'reason' => $fine->reason,
                 'note' => $fine->note,
+                'paid_at' => $fine->paid_at?->format('Y-m-d H:i:s'),
             ];
         }
-
-        // For salary calculation: deduct ALL fines from this month (paid or unpaid)
-        // This ensures fines paid during processing are included in the invoice
-        $unpaidFines = $totalFines - $totalFinesPaid;
-        $finesForDeduction = $totalFines; // Use total fines instead of just unpaid
 
         // Get advance salaries for the month
         // Note: month field stores complete dates (e.g., 2025-10-15), so we filter by date range
@@ -171,10 +165,7 @@ class SalaryCalculationService
                 'details' => $leaveDetails,
             ],
             'fines' => [
-                'total_fines' => $totalFines,
-                'total_paid' => $totalFinesPaid,
-                'unpaid_fines' => $unpaidFines,
-                'fines_for_deduction' => $finesForDeduction, // Total fines to deduct this month
+                'fines_for_deduction' => $finesForDeduction, // Only deducted fines
                 'details' => $fineDetails,
             ],
             'advances' => [

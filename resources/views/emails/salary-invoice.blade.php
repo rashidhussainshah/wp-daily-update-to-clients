@@ -218,13 +218,13 @@
 
         <p>A detailed PDF invoice is attached to this email for your records.</p>
 
-        @if($invoiceData['leaves']['exceeded_leave_days'] > 0 || $invoiceData['fines']['unpaid_fines'] > 0 || ($invoiceData['advances']['total_advance'] ?? 0) > 0)
+        @if($invoiceData['leaves']['exceeded_leave_days'] > 0 || $invoiceData['fines']['fines_for_deduction'] > 0 || ($invoiceData['advances']['total_advance'] ?? 0) > 0)
         <p style="font-size: 13px; color: #666;">
             <strong>Note:</strong> Adjustments have been made for
             @php
                 $adjustments = [];
                 if ($invoiceData['leaves']['exceeded_leave_days'] > 0) $adjustments[] = 'extra leaves';
-                if ($invoiceData['fines']['unpaid_fines'] > 0) $adjustments[] = 'fines';
+                if ($invoiceData['fines']['fines_for_deduction'] > 0) $adjustments[] = 'fines';
                 if (($invoiceData['advances']['total_advance'] ?? 0) > 0) $adjustments[] = 'advance salary';
 
                 if (count($adjustments) == 1) {

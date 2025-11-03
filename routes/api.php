@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ClientPortfolioController;
+use App\Http\Controllers\API\ContactMessageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -39,3 +40,10 @@ Route::prefix('salary')->group(function () {
     Route::get('invoice', [SalaryController::class, 'generateInvoice']);
     Route::get('invoice-data', [SalaryController::class, 'getInvoiceData']);
 });
+
+// Contact Message Routes
+Route::post('contact', [ContactMessageController::class, 'store']);
+Route::get('contact-messages', [ContactMessageController::class, 'index']);
+Route::get('contact-messages/{id}', [ContactMessageController::class, 'show']);
+Route::patch('contact-messages/{id}/status', [ContactMessageController::class, 'updateStatus']);
+Route::delete('contact-messages/{id}', [ContactMessageController::class, 'destroy']);

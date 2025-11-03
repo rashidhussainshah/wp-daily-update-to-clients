@@ -241,48 +241,42 @@ class ProcessMonthlySalaries extends Command
     }
 
     /**
-     * Handle fines interaction
+     * Handle fines interaction - Ask ONCE to deduct all fines from this month
      */
     protected function handleFinesInteraction(int $userId, array $data): void
     {
-        if ($data['fines']['unpaid_fines'] <= 0) {
-            return;
-        }
+        // Get pending fines for this month
+        $date = Carbon::createFromFormat('Y-m', $this->currentMonth);
+        $monthStart = $date->copy()->startOfMonth();
+        $monthEnd = $date->copy()->endOfMonth();
 
-        if (!$this->confirm('Do you want to mark any fines as paid?', false)) {
+        $pendingFines = Fine::where('user_id', $userId)
+            ->whereBetween('date', [$monthStart, $monthEnd])
+            ->where('status', 'pending')
+            ->get();
+
+        if ($pendingFines->isEmpty()) {
             return;
         }
 
         $currency = $data['contract']['currency'];
+        $totalFines = $pendingFines->sum('amount');
 
-        foreach ($data['fines']['details'] as $fine) {
-            $unpaid = $fine['amount'] - $fine['paid'];
-
-            if ($unpaid <= 0) {
-                continue;
-            }
-
-            $this->newLine();
-            $this->line("Fine: {$fine['reason']} - {$currency} {$unpaid}");
-
-            if ($this->confirm('Mark this fine as paid?', false)) {
-                $this->markFineAsPaid($fine['id'], $fine['amount']);
-            }
+        $this->newLine();
+        $this->warn("Found {$pendingFines->count()} fine(s) for this month:");
+        foreach ($pendingFines as $fine) {
+            $this->line("  - {$fine->date}: {$currency} {$fine->amount} - {$fine->reason}");
         }
-    }
+        $this->line("  Total: {$currency} " . number_format($totalFines, 2));
 
-    /**
-     * Mark a fine as paid
-     */
-    protected function markFineAsPaid(int $fineId, float $amount): void
-    {
-        try {
-            $fine = Fine::findOrFail($fineId);
-            $fine->paid = $amount;
-            $fine->save();
-            $this->info('✓ Fine marked as paid');
-        } catch (Exception $e) {
-            $this->error("Failed to mark fine as paid: " . $e->getMessage());
+        if ($this->confirm("\nDeduct these fines from this month's salary?", true)) {
+            foreach ($pendingFines as $fine) {
+                $fine->status = 'deducted';
+                $fine->paid = $fine->amount;
+                $fine->paid_at = now();
+                $fine->save();
+            }
+            $this->info("✓ All fines marked as deducted");
         }
     }
 
@@ -593,7 +587,7 @@ class ProcessMonthlySalaries extends Command
         }
 
         // Fines
-        if ($data['fines']['total_fines'] > 0) {
+        if ($data['fines']['fines_for_deduction'] > 0) {
             $this->displayFineSummary($data, $currency);
         }
 
@@ -619,20 +613,19 @@ class ProcessMonthlySalaries extends Command
     }
 
     /**
-     * Display fine summary
+     * Display fine summary (deducted fines only)
      */
     protected function displayFineSummary(array $data, string $currency): void
     {
-        $this->line('<fg=red>Fines:</>');
-        $this->line("  Total: {$currency} " . number_format($data['fines']['total_fines'], 2));
-        $this->line("  Paid: {$currency} " . number_format($data['fines']['total_paid'], 2));
-        $this->line("  Unpaid: {$currency} " . number_format($data['fines']['unpaid_fines'], 2));
+        if ($data['fines']['fines_for_deduction'] <= 0) {
+            return;
+        }
+
+        $this->line('<fg=red>Fines to be Deducted:</>');
+        $this->line("  Total: {$currency} " . number_format($data['fines']['fines_for_deduction'], 2));
 
         foreach ($data['fines']['details'] as $fine) {
-            $unpaid = $fine['amount'] - $fine['paid'];
-            if ($unpaid > 0) {
-                $this->line("    - {$fine['date']}: {$currency} {$unpaid} ({$fine['reason']})");
-            }
+            $this->line("    - {$fine['date']}: {$currency} {$fine['amount']} ({$fine['reason']})");
         }
 
         $this->newLine();
@@ -675,26 +668,29 @@ class ProcessMonthlySalaries extends Command
 
         $this->line("Gross Salary:        {$currency} " . number_format($data['summary']['gross_salary'], 2));
 
+        if ($data['fines']['fines_for_deduction'] > 0) {
+            $this->line("Fines:               - {$currency} " . number_format($data['fines']['fines_for_deduction'], 2));
+        }
+
+        $this->line('─────────────────────────────────────────────────────────');
+        $this->line("<fg=green;options=bold>NET SALARY:          {$currency} " . number_format($data['summary']['net_salary'], 2) . "</>");
+        $this->newLine();
+
+        // Show additional deductions after Net Salary
         if ($data['leaves']['leave_deduction'] > 0) {
             $days = $data['leaves']['exceeded_leave_days'];
             $this->line("Extra Leave Days ({$days} days): - {$currency} " . number_format($data['leaves']['leave_deduction'], 2));
-        }
-
-        if ($data['fines']['unpaid_fines'] > 0) {
-            $this->line("Fines:               - {$currency} " . number_format($data['fines']['unpaid_fines'], 2));
         }
 
         if ($data['advances']['total_advance'] > 0) {
             $this->line("Advance Salary:      - {$currency} " . number_format($data['advances']['total_advance'], 2));
         }
 
-        // Only show Total Adjustments if there are any deductions
-        if ($data['summary']['total_deductions'] > 0) {
-            $this->line("Total Adjustments:   - {$currency} " . number_format($data['summary']['total_deductions'], 2));
+        // Show final payable amount if there are additional deductions
+        if ($data['leaves']['leave_deduction'] > 0 || $data['advances']['total_advance'] > 0) {
+            $this->line('─────────────────────────────────────────────────────────');
+            $this->line("<fg=cyan;options=bold>FINAL PAYABLE:       {$currency} " . number_format($data['summary']['final_payable'], 2) . "</>");
         }
-
-        $this->line('─────────────────────────────────────────────────────────');
-        $this->line("<fg=green;options=bold>NET SALARY:          {$currency} " . number_format($data['summary']['net_salary'], 2) . "</>");
     }
 
     /**
