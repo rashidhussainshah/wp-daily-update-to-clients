@@ -121,21 +121,31 @@ class GenerateSalarySummary extends Command
 
         // Fines Info
         $this->line("<fg=magenta>Fine Information:</>");
-        $this->line("  Total Fines: {$result['contract']['currency']} {$result['fines']['total_fines']}");
-        $this->line("  Total Paid: {$result['contract']['currency']} {$result['fines']['total_paid']}");
-
-        if ($result['fines']['unpaid_fines'] > 0) {
-            $this->line("  <fg=red>Unpaid Fines: {$result['contract']['currency']} {$result['fines']['unpaid_fines']}</>");
-        } else {
-            $this->line("  Unpaid Fines: {$result['contract']['currency']} 0.00");
-        }
+        $this->line("  Fines for Deduction: {$result['contract']['currency']} {$result['fines']['fines_for_deduction']}");
 
         if (!empty($result['fines']['details'])) {
-            $this->line("  Fine Details:");
+            $this->line("  Fine Details (Deducted):");
             foreach ($result['fines']['details'] as $fine) {
-                $unpaid = $fine['amount'] - $fine['paid'];
-                $this->line("    - {$fine['date']}: {$result['contract']['currency']} {$fine['amount']} (Unpaid: {$unpaid}) - {$fine['reason']}");
+                $paidAt = $fine['paid_at'] ? " (Paid at: {$fine['paid_at']})" : '';
+                $this->line("    - {$fine['date']}: {$result['contract']['currency']} {$fine['amount']} - {$fine['reason']}{$paidAt}");
             }
+        } else {
+            $this->line("  No deducted fines for this month.");
+        }
+        $this->newLine();
+
+        // Advance Salary Info
+        $this->line("<fg=blue>Advance Salary Information:</>");
+        $this->line("  Total Advance: {$result['contract']['currency']} {$result['advances']['total_advance']}");
+
+        if (!empty($result['advances']['details'])) {
+            $this->line("  Advance Details:");
+            foreach ($result['advances']['details'] as $advance) {
+                $statusLabel = ucfirst($advance['status']);
+                $this->line("    - {$advance['created_at']}: {$result['contract']['currency']} {$advance['amount']} - {$advance['reason']} (Status: {$statusLabel})");
+            }
+        } else {
+            $this->line("  No advance salary for this month.");
         }
         $this->newLine();
 
@@ -144,6 +154,7 @@ class GenerateSalarySummary extends Command
         $this->line("  Gross Salary: {$result['contract']['currency']} {$result['summary']['gross_salary']}");
         $this->line("  Total Deductions: {$result['contract']['currency']} {$result['summary']['total_deductions']}");
         $this->line("  <fg=green;options=bold>Net Salary: {$result['contract']['currency']} {$result['summary']['net_salary']}</>");
+        $this->line("  <fg=cyan;options=bold>Final Payable: {$result['contract']['currency']} {$result['summary']['final_payable']}</>");
         $this->line("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     }
 }
