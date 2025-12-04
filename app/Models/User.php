@@ -23,6 +23,7 @@ class User extends \TCG\Voyager\Models\User
         });
     }
     const AYUB_USER_ID = 3;
+    const ALI_HASAN_USER_ID = 147;
     const CLIENT_ID = 4;
     public $disable_export = true;
     protected $dates = ['deleted_at'];
