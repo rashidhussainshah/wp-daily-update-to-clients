@@ -57,7 +57,7 @@ class CheckinController extends Controller
             // Apply fine only if slot is enabled + dev team member
             if ($lateCheckinFineEnabled && $isDevTeam) {
                 // Use user-defined time or default to 09:50
-                $checkinTime = $user->checkin_time ?? '09:52';
+                $checkinTime = $user->checkin_time ?? '10:17';
 
                 $allowedTime = Carbon::parse($todayDate . ' ' . $checkinTime);
 
