@@ -66,7 +66,7 @@ class RegenerateLateCheckinFines extends Command
         Log::info("Date range: {$startDate->toDateString()} to {$endDate->toDateString()}");
 
         // Get user's allowed check-in time
-        $allowedCheckinTime = $user->checkin_time ?? '10:17';
+        $allowedCheckinTime = $user->checkin_time ?? '10:30';
         $this->info("Allowed check-in time for user: {$allowedCheckinTime}");
         Log::info("Allowed check-in time: {$allowedCheckinTime}");
 
