@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\ContactMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use Spatie\SlackAlerts\Facades\SlackAlert;
 
 class ContactMessageController extends Controller
 {
@@ -39,6 +41,63 @@ class ContactMessageController extends Controller
                 'message' => $request->message,
                 'status' => 'new'
             ]);
+
+            // Send email notification if enabled
+            $emailNotificationEnabled = setting('contact.email_notification_enabled', false);
+            if ($emailNotificationEnabled) {
+                $emailRecipients = setting('contact.notification_email');
+                if ($emailRecipients) {
+                    try {
+                        // Split comma-separated emails and trim whitespace
+                        $emailList = array_filter(
+                            array_map('trim', explode(',', $emailRecipients)),
+                            function($email) {
+                                return !empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL);
+                            }
+                        );
+
+                        if (!empty($emailList)) {
+                            Mail::send('emails.contact-message', ['contact' => $contact], function ($message) use ($emailList, $contact) {
+                                $message->to($emailList)
+                                        ->subject('New Contact Message from ' . $contact->name);
+                            });
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to send contact message email: ' . $e->getMessage());
+                    }
+                }
+            }
+
+            // Send Slack notification if enabled
+            $slackNotificationEnabled = setting('contact.slack_notification_enabled', false);
+            if ($slackNotificationEnabled) {
+                $slackWebhookUrl = setting('contact.slack_webhook_url');
+                if ($slackWebhookUrl) {
+                    try {
+                        $slackMessage = "*New Contact Message Received*\n\n" .
+                                      "*Name:* {$contact->name}\n" .
+                                      "*Email:* {$contact->email}\n" .
+                                      ($contact->company ? "*Company:* {$contact->company}\n" : "") .
+                                      ($contact->phone ? "*Phone:* {$contact->phone}\n" : "") .
+                                      "*Message:*\n{$contact->message}\n\n" .
+                                      "*Submitted at:* " . $contact->created_at->format('Y-m-d H:i:s');
+
+                        $blocks = [
+                            [
+                                'type' => 'section',
+                                'text' => [
+                                    'type' => 'mrkdwn',
+                                    'text' => $slackMessage,
+                                ],
+                            ],
+                        ];
+
+                        $this->sendTxtToSlack($blocks, $slackWebhookUrl);
+                    } catch (\Exception $e) {
+                        \Log::error('Failed to send contact message to Slack: ' . $e->getMessage());
+                    }
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -147,5 +206,13 @@ class ContactMessageController extends Controller
             'success' => true,
             'message' => 'Contact message deleted successfully'
         ]);
+    }
+
+    /**
+     * Send message to Slack
+     */
+    private function sendTxtToSlack($blocks, $slackWebhookUrl)
+    {
+        SlackAlert::to($slackWebhookUrl)->blocks($blocks);
     }
 }

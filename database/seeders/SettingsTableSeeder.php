@@ -131,6 +131,63 @@ class SettingsTableSeeder extends Seeder
                 'group'        => 'Admin',
             ])->save();
         }
+
+        // Contact Message Settings
+        $setting = $this->findSetting('contact.email_notification_enabled');
+        if (!$setting->exists) {
+            $setting->fill([
+                'display_name' => 'Enable Email Notifications',
+                'value'        => '0',
+                'details'      => json_encode([
+                    'on' => 'Enabled',
+                    'off' => 'Disabled',
+                    'checked' => false,
+                ]),
+                'type'         => 'checkbox',
+                'order'        => 1,
+                'group'        => 'Contact',
+            ])->save();
+        }
+
+        $setting = $this->findSetting('contact.notification_email');
+        if (!$setting->exists) {
+            $setting->fill([
+                'display_name' => 'Notification Email(s)',
+                'value'        => 'contact@webpenter.com,ahmad.nawaz@webpenter.com',
+                'details'      => 'Email addresses to receive contact message notifications (comma-separated for multiple emails)',
+                'type'         => 'text',
+                'order'        => 2,
+                'group'        => 'Contact',
+            ])->save();
+        }
+
+        $setting = $this->findSetting('contact.slack_notification_enabled');
+        if (!$setting->exists) {
+            $setting->fill([
+                'display_name' => 'Enable Slack Notifications',
+                'value'        => '0',
+                'details'      => json_encode([
+                    'on' => 'Enabled',
+                    'off' => 'Disabled',
+                    'checked' => false,
+                ]),
+                'type'         => 'checkbox',
+                'order'        => 3,
+                'group'        => 'Contact',
+            ])->save();
+        }
+
+        $setting = $this->findSetting('contact.slack_webhook_url');
+        if (!$setting->exists) {
+            $setting->fill([
+                'display_name' => 'Slack Webhook URL',
+                'value'        => 'https://hooks.slack.com/services/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',
+                'details'      => 'Slack webhook URL for contact message notifications',
+                'type'         => 'text',
+                'order'        => 4,
+                'group'        => 'Contact',
+            ])->save();
+        }
     }
 
     /**
