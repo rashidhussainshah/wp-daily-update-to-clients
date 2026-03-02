@@ -65,10 +65,13 @@ class RegenerateLateCheckinFines extends Command
         $this->info("Date range: {$startDate->toDateString()} to {$endDate->toDateString()}");
         Log::info("Date range: {$startDate->toDateString()} to {$endDate->toDateString()}");
 
-        // Get user's allowed check-in time
-        $allowedCheckinTime = $user->checkin_time ?? '10:30';
-        $this->info("Allowed check-in time for user: {$allowedCheckinTime}");
-        Log::info("Allowed check-in time: {$allowedCheckinTime}");
+        $saturdayCheckinTime = setting('checkin.saturday_checkin_time', '10:30');
+        $defaultCheckinTime  = setting('checkin.default_checkin_time', '10:30');
+        $weekdayCheckinTime  = $user->checkin_time ?? $defaultCheckinTime;
+
+        $this->info("Weekday check-in time for user: {$weekdayCheckinTime}");
+        $this->info("Saturday check-in time (global): {$saturdayCheckinTime}");
+        Log::info("Weekday check-in time: {$weekdayCheckinTime}, Saturday: {$saturdayCheckinTime}");
 
         // Get all check-ins for the user in the specified month
         $checkins = Checkin::where('developer_id', $userId)
@@ -86,6 +89,7 @@ class RegenerateLateCheckinFines extends Command
         foreach ($checkins as $checkin) {
             $checkinAt = Carbon::parse($checkin->checkin_at);
             $checkinDate = $checkinAt->toDateString();
+            $allowedCheckinTime = $checkinAt->isSaturday() ? $saturdayCheckinTime : $weekdayCheckinTime;
             $allowedTime = Carbon::parse($checkinDate . ' ' . $allowedCheckinTime);
 
             $this->line("---");

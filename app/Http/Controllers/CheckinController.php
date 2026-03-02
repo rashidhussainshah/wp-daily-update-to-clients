@@ -56,8 +56,12 @@ class CheckinController extends Controller
 
             // Apply fine only if slot is enabled + dev team member
             if ($lateCheckinFineEnabled && $isDevTeam) {
-                // Use user-defined time or default to 09:50
-                $checkinTime = $user->checkin_time ?? '10:30';
+                // Saturday uses a global setting; weekdays use per-user override → global default fallback
+                if ($now->isSaturday()) {
+                    $checkinTime = setting('checkin.saturday_checkin_time', '10:30');
+                } else {
+                    $checkinTime = $user->checkin_time ?? setting('checkin.default_checkin_time', '10:30');
+                }
 
                 $allowedTime = Carbon::parse($todayDate . ' ' . $checkinTime);
 
@@ -143,11 +147,18 @@ class CheckinController extends Controller
                 return redirect()->back()->with('error', 'No Slack configuration found for the user.');
             }
 
-            // Fetch check-in record for today
+            // Fetch open check-in — today first, then yesterday (covers night shifts that cross midnight)
             $checkin = Checkin::where('developer_id', Auth::id())
                 ->whereNull('checkout_at')
                 ->whereDate('checkin_at', Carbon::today())
                 ->latest()->first();
+
+            if (!$checkin) {
+                $checkin = Checkin::where('developer_id', Auth::id())
+                    ->whereNull('checkout_at')
+                    ->whereDate('checkin_at', Carbon::yesterday())
+                    ->latest()->first();
+            }
 
             if (!$checkin) {
                 return redirect()->back()->with($this->getErrorMsg('No check-in information found for today. Please check-in first.'));
