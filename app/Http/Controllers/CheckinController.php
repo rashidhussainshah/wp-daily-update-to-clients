@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use PHPUnit\Exception;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
@@ -116,7 +117,7 @@ class CheckinController extends Controller
                 ],
             ];
 
-            // $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+             $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
 
             $msg = $fineApplied
                 ? "Check-in successful! A fine of Rs. {$fineAmount} was applied due to late check-in."
@@ -271,7 +272,14 @@ class CheckinController extends Controller
      */
     public function sendTxtToSlack($blocks, $slackWebhookUrl)
     {
-        SlackAlert::to($slackWebhookUrl)->blocks($blocks);
+        try {
+            SlackAlert::to($slackWebhookUrl)->blocks($blocks);
+        } catch (\Throwable $e) {
+            Log::error('Slack notification failed', [
+                'error' => $e->getMessage(),
+                'webhook' => $slackWebhookUrl
+            ]);
+        }
     }
 
     /**
