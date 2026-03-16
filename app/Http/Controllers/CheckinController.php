@@ -116,7 +116,7 @@ class CheckinController extends Controller
                 ],
             ];
 
-            $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
+            // $this->sendTxtToSlack($blocks, $checkinConfig->slack_webhook_url);
 
             $msg = $fineApplied
                 ? "Check-in successful! A fine of Rs. {$fineAmount} was applied due to late check-in."
