@@ -14,7 +14,10 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call([
-            MailTemplatesSeeder::class
+            MailTemplatesSeeder::class,
+            RolesTableSeeder::class,
+            MarketingSettingsSeeder::class,
+            EmailCampaignSeeder::class,
         ]);
     }
 }

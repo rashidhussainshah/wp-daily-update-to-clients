@@ -4,6 +4,7 @@ use App\Http\Controllers\CheckinController;
 use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
+use App\Http\Controllers\Voyager\EmailCampaignController;
 use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
@@ -77,6 +78,22 @@ Route::group(['prefix' => 'admin'], function () {
     // Salary Invoice routes
     Route::get('salary-invoice/pdf', [SalaryInvoiceController::class, 'viewPdf'])->name('salary-invoice.pdf');
     Route::get('salary-invoice/html', [SalaryInvoiceController::class, 'viewHtml'])->name('salary-invoice.html');
+
+    // Email Campaigns
+    Route::prefix('email-campaigns')->name('email-campaigns.')->group(function () {
+        Route::get('/',                        [EmailCampaignController::class, 'index'])->name('index');
+        Route::get('/create',                  [EmailCampaignController::class, 'create'])->name('create');
+        Route::post('/',                       [EmailCampaignController::class, 'store'])->name('store');
+        Route::get('/{id}',                    [EmailCampaignController::class, 'show'])->name('show');
+        Route::get('/{id}/edit',               [EmailCampaignController::class, 'edit'])->name('edit');
+        Route::put('/{id}',                    [EmailCampaignController::class, 'update'])->name('update');
+        Route::delete('/{id}',                 [EmailCampaignController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/preview',            [EmailCampaignController::class, 'preview'])->name('preview');
+        Route::post('/{id}/send-test',         [EmailCampaignController::class, 'sendTest'])->name('send-test');
+        Route::post('/{id}/send-single',       [EmailCampaignController::class, 'sendSingle'])->name('send-single');
+        Route::post('/{id}/dispatch',          [EmailCampaignController::class, 'dispatch'])->name('dispatch');
+        Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
+    });
 
     Voyager::routes();
 });
