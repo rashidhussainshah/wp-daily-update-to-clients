@@ -730,5 +730,493 @@ CEO, Webpenter
 https://houzilo.com | https://webpenter.com
 TEXT,
         ]);
+
+        // ── Campaign 6: WordPress Speed Optimisation ──────────────────────────
+        EmailCampaign::firstOrCreate(['name' => 'WordPress Speed Optimisation — Homey Sites'], [
+            'subject'     => 'Your Homey Site Scored 23/100 on Google — Let\'s Fix That',
+            'from_name'   => 'Rashid | Webpenter',
+            'from_email'  => 'sales@webpenter.com',
+            'target_role' => 'homey_client',
+            'status'      => 'draft',
+            'html_body'   => <<<'HTML'
+<p>Hi {{first_name}},</p>
+
+<p>We ran a speed audit on a sample of Homey booking sites last month. The average Google PageSpeed score was <strong>23 out of 100</strong>. Slow pages kill bookings — <strong>53% of visitors leave a site that takes more than 3 seconds to load.</strong></p>
+
+<!-- ── Speed Score Visual ─────────────────────────────────────────────── -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin:24px 0 28px;">
+  <tr>
+    <td style="background:#0f172a;border-radius:10px;padding:28px 24px 24px;">
+
+      <!-- Label row -->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+        <tr>
+          <td style="text-align:center;">
+            <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;">TYPICAL HOMEY SITE — BEFORE OPTIMISATION</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center;padding-top:10px;">
+            <span style="font-size:64px;font-weight:900;color:#ef4444;line-height:1;">23</span>
+            <span style="font-size:28px;font-weight:400;color:rgba(255,255,255,0.4);line-height:1;"> / 100</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center;padding-top:6px;">
+            <span style="display:inline-block;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">Poor</span>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Score bar -->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:6px;">
+        <tr>
+          <td width="50%" style="background:#ef4444;height:10px;border-radius:6px 0 0 6px;"></td>
+          <td width="35%" style="background:#f97316;height:10px;"></td>
+          <td width="15%" style="background:#22c55e;height:10px;border-radius:0 6px 6px 0;"></td>
+        </tr>
+      </table>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="50%" style="font-size:10px;color:rgba(255,255,255,0.4);text-align:left;padding-top:4px;">0 — Poor</td>
+          <td width="35%" style="font-size:10px;color:rgba(255,255,255,0.4);text-align:center;padding-top:4px;">50 — Needs Work</td>
+          <td width="15%" style="font-size:10px;color:rgba(255,255,255,0.4);text-align:right;padding-top:4px;">90 — Good</td>
+        </tr>
+      </table>
+
+      <!-- After row -->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:18px;">
+        <tr>
+          <td style="text-align:center;">
+            <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:1.5px;text-transform:uppercase;">AFTER WEBPENTER OPTIMISATION</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center;padding-top:10px;">
+            <span style="font-size:64px;font-weight:900;color:#22c55e;line-height:1;">94</span>
+            <span style="font-size:28px;font-weight:400;color:rgba(255,255,255,0.4);line-height:1;"> / 100</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="text-align:center;padding-top:6px;">
+            <span style="display:inline-block;background:#22c55e;color:#fff;font-size:11px;font-weight:700;padding:4px 14px;border-radius:20px;letter-spacing:1px;text-transform:uppercase;">Excellent</span>
+          </td>
+        </tr>
+      </table>
+      <!-- After bar -->
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-top:12px;">
+        <tr>
+          <td width="94%" style="background:#22c55e;height:10px;border-radius:6px 0 0 6px;"></td>
+          <td width="6%"  style="background:rgba(255,255,255,0.12);height:10px;border-radius:0 6px 6px 0;"></td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+<!-- ── Before / After Metrics Table ──────────────────────────────────── -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:28px;border:1px solid #e8ecef;border-radius:8px;overflow:hidden;">
+  <!-- Header -->
+  <tr>
+    <td style="background:#f8fafc;padding:10px 16px;border-bottom:1px solid #e8ecef;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="40%" style="font-size:11px;font-weight:700;color:#64748b;letter-spacing:1px;text-transform:uppercase;">METRIC</td>
+          <td width="30%" style="font-size:11px;font-weight:700;color:#ef4444;letter-spacing:1px;text-transform:uppercase;text-align:center;">BEFORE</td>
+          <td width="30%" style="font-size:11px;font-weight:700;color:#22c55e;letter-spacing:1px;text-transform:uppercase;text-align:center;">AFTER</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 1 -->
+  <tr>
+    <td style="padding:0 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #f0f0f0;">
+        <tr>
+          <td width="40%" style="padding:13px 0;font-size:13px;font-weight:600;color:#1e293b;">Page Load Time</td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">8.2 s</span>
+          </td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">0.9 s</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td style="padding:0 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #f0f0f0;">
+        <tr>
+          <td width="40%" style="padding:13px 0;font-size:13px;font-weight:600;color:#1e293b;">PageSpeed Score</td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">23 / 100</span>
+          </td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">94 / 100</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td style="padding:0 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #f0f0f0;">
+        <tr>
+          <td width="40%" style="padding:13px 0;font-size:13px;font-weight:600;color:#1e293b;">LCP — Largest Content</td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">6.8 s</span>
+          </td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">1.1 s</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 4 -->
+  <tr>
+    <td style="padding:0 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border-bottom:1px solid #f0f0f0;">
+        <tr>
+          <td width="40%" style="padding:13px 0;font-size:13px;font-weight:600;color:#1e293b;">Time to First Byte (TTFB)</td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">2.4 s</span>
+          </td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">0.18 s</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 5 -->
+  <tr>
+    <td style="padding:0 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="40%" style="padding:13px 0;font-size:13px;font-weight:600;color:#1e293b;">Total Page Size</td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#fef2f2;color:#dc2626;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">5.1 MB</span>
+          </td>
+          <td width="30%" style="padding:13px 0;text-align:center;">
+            <span style="display:inline-block;background:#f0fdf4;color:#16a34a;font-size:13px;font-weight:700;padding:3px 10px;border-radius:4px;">0.8 MB</span>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- ── What slows your Homey site down ───────────────────────────────── -->
+<p style="margin:0 0 6px;font-size:16px;font-weight:700;color:#0f172a;">What's slowing your Homey site down</p>
+<p style="margin:0 0 20px;font-size:14px;color:#475569;line-height:1.7;">Homey is a feature-rich theme — that's also what makes it heavy. These are the top culprits we find on every unoptimised Homey site:</p>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+  <!-- Row 1 -->
+  <tr>
+    <td width="50%" style="padding:0 8px 14px 0;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #fecaca;border-radius:8px;background:#fff;">
+        <tr><td style="padding:16px 18px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#fef2f2;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🖼️</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Unoptimised<br>Listing Images</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Full-size JPEGs served as-is. A single listing page loads 3–8 MB of images alone.</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="50%" style="padding:0 0 14px 8px;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #fecaca;border-radius:8px;background:#fff;">
+        <tr><td style="padding:16px 18px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#fef2f2;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🗄️</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">No Page or<br>Object Caching</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Every page visit re-runs all PHP and database queries from scratch — even for the same content.</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td width="50%" style="padding:0 8px 14px 0;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #fecaca;border-radius:8px;background:#fff;">
+        <tr><td style="padding:16px 18px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#fef2f2;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🔌</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Bloated Plugin<br>Stack</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">20–40 plugins loading scripts and styles on every page, most of which aren't needed on that page at all.</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="50%" style="padding:0 0 14px 8px;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #fecaca;border-radius:8px;background:#fff;">
+        <tr><td style="padding:16px 18px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#fef2f2;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🌍</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">No CDN — Assets<br>Served from One Server</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Every image, script, and CSS file travels from one server to every visitor worldwide — adding 1–3 s of extra latency.</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- ── What we optimise ───────────────────────────────────────────────── -->
+<p style="margin:0 0 6px;font-size:16px;font-weight:700;color:#0f172a;">The 6 optimisations we run on every site</p>
+<p style="margin:0 0 20px;font-size:14px;color:#475569;line-height:1.7;">This is the exact stack we've deployed on Homey sites to bring load times under 1 second:</p>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+  <!-- Row 1 -->
+  <tr>
+    <td width="50%" style="padding:0 8px 14px 0;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">⚡</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Full-Page &amp;<br>Object Caching</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Redis or Memcached object cache + full HTML page cache. TTFB drops to under 200 ms instantly.</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="50%" style="padding:0 0 14px 8px;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🖼️</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Image Optimisation<br>&amp; WebP Conversion</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Bulk compress all listing images, convert to WebP, enable lazy loading. Page weight cut by 80%.</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 2 -->
+  <tr>
+    <td width="50%" style="padding:0 8px 14px 0;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🌐</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">CDN Integration<br>(Cloudflare / BunnyCDN)</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Static assets delivered from servers closest to each visitor. Eliminates geographic latency worldwide.</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="50%" style="padding:0 0 14px 8px;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">✂️</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">CSS / JS Minify,<br>Defer &amp; Async</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Unused CSS removed, scripts deferred so they don't block the first paint. Render-blocking eliminated.</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Row 3 -->
+  <tr>
+    <td width="50%" style="padding:0 8px 0 0;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🗄️</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Database<br>Optimisation</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">Clean up autoloaded data, expired transients, post revisions. Slow queries identified and indexed.</p>
+        </td></tr>
+      </table>
+    </td>
+    <td width="50%" style="padding:0 0 0 8px;vertical-align:top;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;">
+        <tr><td style="padding:16px 18px 14px;">
+          <table border="0" cellpadding="0" cellspacing="0" style="margin-bottom:10px;">
+            <tr>
+              <td style="width:36px;height:36px;background:#eff6ff;border-radius:8px;text-align:center;vertical-align:middle;font-size:18px;">🔌</td>
+              <td style="width:10px;"></td>
+              <td style="font-size:13px;font-weight:700;color:#0f172a;line-height:1.3;">Plugin Audit &amp;<br>Lightweight Swap</td>
+            </tr>
+          </table>
+          <p style="margin:0;font-size:12px;color:#64748b;line-height:1.6;">We audit every plugin, remove dead weight, and replace heavy ones with lighter alternatives that do the same job.</p>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- ── Core Web Vitals explainer ──────────────────────────────────────── -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:28px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;">
+  <tr>
+    <td style="padding:20px 22px 16px;">
+      <p style="margin:0 0 14px;font-size:14px;font-weight:700;color:#0f172a;">Why Core Web Vitals matter for your bookings</p>
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td width="33%" style="padding:0 8px 0 0;vertical-align:top;text-align:center;">
+            <div style="font-size:22px;margin-bottom:6px;">🎯</div>
+            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:4px;">LCP</strong>
+            <span style="font-size:11px;color:#64748b;line-height:1.5;display:block;">Largest Contentful Paint — how fast your hero image and listing photos appear. Google wants this under <strong>2.5 s</strong>.</span>
+          </td>
+          <td width="33%" style="padding:0 8px;vertical-align:top;text-align:center;border-left:1px solid #e2e8f0;border-right:1px solid #e2e8f0;">
+            <div style="font-size:22px;margin-bottom:6px;">📐</div>
+            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:4px;">CLS</strong>
+            <span style="font-size:11px;color:#64748b;line-height:1.5;display:block;">Cumulative Layout Shift — elements jumping around while the page loads, making guests click the wrong button. Target: <strong>under 0.1</strong>.</span>
+          </td>
+          <td width="33%" style="padding:0 0 0 8px;vertical-align:top;text-align:center;">
+            <div style="font-size:22px;margin-bottom:6px;">⚡</div>
+            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:4px;">INP</strong>
+            <span style="font-size:11px;color:#64748b;line-height:1.5;display:block;">Interaction to Next Paint — lag when a guest taps "Book Now" or searches dates. Google wants this under <strong>200 ms</strong>.</span>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:14px 0 0;font-size:12px;color:#94a3b8;line-height:1.6;border-top:1px solid #e2e8f0;padding-top:12px;">
+        Google uses Core Web Vitals as a <strong>direct ranking signal</strong>. A slow Homey site ranks lower in search results — costing you organic bookings every single day.
+      </p>
+    </td>
+  </tr>
+</table>
+
+<!-- ── Social proof ───────────────────────────────────────────────────── -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+  <tr>
+    <td width="33%" style="text-align:center;padding:0 8px 0 0;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background:#0f172a;border-radius:8px;padding:20px 12px;">
+        <tr><td style="padding:20px 12px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#22c55e;line-height:1;">9&times;</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.4;">faster average<br>page load</div>
+        </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="text-align:center;padding:0 4px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background:#0f172a;border-radius:8px;">
+        <tr><td style="padding:20px 12px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#22c55e;line-height:1;">80%</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.4;">reduction in<br>page weight</div>
+        </td></tr>
+      </table>
+    </td>
+    <td width="33%" style="text-align:center;padding:0 0 0 8px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background:#0f172a;border-radius:8px;">
+        <tr><td style="padding:20px 12px;text-align:center;">
+          <div style="font-size:32px;font-weight:900;color:#22c55e;line-height:1;">94</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:6px;line-height:1.4;">avg. PageSpeed<br>score after</div>
+        </td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+
+<!-- ── CTA ────────────────────────────────────────────────────────────── -->
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="background:#0f172a;border-radius:10px;padding:28px 24px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:18px;font-weight:800;color:#ffffff;line-height:1.3;">Find out your site's real score — free</p>
+      <p style="margin:0 0 22px;font-size:13px;color:rgba(255,255,255,0.65);line-height:1.7;">Reply with your site URL and we'll run a full PageSpeed + Core Web Vitals audit, send you the results, and give you a fixed-price quote to fix everything.</p>
+      <a href="mailto:sales@webpenter.com?subject=WordPress Speed Audit Request" style="display:inline-block;background:#22c55e;color:#fff;padding:14px 36px;border-radius:6px;font-weight:800;font-size:15px;text-decoration:none;letter-spacing:0.3px;">Get My Free Speed Audit &rarr;</a>
+      <p style="margin:18px 0 0;font-size:12px;color:rgba(255,255,255,0.4);">Takes 24 hours &bull; No commitment &bull; Full report included</p>
+    </td>
+  </tr>
+</table>
+
+<p style="margin-top:28px;">Questions? Just reply — happy to walk through any of this on a quick call.</p>
+
+<p>Best regards,<br>
+<strong>Rashid Bukhari</strong><br>
+CEO, Webpenter<br>
+<a href="https://webpenter.com">webpenter.com</a> &nbsp;&bull;&nbsp; <a href="mailto:sales@webpenter.com">sales@webpenter.com</a></p>
+HTML,
+            'text_body' => <<<'TEXT'
+Hi {{first_name}},
+
+We ran a speed audit on Homey booking sites last month. The average Google PageSpeed score was 23 out of 100. Slow pages kill bookings — 53% of visitors leave a site that takes more than 3 seconds to load.
+
+TYPICAL RESULTS AFTER OUR OPTIMISATION:
+────────────────────────────────────────
+Metric                Before    After
+────────────────────────────────────────
+Page Load Time        8.2 s     0.9 s
+PageSpeed Score       23/100    94/100
+LCP (Largest Content) 6.8 s     1.1 s
+Time to First Byte    2.4 s     0.18 s
+Total Page Size       5.1 MB    0.8 MB
+────────────────────────────────────────
+
+WHAT'S SLOWING YOUR HOMEY SITE DOWN:
+1. Unoptimised listing images (3–8 MB per page)
+2. No page or object caching (PHP + DB runs on every visit)
+3. Bloated plugin stack loading scripts on every page
+4. No CDN — all assets served from one server worldwide
+
+THE 6 OPTIMISATIONS WE RUN ON EVERY SITE:
+1. Full-Page & Object Caching (Redis/Memcached) — TTFB drops under 200ms
+2. Image Optimisation & WebP Conversion — page weight cut by 80%
+3. CDN Integration (Cloudflare / BunnyCDN) — eliminates geographic latency
+4. CSS / JS Minify, Defer & Async — render-blocking eliminated
+5. Database Optimisation — expired transients, slow queries, missing indexes
+6. Plugin Audit & Lightweight Swap — dead weight removed
+
+WHY CORE WEB VITALS MATTER:
+- LCP (Largest Contentful Paint): Google wants under 2.5 s
+- CLS (Cumulative Layout Shift): elements jumping while page loads — target under 0.1
+- INP (Interaction to Next Paint): lag on "Book Now" tap — target under 200 ms
+Google uses these as a direct ranking signal. A slow Homey site ranks lower, costing you organic bookings every day.
+
+OUR RESULTS ACROSS CLIENT SITES:
+- 9× faster average page load
+- 80% reduction in page weight
+- 94 avg. PageSpeed score after optimisation
+
+────────────────────────────────────────────────────────────────────────
+GET A FREE SPEED AUDIT
+
+Reply with your site URL — we'll run a full PageSpeed + Core Web Vitals audit,
+send you the results, and give a fixed-price quote to fix everything.
+
+Email: sales@webpenter.com
+Subject: WordPress Speed Audit Request
+
+Takes 24 hours · No commitment · Full report included.
+────────────────────────────────────────────────────────────────────────
+Best regards,
+Rashid Bukhari
+CEO, Webpenter
+https://webpenter.com | sales@webpenter.com
+TEXT,
+        ]);
     }
 }
