@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ClockifyService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
@@ -11,6 +12,10 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends \TCG\Voyager\Models\User
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
+
+    // Named scope key — use withoutGlobalScope(self::SCOPE_EXCLUDE_HOMEY) to opt out
+    const SCOPE_EXCLUDE_HOMEY = 'exclude_homey_clients';
+
     protected static function booted()
     {
         static::created(function ($user) {
@@ -20,6 +25,17 @@ class User extends \TCG\Voyager\Models\User
             // Save the Clockify user ID
             $user->clockify_user_id = $clockifyUser['id'];
             $user->save();
+        });
+
+        // Keep homey_client (marketing imports) out of all normal User queries.
+        // Console commands and campaign dispatch use DB::table() or withoutGlobalScope().
+        static::addGlobalScope(self::SCOPE_EXCLUDE_HOMEY, function (Builder $builder) {
+            $roleId = \Illuminate\Support\Facades\Cache::remember('role_id_homey_client', 3600, function () {
+                return \TCG\Voyager\Models\Role::where('name', 'homey_client')->value('id');
+            });
+            if ($roleId) {
+                $builder->where('role_id', '!=', $roleId);
+            }
         });
     }
     const AYUB_USER_ID = 3;
