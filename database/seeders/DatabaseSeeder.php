@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             RolesTableSeeder::class,
             MarketingSettingsSeeder::class,
             EmailCampaignSeeder::class,
+            EmailCampaignMenuSeeder::class,
         ]);
     }
 }
