@@ -16,7 +16,7 @@ class EmailCampaignController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('admin.user');
+        $this->middleware(['admin.user', 'campaign.access']);
     }
 
     // ── List ────────────────────────────────────────────────────────────────
