@@ -5,14 +5,13 @@ namespace App\Mail;
 use App\Models\EmailCampaign;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Config;
 
-class MarketingCampaignMail extends Mailable implements ShouldQueue
+class MarketingCampaignMail extends BaseEmail
 {
     use Queueable, SerializesModels;
 
@@ -36,6 +35,8 @@ class MarketingCampaignMail extends Mailable implements ShouldQueue
 
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
+        parent::__construct(); // load email-configuration.* SMTP (same as DeveloperPaymentMail)
+
         $this->recipientName     = $recipientName;
         $this->htmlBody          = $this->personalise($campaign->html_body, $recipientName);
         $this->textBody          = $this->personalise($campaign->text_body ?? '', $recipientName);
@@ -86,7 +87,18 @@ class MarketingCampaignMail extends Mailable implements ShouldQueue
     private function applySmtpOverride(EmailCampaign $campaign): void
     {
         $host = setting('marketing.smtp_host');
+
         if (!$host) {
+            // No dedicated marketing SMTP — BaseEmail already configured the
+            // production SMTP via email-configuration.* settings.
+            // Align the envelope from-address with the same settings so
+            // Gmail/SMTP accepts the sender identity.
+            $this->campaignFromEmail = setting('email-configuration.from')
+                ?: config('mail.from.address')
+                ?: $campaign->from_email;
+            $this->campaignFromName  = setting('email-configuration.from.name')
+                ?: config('mail.from.name')
+                ?: $campaign->from_name;
             return;
         }
 

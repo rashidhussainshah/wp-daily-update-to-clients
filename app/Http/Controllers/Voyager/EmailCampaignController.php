@@ -166,7 +166,7 @@ class EmailCampaignController extends Controller
         }
     }
 
-    // ── Dispatch Bulk (queued) ────────────────────────────────────────────────
+    // ── Bulk Send (synchronous — no queue required) ───────────────────────────
     public function dispatch(Request $request, int $id)
     {
         $campaign = EmailCampaign::findOrFail($id);
@@ -202,14 +202,15 @@ class EmailCampaignController extends Controller
                     ->all();
 
                 if (count($batch)) {
-                    SendCampaignBatchJob::dispatch($campaign->id, $batch);
+                    // dispatchSync runs the job immediately without a queue worker
+                    SendCampaignBatchJob::dispatchSync($campaign->id, $batch);
                     $dispatched += count($batch);
                 }
             });
 
         $campaign->update(['status' => 'sending']);
 
-        return back()->with('success', "Dispatched {$dispatched} emails to queue in batches of {$batchSize}.");
+        return back()->with('success', "Sent {$dispatched} emails directly (no queue).");
     }
 
     // ── Search eligible recipients (AJAX, per-campaign) ──────────────────────
