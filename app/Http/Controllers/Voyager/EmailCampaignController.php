@@ -9,6 +9,7 @@ use App\Models\EmailCampaignLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use TCG\Voyager\Models\Role;
 
@@ -132,6 +133,12 @@ class EmailCampaignController extends Controller
 
             return back()->with('success', "Test email sent to {$testEmail}");
         } catch (\Throwable $e) {
+            Log::error('Campaign test email failed', [
+                'campaign_id' => $id,
+                'to'          => $testEmail,
+                'error'       => $e->getMessage(),
+                'trace'       => $e->getTraceAsString(),
+            ]);
             return back()->with('error', 'Send failed: ' . $e->getMessage());
         }
     }
@@ -162,6 +169,12 @@ class EmailCampaignController extends Controller
 
             return back()->with('success', "Email sent to {$toEmail}");
         } catch (\Throwable $e) {
+            Log::error('Campaign single send failed', [
+                'campaign_id' => $id,
+                'to'          => $toEmail,
+                'error'       => $e->getMessage(),
+                'trace'       => $e->getTraceAsString(),
+            ]);
             return back()->with('error', 'Send failed: ' . $e->getMessage());
         }
     }
