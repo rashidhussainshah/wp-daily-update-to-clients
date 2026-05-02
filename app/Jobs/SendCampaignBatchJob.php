@@ -10,7 +10,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -32,8 +31,6 @@ class SendCampaignBatchJob implements ShouldQueue
         if (!$campaign) {
             return;
         }
-
-        $this->applySmtpOverride($campaign);
 
         $delayMs = (int) (setting('marketing.delay_ms') ?? 100);
 
@@ -77,26 +74,4 @@ class SendCampaignBatchJob implements ShouldQueue
         }
     }
 
-    private function applySmtpOverride(EmailCampaign $campaign): void
-    {
-        $host = setting('marketing.smtp_host');
-        if (!$host) {
-            return;
-        }
-
-        Config::set('mail.mailers.smtp', [
-            'transport'  => 'smtp',
-            'host'       => $host,
-            'port'       => setting('marketing.smtp_port') ?: 587,
-            'encryption' => setting('marketing.smtp_encryption') ?: 'tls',
-            'username'   => setting('marketing.smtp_username'),
-            'password'   => setting('marketing.smtp_password'),
-            'timeout'    => null,
-        ]);
-
-        Config::set('mail.from', [
-            'address' => $campaign->from_email,
-            'name'    => $campaign->from_name,
-        ]);
-    }
 }
