@@ -93,6 +93,8 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/{id}/send-single',       [EmailCampaignController::class, 'sendSingle'])->name('send-single');
         Route::post('/{id}/dispatch',          [EmailCampaignController::class, 'dispatch'])->name('dispatch');
         Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
+        Route::get('/{id}/recipients',         [EmailCampaignController::class, 'searchRecipients'])->name('recipients');
+        Route::post('/{id}/send-to-selected',  [EmailCampaignController::class, 'sendToSelected'])->name('send-to-selected');
     });
 
     Voyager::routes();

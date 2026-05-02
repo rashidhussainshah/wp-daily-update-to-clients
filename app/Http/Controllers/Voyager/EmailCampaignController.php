@@ -212,6 +212,101 @@ class EmailCampaignController extends Controller
         return back()->with('success', "Dispatched {$dispatched} emails to queue in batches of {$batchSize}.");
     }
 
+    // ── Search eligible recipients (AJAX, per-campaign) ──────────────────────
+    public function searchRecipients(Request $request, int $id)
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+        $role     = Role::where('name', $campaign->target_role)->first();
+
+        if (!$role) {
+            return response()->json(['results' => []]);
+        }
+
+        $q = trim($request->input('q', ''));
+
+        $users = User::withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)
+            ->where('users.role_id', $role->id)
+            ->whereNotNull('users.email')
+            ->whereNotExists(function ($sub) use ($id) {
+                $sub->from('email_campaign_logs')
+                    ->whereColumn('email_campaign_logs.email', 'users.email')
+                    ->where('email_campaign_logs.campaign_id', $id)
+                    ->where('email_campaign_logs.status', 'sent');
+            })
+            ->when($q, fn($query) => $query->where(function ($w) use ($q) {
+                $w->where('users.email', 'like', "%{$q}%")
+                  ->orWhere('users.name', 'like', "%{$q}%");
+            }))
+            ->select('users.id', 'users.name', 'users.email')
+            ->limit(60)
+            ->get();
+
+        return response()->json([
+            'results' => $users->map(fn($u) => [
+                'id'    => $u->id,
+                'text'  => ($u->name ? "{$u->name} " : '') . "<{$u->email}>",
+                'email' => $u->email,
+                'name'  => $u->name ?? '',
+            ]),
+        ]);
+    }
+
+    // ── Send to hand-picked users ─────────────────────────────────────────────
+    public function sendToSelected(Request $request, int $id)
+    {
+        $campaign = EmailCampaign::findOrFail($id);
+
+        $request->validate(['user_ids' => 'required|array|min:1', 'user_ids.*' => 'integer']);
+
+        $users = User::withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)
+            ->whereIn('id', $request->input('user_ids'))
+            ->whereNotNull('email')
+            ->get();
+
+        $sent   = 0;
+        $failed = 0;
+        $skipped = 0;
+
+        foreach ($users as $user) {
+            $alreadySent = EmailCampaignLog::where('campaign_id', $id)
+                ->where('email', $user->email)
+                ->where('status', 'sent')
+                ->exists();
+
+            if ($alreadySent) {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                Mail::to($user->email, $user->name ?? '')
+                    ->send(new MarketingCampaignMail($campaign, $user->name ?? ''));
+
+                EmailCampaignLog::updateOrCreate(
+                    ['campaign_id' => $id, 'email' => $user->email],
+                    ['name' => $user->name, 'status' => 'sent', 'sent_at' => now(), 'error' => null]
+                );
+                $campaign->increment('sent_count');
+                $sent++;
+            } catch (\Throwable $e) {
+                EmailCampaignLog::updateOrCreate(
+                    ['campaign_id' => $id, 'email' => $user->email],
+                    ['name' => $user->name, 'status' => 'failed', 'sent_at' => null, 'error' => $e->getMessage()]
+                );
+                $campaign->increment('failed_count');
+                $failed++;
+            }
+        }
+
+        $msg = "Sent: {$sent}";
+        if ($skipped) $msg .= ", Already sent (skipped): {$skipped}";
+        if ($failed)  $msg .= ", Failed: {$failed}";
+
+        return $failed
+            ? back()->with('error', $msg)
+            : back()->with('success', $msg);
+    }
+
     // ── Mark Complete ─────────────────────────────────────────────────────────
     public function markComplete(int $id)
     {

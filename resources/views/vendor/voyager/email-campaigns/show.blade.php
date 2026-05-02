@@ -85,6 +85,32 @@
                 </div>
             </div>
 
+            {{-- Send to Selected Clients ──────────────────────────────── --}}
+            <div class="panel panel-bordered" style="border-color:#1a1a2e;">
+                <div class="panel-heading" style="background:#1a1a2e;color:#fff;">
+                    <h3 class="panel-title" style="color:#fff;font-size:15px;font-weight:700;">👥 Send to Selected Clients</h3>
+                </div>
+                <div class="panel-body">
+                    <p style="font-size:14px;color:#555;margin-bottom:14px;line-height:1.5;">
+                        Search and pick individual clients. Clients already sent <em>this</em> campaign won't appear.
+                    </p>
+                    <form method="POST" action="{{ route('email-campaigns.send-to-selected', $campaign->id) }}"
+                          id="send-selected-form">
+                        @csrf
+                        <div class="form-group" style="margin-bottom:14px;">
+                            <select name="user_ids[]" id="recipient-select" class="form-control"
+                                    multiple="multiple" style="width:100%;"
+                                    data-placeholder="Type name or email to search…">
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block" id="send-selected-btn" disabled>
+                            <i class="voyager-send"></i>
+                            <span id="send-selected-label">Select recipients first</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             {{-- Test Send --}}
             <div class="panel panel-bordered">
                 <div class="panel-heading"><h3 class="panel-title">🧪 Send Test Email</h3></div>
@@ -207,4 +233,104 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('javascript')
+<style>
+/* ── Dropdown result rows ─────────────────────────────────────────────── */
+.select2-results__option {
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    color: #222 !important;
+}
+.select2-results__option.select2-results__option--highlighted {
+    background: #1a1a2e !important;
+    color: #fff !important;
+}
+/* ── Selected tags (chips) ────────────────────────────────────────────── */
+#select2-recipient-select-container ~ .select2-selection__choice,
+.select2-selection--multiple .select2-selection__choice {
+    background: #1a1a2e !important;
+    border-color: #1a1a2e !important;
+    color: #fff !important;
+    font-size: 13px !important;
+    padding: 4px 10px !important;
+    border-radius: 4px !important;
+    line-height: 1.6 !important;
+    max-width: 100% !important;
+}
+.select2-selection--multiple .select2-selection__choice__remove {
+    color: rgba(255,255,255,0.75) !important;
+    margin-right: 6px !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+}
+.select2-selection--multiple .select2-selection__choice__remove:hover {
+    color: #fff !important;
+}
+/* ── Search input ─────────────────────────────────────────────────────── */
+.select2-search--inline .select2-search__field {
+    font-size: 14px !important;
+    margin-top: 6px !important;
+}
+/* ── The multi-select box itself ──────────────────────────────────────── */
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    min-height: 44px !important;
+    padding: 4px 6px !important;
+}
+</style>
+<script>
+$(function () {
+    var recipientsUrl = '{{ route('email-campaigns.recipients', $campaign->id) }}';
+
+    $('#recipient-select').select2({
+        width: '100%',
+        placeholder: 'Type name or email to search…',
+        minimumInputLength: 1,
+        ajax: {
+            url: recipientsUrl,
+            dataType: 'json',
+            delay: 300,
+            data: function (params) { return { q: params.term }; },
+            processResults: function (data) { return { results: data.results }; },
+            cache: true
+        },
+        templateResult: function (u) {
+            if (u.loading) return u.text;
+            var $wrap = $('<div style="padding:2px 0;">');
+            var $name = $('<div style="font-size:14px;font-weight:600;color:inherit;line-height:1.4;">').text(u.name || u.email);
+            $wrap.append($name);
+            if (u.name) {
+                var $email = $('<div style="font-size:13px;color:inherit;opacity:0.75;margin-top:1px;">').text(u.email);
+                $wrap.append($email);
+            }
+            return $wrap;
+        },
+        templateSelection: function (u) {
+            return u.email ? (u.name ? u.name + '  〈' + u.email + '〉' : u.email) : u.text;
+        }
+    });
+
+    $('#recipient-select').on('change', function () {
+        var count = $(this).val() ? $(this).val().length : 0;
+        var btn   = $('#send-selected-btn');
+        var lbl   = $('#send-selected-label');
+        if (count === 0) {
+            btn.prop('disabled', true);
+            lbl.text('Select recipients first');
+        } else {
+            btn.prop('disabled', false);
+            lbl.text('Send to ' + count + ' recipient' + (count > 1 ? 's' : '') + ' now');
+        }
+    });
+
+    $('#send-selected-form').on('submit', function () {
+        var count = $('#recipient-select').val().length;
+        return confirm('Send this campaign to ' + count + ' recipient' + (count > 1 ? 's' : '') + ' now?');
+    });
+});
+</script>
 @stop
