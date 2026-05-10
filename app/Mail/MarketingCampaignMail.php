@@ -45,8 +45,7 @@ class MarketingCampaignMail extends BaseEmail
         // Ignore marketing.smtp_* settings entirely.
         $this->campaignFromEmail = setting('email-configuration.from')
             ?: config('mail.from.address', $campaign->from_email);
-        $this->campaignFromName  = setting('email-configuration.from.name')
-            ?: config('mail.from.name', $campaign->from_name);
+        $this->campaignFromName  = config('mail.from.name', $campaign->from_name);
 
         $this->companyName     = setting('marketing.company_name')     ?: 'Webpenter';
         $this->companyTagline  = setting('marketing.company_tagline')  ?: 'Software & Development';
