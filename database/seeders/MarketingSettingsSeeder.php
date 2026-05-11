@@ -11,16 +11,16 @@ class MarketingSettingsSeeder extends Seeder
     {
         $settings = [
             // ── Sender identity ─────────────────────────────────────────────
-            ['key' => 'marketing.from_name',       'display_name' => 'From Name',           'value' => 'Rashid | Webpenter',         'type' => 'text',     'order' => 1],
-            ['key' => 'marketing.from_email',      'display_name' => 'From Email',          'value' => 'sales@webpenter.com',        'type' => 'text',     'order' => 2],
-            ['key' => 'marketing.reply_to',        'display_name' => 'Reply-To Email',      'value' => 'sales@webpenter.com',        'type' => 'text',     'order' => 3],
+            ['key' => 'marketing.from_name',       'display_name' => 'From Name',           'value' => 'Webpenter',                  'type' => 'text',     'order' => 1],
+            ['key' => 'marketing.from_email',      'display_name' => 'From Email',          'value' => 'contact@webpenter.com',      'type' => 'text',     'order' => 2],
+            ['key' => 'marketing.reply_to',        'display_name' => 'Reply-To Email',      'value' => 'contact@webpenter.com',      'type' => 'text',     'order' => 3],
 
-            // ── SMTP override for marketing (leave blank to use app default) ─
-            ['key' => 'marketing.smtp_host',       'display_name' => 'SMTP Host',           'value' => '',                           'type' => 'text',     'order' => 4],
-            ['key' => 'marketing.smtp_port',       'display_name' => 'SMTP Port',           'value' => '',                           'type' => 'text',     'order' => 5],
-            ['key' => 'marketing.smtp_username',   'display_name' => 'SMTP Username',       'value' => '',                           'type' => 'text',     'order' => 6],
-            ['key' => 'marketing.smtp_password',   'display_name' => 'SMTP Password',       'value' => '',                           'type' => 'password', 'order' => 7],
-            ['key' => 'marketing.smtp_encryption', 'display_name' => 'SMTP Encryption',     'value' => 'tls',                        'type' => 'text',     'order' => 8],
+            // ── SMTP — Titan (Hostinger) ─────────────────────────────────────
+            ['key' => 'marketing.smtp_host',       'display_name' => 'SMTP Host',           'value' => 'smtp.titan.email',           'type' => 'text',     'order' => 4],
+            ['key' => 'marketing.smtp_port',       'display_name' => 'SMTP Port',           'value' => '465',                        'type' => 'text',     'order' => 5],
+            ['key' => 'marketing.smtp_username',   'display_name' => 'SMTP Username',       'value' => 'contact@webpenter.com',      'type' => 'text',     'order' => 6],
+            ['key' => 'marketing.smtp_password',   'display_name' => 'SMTP Password',       'value' => 'contact@786',                'type' => 'password', 'order' => 7],
+            ['key' => 'marketing.smtp_encryption', 'display_name' => 'SMTP Encryption',     'value' => 'ssl',                        'type' => 'text',     'order' => 8],
 
             // ── Sending throttle ────────────────────────────────────────────
             ['key' => 'marketing.batch_size',      'display_name' => 'Batch Size',          'value' => '200',                        'type' => 'text',     'order' => 9],
@@ -39,17 +39,17 @@ class MarketingSettingsSeeder extends Seeder
         ];
 
         foreach ($settings as $data) {
-            $setting = Setting::firstOrNew(['key' => $data['key']]);
-            if (!$setting->exists) {
-                $setting->fill([
+            Setting::updateOrCreate(
+                ['key' => $data['key']],
+                [
                     'display_name' => $data['display_name'],
                     'value'        => $data['value'],
                     'details'      => '',
                     'type'         => $data['type'],
                     'order'        => $data['order'],
                     'group'        => 'Marketing',
-                ])->save();
-            }
+                ]
+            );
         }
     }
 }
