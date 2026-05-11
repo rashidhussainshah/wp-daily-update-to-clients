@@ -3,14 +3,17 @@
 namespace App\Mail;
 
 use App\Models\EmailCampaign;
+use Illuminate\Bus\Queueable;
+use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 
-class MarketingCampaignMail extends BaseEmail
+class MarketingCampaignMail extends Mailable
 {
-    // Queueable + SerializesModels are inherited from BaseEmail — no duplicates here.
-    // No ShouldQueue — emails are sent synchronously (dispatchSync in controller).
+    use Queueable, SerializesModels;
 
     public string $recipientName;
     public string $htmlBody;
@@ -31,27 +34,31 @@ class MarketingCampaignMail extends BaseEmail
 
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
-        // BaseEmail reads email-configuration.* from Voyager settings (with .env fallback)
-        // and calls Config::set('mail.mailers.smtp', ...) — same SMTP used by payment emails.
-        parent::__construct();
+        Config::set('mail.mailers.smtp', [
+            'transport'  => 'smtp',
+            'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
+            'port'       => (int) (setting('marketing.smtp_port') ?: 465),
+            'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
+            'username'   => setting('marketing.smtp_username')   ?: '',
+            'password'   => setting('marketing.smtp_password')   ?: '',
+            'timeout'    => null,
+            'auth_mode'  => null,
+        ]);
 
         $this->recipientName   = $recipientName;
         $this->htmlBody        = $this->personalise($campaign->html_body, $recipientName);
         $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
         $this->campaignSubject = $this->personalise($campaign->subject, $recipientName);
-        $this->campaignReplyTo = setting('email-configuration.from') ?: $campaign->from_email;
 
-        // Always use the working default sender (webpenterinvoices@gmail.com).
-        // Ignore marketing.smtp_* settings entirely.
-        $this->campaignFromEmail = setting('email-configuration.from')
-            ?: config('mail.from.address', $campaign->from_email);
-        $this->campaignFromName  = config('mail.from.name', $campaign->from_name);
+        $this->campaignFromEmail = setting('marketing.from_email') ?: 'contact@webpenter.com';
+        $this->campaignFromName  = setting('marketing.from_name')  ?: 'Webpenter';
+        $this->campaignReplyTo   = setting('marketing.reply_to')   ?: 'contact@webpenter.com';
 
         $this->companyName     = setting('marketing.company_name')     ?: 'Webpenter';
         $this->companyTagline  = setting('marketing.company_tagline')  ?: 'Software & Development';
         $this->companyAddress  = setting('marketing.company_address')  ?: 'Pakistan';
         $this->companyWebsite  = setting('marketing.company_website')  ?: 'https://webpenter.com';
-        $this->companyEmail    = setting('email-configuration.from')   ?: 'sales@webpenter.com';
+        $this->companyEmail    = setting('marketing.from_email')       ?: 'contact@webpenter.com';
         $this->companyPhone    = setting('marketing.company_phone')    ?: '';
         $this->companyLogoUrl  = setting('marketing.company_logo_url') ?: '';
         $this->unsubscribeText = setting('marketing.unsubscribe_text')
