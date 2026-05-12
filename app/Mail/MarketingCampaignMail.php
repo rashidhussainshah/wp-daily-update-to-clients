@@ -9,7 +9,6 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Config;
 
 class MarketingCampaignMail extends Mailable
 {
@@ -34,17 +33,6 @@ class MarketingCampaignMail extends Mailable
 
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
-        Config::set('mail.mailers.smtp', [
-            'transport'  => 'smtp',
-            'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
-            'port'       => (int) (setting('marketing.smtp_port') ?: 465),
-            'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
-            'username'   => setting('marketing.smtp_username')   ?: '',
-            'password'   => setting('marketing.smtp_password')   ?: '',
-            'timeout'    => null,
-            'auth_mode'  => null,
-        ]);
-
         $this->recipientName   = $recipientName;
         $this->htmlBody        = $this->personalise($campaign->html_body, $recipientName);
         $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
