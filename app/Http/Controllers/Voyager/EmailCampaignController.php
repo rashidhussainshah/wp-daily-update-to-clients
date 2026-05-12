@@ -9,6 +9,7 @@ use App\Models\EmailCampaignLog;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use TCG\Voyager\Models\Role;
@@ -128,6 +129,7 @@ class EmailCampaignController extends Controller
         $testName  = $request->input('test_name', 'Test User');
 
         try {
+            $this->configureMailer();
             Mail::to($testEmail, $testName)
                 ->send(new MarketingCampaignMail($campaign, $testName));
 
@@ -157,6 +159,7 @@ class EmailCampaignController extends Controller
         $toName  = $request->input('to_name', '');
 
         try {
+            $this->configureMailer();
             Mail::to($toEmail, $toName)
                 ->send(new MarketingCampaignMail($campaign, $toName));
 
@@ -293,6 +296,7 @@ class EmailCampaignController extends Controller
             }
 
             try {
+                $this->configureMailer();
                 Mail::to($user->email, $user->name ?? '')
                     ->send(new MarketingCampaignMail($campaign, $user->name ?? ''));
 
@@ -327,6 +331,22 @@ class EmailCampaignController extends Controller
         $campaign = EmailCampaign::findOrFail($id);
         $campaign->update(['status' => 'sent', 'sent_at' => $campaign->sent_at ?? now()]);
         return back()->with('success', 'Campaign marked as sent.');
+    }
+
+    // ── Configure marketing SMTP before Mail::to() ───────────────────────────
+    private function configureMailer(): void
+    {
+        Config::set('mail.mailers.smtp', [
+            'transport'  => 'smtp',
+            'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
+            'port'       => (int) (setting('marketing.smtp_port') ?: 465),
+            'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
+            'username'   => setting('marketing.smtp_username')   ?: '',
+            'password'   => setting('marketing.smtp_password')   ?: '',
+            'timeout'    => null,
+            'auth_mode'  => null,
+        ]);
+        app('mail.manager')->purge('smtp');
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────
