@@ -18,7 +18,7 @@ class EmailCampaignController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['admin.user', 'campaign.access']);
+        $this->middleware(['campaign.access']);
     }
 
     // ── List ────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ class EmailCampaignController extends Controller
 
         $campaign = EmailCampaign::create($data);
 
-        return redirect()->route('email-campaigns.show', $campaign->id)
+        return redirect()->route('email-campaigns.index')
             ->with('success', "Campaign \"{$campaign->name}\" created.");
     }
 
