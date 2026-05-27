@@ -18,6 +18,9 @@ class DatabaseSeeder extends Seeder
             RolesTableSeeder::class,
             MarketingSettingsSeeder::class,
             EmailCampaignSeeder::class,
+            HomeyCampaignSeeder::class,
+            HouzezCampaignSeeder::class,
+            RetainerCampaignSeeder::class,
             EmailCampaignMenuSeeder::class,
         ]);
     }

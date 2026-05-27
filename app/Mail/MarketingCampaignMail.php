@@ -55,10 +55,24 @@ class MarketingCampaignMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $replyTo = $this->campaignReplyTo;
+
         return new Envelope(
             from: new Address($this->campaignFromEmail, $this->campaignFromName),
-            replyTo: [new Address($this->campaignReplyTo)],
+            replyTo: [new Address($replyTo)],
             subject: $this->campaignSubject,
+            using: [
+                function (\Symfony\Component\Mime\Email $message) use ($replyTo) {
+                    $headers = $message->getHeaders();
+                    $headers->addTextHeader(
+                        'List-Unsubscribe',
+                        '<mailto:' . $replyTo . '?subject=unsubscribe>'
+                    );
+                    $headers->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
+                    $headers->addTextHeader('Precedence', 'bulk');
+                    $headers->addTextHeader('X-Mailer', 'Webpenter Mailer 1.0');
+                },
+            ]
         );
     }
 

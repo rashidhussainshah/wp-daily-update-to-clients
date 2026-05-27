@@ -67,6 +67,12 @@
   <tr>
     <td class="footer-cell">
       <p>{{ $unsubscribeText }}</p>
+      <p style="margin-top:4px;">
+        <a href="mailto:{{ $companyEmail }}?subject=unsubscribe"
+           style="color:#9aa5b4;text-decoration:underline;font-size:11px;">
+          Click here to unsubscribe
+        </a>
+      </p>
       <p>
         <strong>{{ $companyName }}</strong>
         @if($companyTagline) &mdash; {{ $companyTagline }}@endif

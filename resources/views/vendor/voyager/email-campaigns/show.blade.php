@@ -100,7 +100,7 @@
                         <div class="form-group" style="margin-bottom:14px;">
                             <select name="user_ids[]" id="recipient-select" class="form-control"
                                     multiple="multiple" style="width:100%;"
-                                    data-placeholder="Type name or email to search…">
+                                    data-placeholder="Click to browse or type to search…">
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block" id="send-selected-btn" disabled>
@@ -237,45 +237,54 @@
 
 @section('javascript')
 <style>
-/* ── Dropdown result rows ─────────────────────────────────────────────── */
+/* ── Dropdown list container ──────────────────────────────────────────── */
+.select2-dropdown {
+    border: 1px solid #ccc !important;
+    border-radius: 4px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+/* ── Each result row — always light bg, dark text ────────────────────── */
 .select2-results__option {
-    padding: 10px 14px !important;
+    padding: 8px 12px !important;
     font-size: 14px !important;
     line-height: 1.4 !important;
-    color: #222 !important;
+    background-color: #fff !important;
+    color: #333 !important;
 }
+/* ── Hover / keyboard focus row ──────────────────────────────────────── */
 .select2-results__option.select2-results__option--highlighted {
-    background: #1a1a2e !important;
-    color: #fff !important;
+    background-color: #f0f4ff !important;
+    color: #1a1a2e !important;
 }
 /* ── Selected tags (chips) ────────────────────────────────────────────── */
-#select2-recipient-select-container ~ .select2-selection__choice,
 .select2-selection--multiple .select2-selection__choice {
-    background: #1a1a2e !important;
-    border-color: #1a1a2e !important;
-    color: #fff !important;
+    background-color: #e8eaf6 !important;
+    border: 1px solid #9fa8da !important;
+    color: #1a237e !important;
     font-size: 13px !important;
-    padding: 4px 10px !important;
+    padding: 3px 8px !important;
     border-radius: 4px !important;
     line-height: 1.6 !important;
     max-width: 100% !important;
 }
 .select2-selection--multiple .select2-selection__choice__remove {
-    color: rgba(255,255,255,0.75) !important;
-    margin-right: 6px !important;
-    font-size: 16px !important;
+    color: #5c6bc0 !important;
+    margin-right: 5px !important;
+    font-size: 15px !important;
     font-weight: 700 !important;
 }
 .select2-selection--multiple .select2-selection__choice__remove:hover {
-    color: #fff !important;
+    color: #c62828 !important;
 }
 /* ── Search input ─────────────────────────────────────────────────────── */
 .select2-search--inline .select2-search__field {
     font-size: 14px !important;
+    color: #333 !important;
     margin-top: 6px !important;
 }
 /* ── The multi-select box itself ──────────────────────────────────────── */
 .select2-container--default .select2-selection--multiple {
+    background-color: #fff !important;
     border: 1px solid #ccc !important;
     border-radius: 4px !important;
     min-height: 44px !important;
@@ -288,29 +297,29 @@ $(function () {
 
     $('#recipient-select').select2({
         width: '100%',
-        placeholder: 'Type name or email to search…',
-        minimumInputLength: 1,
+        placeholder: 'Click to browse or type to search…',
+        minimumInputLength: 0,
         ajax: {
             url: recipientsUrl,
             dataType: 'json',
-            delay: 300,
-            data: function (params) { return { q: params.term }; },
+            delay: 250,
+            data: function (params) { return { q: params.term || '' }; },
             processResults: function (data) { return { results: data.results }; },
-            cache: true
+            cache: false
         },
         templateResult: function (u) {
             if (u.loading) return u.text;
-            var $wrap = $('<div style="padding:2px 0;">');
-            var $name = $('<div style="font-size:14px;font-weight:600;color:inherit;line-height:1.4;">').text(u.name || u.email);
+            var $wrap  = $('<div style="padding:2px 0;line-height:1.5;">');
+            var $name  = $('<div style="font-size:14px;font-weight:600;color:#222;">').text(u.name || u.email);
             $wrap.append($name);
             if (u.name) {
-                var $email = $('<div style="font-size:13px;color:inherit;opacity:0.75;margin-top:1px;">').text(u.email);
+                var $email = $('<div style="font-size:12px;color:#666;margin-top:1px;">').text(u.email);
                 $wrap.append($email);
             }
             return $wrap;
         },
         templateSelection: function (u) {
-            return u.email ? (u.name ? u.name + '  〈' + u.email + '〉' : u.email) : u.text;
+            return u.email ? (u.name ? u.name + ' — ' + u.email : u.email) : u.text;
         }
     });
 
