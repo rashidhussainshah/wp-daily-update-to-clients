@@ -292,6 +292,46 @@
                 @endif
             </tbody>
         </table>
+
+        <!-- Exceeded Leave Breakdown (Saturday half-day details) -->
+        @if($data['leaves']['exceeded_leave_days'] > 0 && !empty($data['leaves']['exceeded_details']))
+        <h4 style="color: #e74c3c; margin-top: 15px; margin-bottom: 10px;">Exceeded Leave Deduction Breakdown</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Day</th>
+                    <th>Reason</th>
+                    <th class="amount-cell">Deduction Days</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($data['leaves']['exceeded_details'] as $exceededLeave)
+                <tr @if($exceededLeave['is_saturday']) style="background: #fff3cd;" @endif>
+                    <td>{{ \Carbon\Carbon::parse($exceededLeave['date'])->format('M d, Y') }}</td>
+                    <td>
+                        {{ $exceededLeave['day_name'] }}
+                        @if($exceededLeave['is_saturday'])
+                            <span style="color: #856404; font-weight: bold;">(Half Day)</span>
+                        @endif
+                    </td>
+                    <td>{{ $exceededLeave['reason'] }}</td>
+                    <td class="amount-cell">
+                        @if($exceededLeave['is_saturday'])
+                            <span style="color: #856404; font-weight: bold;">0.5</span>
+                        @else
+                            1
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+                <tr style="background: #f8f9fa; font-weight: bold;">
+                    <td colspan="3"><strong>Total Deduction Days</strong></td>
+                    <td class="amount-cell"><strong>{{ $data['leaves']['exceeded_leave_deduction_days'] }}</strong></td>
+                </tr>
+            </tbody>
+        </table>
+        @endif
         @endif
 
         <!-- Fine Details -->
@@ -357,6 +397,9 @@
         <div class="warning-box">
             @if($data['leaves']['exceeded_leave_days'] > 0)
             <p><strong>Extra Leave Days:</strong> You have taken {{ $data['leaves']['exceeded_leave_days'] }} extra leave day(s) beyond your monthly quota of {{ $data['leaves']['allowed_monthly_leaves'] }} days.</p>
+            @if($data['leaves']['exceeded_leave_deduction_days'] != $data['leaves']['exceeded_leave_days'])
+            <p style="color: #856404;"><strong>Note:</strong> Saturday leaves are counted as half-day (0.5) for deduction purposes. Total deduction days: {{ $data['leaves']['exceeded_leave_deduction_days'] }}</p>
+            @endif
             @endif
             @if($data['fines']['fines_for_deduction'] > 0)
             <p><strong>Fines Deducted:</strong> Total fines deducted this month amount to {{ $data['contract']['currency'] }} {{ number_format($data['fines']['fines_for_deduction'], 2) }}.</p>
@@ -370,28 +413,41 @@
                 <span>Gross Salary:</span>
                 <span>{{ $data['contract']['currency'] }} {{ number_format($data['summary']['gross_salary'], 2) }}</span>
             </div>
-            @if($data['leaves']['leave_deduction'] > 0)
-            <div class="summary-row deduction">
-                <span>Extra Leave Days ({{ $data['leaves']['exceeded_leave_days'] }} days × {{ $data['contract']['currency'] }} {{ number_format($data['contract']['daily_salary'], 2) }}):</span>
-                <span>- {{ $data['contract']['currency'] }} {{ number_format($data['leaves']['leave_deduction'], 2) }}</span>
-            </div>
-            @endif
+
             @if($data['fines']['fines_for_deduction'] > 0)
             <div class="summary-row deduction">
-                <span>Fines:</span>
+                <span>Fines Deduction:</span>
                 <span>- {{ $data['contract']['currency'] }} {{ number_format($data['fines']['fines_for_deduction'], 2) }}</span>
             </div>
+            <div class="summary-row" style="background: #f0f0f0; padding: 8px; margin: 5px 0;">
+                <span><strong>Salary After Fines:</strong></span>
+                <span><strong>{{ $data['contract']['currency'] }} {{ number_format($data['summary']['salary_after_fines'], 2) }}</strong></span>
+            </div>
             @endif
+
+            @if($data['leaves']['leave_deduction'] > 0)
+            <div class="summary-row deduction">
+                <span>Extra Leave Deduction ({{ $data['leaves']['exceeded_leave_deduction_days'] }} days × {{ $data['contract']['currency'] }} {{ number_format($data['contract']['daily_salary'], 2) }}):</span>
+                <span>- {{ $data['contract']['currency'] }} {{ number_format($data['leaves']['leave_deduction'], 2) }}</span>
+            </div>
+            <div class="summary-row" style="background: #f0f0f0; padding: 8px; margin: 5px 0;">
+                <span><strong>Salary After Leave Deduction:</strong></span>
+                <span><strong>{{ $data['contract']['currency'] }} {{ number_format($data['summary']['salary_after_leaves'], 2) }}</strong></span>
+            </div>
+            @endif
+
             @if($data['advances']['total_advance'] > 0)
             <div class="summary-row deduction">
-                <span>Advance Salary:</span>
+                <span>Advance Salary Deduction:</span>
                 <span>- {{ $data['contract']['currency'] }} {{ number_format($data['advances']['total_advance'], 2) }}</span>
             </div>
             @endif
-            <div class="summary-row">
-                <span>Total Adjustments:</span>
+
+            <div class="summary-row" style="border-top: 1px dashed #ccc; padding-top: 10px; margin-top: 10px;">
+                <span>Total Deductions:</span>
                 <span>- {{ $data['contract']['currency'] }} {{ number_format($data['summary']['total_deductions'], 2) }}</span>
             </div>
+
             <div class="summary-row total">
                 <span>NET SALARY:</span>
                 <span>{{ $data['contract']['currency'] }} {{ number_format($data['summary']['net_salary'], 2) }}</span>
