@@ -6,7 +6,21 @@
       "Bash(python *)",
       "Bash(pip install *)",
       "Bash(php artisan *)",
-      "Bash(php -r ' *)"
+      "Bash(php -r ' *)",
+      "Bash(php --version)",
+      "Bash(composer show *)",
+      "Bash(git config *)",
+      "Bash(cat app/Http/Middleware/CampaignAccessMiddleware.php)",
+      "Bash(find app *)",
+      "Bash(xargs grep *)",
+      "Bash(nslookup *)",
+      "Bash(Resolve-DnsName -Name webpenter.com -Type TXT)",
+      "Bash(Select-Object -First 20)",
+      "PowerShell(Resolve-DnsName *)",
+      "Bash(curl -s \"https://dns.google/resolve?name=webpenter.com&type=TXT\")",
+      "WebFetch(domain:bookhere.tech)",
+      "WebFetch(domain:simplifyres.com)",
+      "WebFetch(domain:codecanyon.net)"
     ]
   }
 }

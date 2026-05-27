@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -31,6 +32,18 @@ class SendCampaignBatchJob implements ShouldQueue
         if (!$campaign) {
             return;
         }
+
+        Config::set('mail.mailers.smtp', [
+            'transport'  => 'smtp',
+            'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
+            'port'       => (int) (setting('marketing.smtp_port') ?: 465),
+            'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
+            'username'   => setting('marketing.smtp_username')   ?: '',
+            'password'   => setting('marketing.smtp_password')   ?: '',
+            'timeout'    => null,
+            'auth_mode'  => null,
+        ]);
+        app('mail.manager')->purge('smtp');
 
         $delayMs = (int) (setting('marketing.delay_ms') ?? 100);
 

@@ -20,7 +20,22 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
-    <form method="POST"
+    @if(session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <strong>Please fix the following errors:</strong>
+            <ul class="mb-0 mt-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form id="campaign-form" method="POST"
           action="{{ isset($campaign) ? route('email-campaigns.update', $campaign->id) : route('email-campaigns.store') }}">
         @csrf
         @if(isset($campaign)) @method('PUT') @endif
@@ -159,7 +174,7 @@ if (initialHtml) {
     quill.clipboard.dangerouslyPasteHTML(initialHtml);
 }
 
-document.querySelector('form').addEventListener('submit', function () {
+document.getElementById('campaign-form').addEventListener('submit', function () {
     htmlInput.value = quill.root.innerHTML;
 });
 
