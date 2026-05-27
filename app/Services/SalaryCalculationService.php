@@ -52,11 +52,14 @@ class SalaryCalculationService
                             ->where('end_date', '>=', $monthEnd);
                     });
             })
+            ->orderBy('start_date')
             ->get();
 
         // Calculate total leave days in this month
         $totalLeaveDays = 0;
         $leaveDetails = [];
+        $allLeaveDates = []; // Track individual leave dates for exceeded calculation
+
         foreach ($leaves as $leave) {
             $leaveStart = Carbon::parse($leave->start_date);
             $leaveEnd = $leave->end_date ? Carbon::parse($leave->end_date) : $leaveStart->copy();
@@ -68,6 +71,18 @@ class SalaryCalculationService
             $daysInMonth = $rangeStart->diffInDays($rangeEnd) + 1;
             $totalLeaveDays += $daysInMonth;
 
+            // Track individual dates for this leave
+            $currentDate = $rangeStart->copy();
+            while ($currentDate->lte($rangeEnd)) {
+                $allLeaveDates[] = [
+                    'date' => $currentDate->copy(),
+                    'is_saturday' => $currentDate->isSaturday(),
+                    'leave_id' => $leave->id,
+                    'reason' => $leave->reason,
+                ];
+                $currentDate->addDay();
+            }
+
             $leaveDetails[] = [
                 'id' => $leave->id,
                 'start_date' => $leave->start_date,
@@ -77,14 +92,36 @@ class SalaryCalculationService
             ];
         }
 
-        // Calculate exceeded leave days
+        // Calculate exceeded leave days with Saturday half-day logic
         $exceededLeaveDays = max(0, $totalLeaveDays - $allowedMonthlyLeaves);
+
+        // Calculate deduction value for exceeded days (Saturday = 0.5 day)
+        $exceededLeaveDeductionDays = 0;
+        $exceededLeaveDetails = [];
+
+        if ($exceededLeaveDays > 0) {
+            // Get the last N leave dates (exceeded ones)
+            $exceededDates = array_slice($allLeaveDates, -$exceededLeaveDays);
+
+            foreach ($exceededDates as $leaveDate) {
+                $deductionValue = $leaveDate['is_saturday'] ? 0.5 : 1;
+                $exceededLeaveDeductionDays += $deductionValue;
+
+                $exceededLeaveDetails[] = [
+                    'date' => $leaveDate['date']->format('Y-m-d'),
+                    'day_name' => $leaveDate['date']->format('l'),
+                    'is_saturday' => $leaveDate['is_saturday'],
+                    'deduction_days' => $deductionValue,
+                    'reason' => $leaveDate['reason'],
+                ];
+            }
+        }
 
         // Calculate daily salary
         $dailySalary = round($contract->monthly_salary / 30, 2);
 
-        // Calculate leave deduction
-        $leaveDeduction = round($exceededLeaveDays * $dailySalary, 2);
+        // Calculate leave deduction using the adjusted days (Saturday = 0.5)
+        $leaveDeduction = round($exceededLeaveDeductionDays * $dailySalary, 2);
 
         // Get only DEDUCTED fines for the month
         $deductedFines = Fine::where('user_id', $userId)
@@ -129,15 +166,20 @@ class SalaryCalculationService
             ];
         }
 
-        // Calculate net salary (Gross - ALL Fines from this month)
-        // This ensures fines paid during processing are shown in the invoice
-        $netSalary = round($contract->monthly_salary - $finesForDeduction, 2);
+        // Calculate salary after fines (Gross - Fines)
+        $salaryAfterFines = round($contract->monthly_salary - $finesForDeduction, 2);
+
+        // Calculate salary after leave deduction (Salary after fines - Leave deduction)
+        $salaryAfterLeaves = round($salaryAfterFines - $leaveDeduction, 2);
 
         // Calculate total deductions (for reference)
         $totalDeductions = $leaveDeduction + $finesForDeduction + $totalAdvance;
 
-        // Calculate final payable amount (Net Salary - Leaves - Advances)
-        $finalPayable = round($netSalary - $leaveDeduction - $totalAdvance, 2);
+        // Calculate net salary (final amount after all deductions including advances)
+        $netSalary = round($salaryAfterLeaves - $totalAdvance, 2);
+
+        // Final payable is same as net salary
+        $finalPayable = $netSalary;
 
         return [
             'user' => [
@@ -161,8 +203,10 @@ class SalaryCalculationService
                 'allowed_monthly_leaves' => $allowedMonthlyLeaves,
                 'total_leave_days' => $totalLeaveDays,
                 'exceeded_leave_days' => $exceededLeaveDays,
+                'exceeded_leave_deduction_days' => $exceededLeaveDeductionDays, // Adjusted for Saturday half-days
                 'leave_deduction' => $leaveDeduction,
                 'details' => $leaveDetails,
+                'exceeded_details' => $exceededLeaveDetails, // Details of exceeded leaves with Saturday info
             ],
             'fines' => [
                 'fines_for_deduction' => $finesForDeduction, // Only deducted fines
@@ -174,9 +218,11 @@ class SalaryCalculationService
             ],
             'summary' => [
                 'gross_salary' => $contract->monthly_salary,
-                'net_salary' => $netSalary, // Gross - Fines only
+                'salary_after_fines' => $salaryAfterFines, // Gross - Fines
+                'salary_after_leaves' => $salaryAfterLeaves, // Salary after fines - Leave deduction
                 'total_deductions' => $totalDeductions,
-                'final_payable' => $finalPayable, // Net - Leaves - Advances
+                'net_salary' => $netSalary, // Final amount after all deductions
+                'final_payable' => $finalPayable,
             ],
         ];
     }

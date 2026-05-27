@@ -31,12 +31,12 @@ class ProcessMonthlySalaries extends Command
     /**
      * Command signature
      */
-    protected $signature = 'salary:process {--month= : Month in Y-m format (e.g., 2025-10)} {--user_id= : Process specific user only}';
+    protected $signature = 'salary:process {--month= : Month in Y-m format (e.g., 2025-10)} {--user_id= : Process specific user only} {--regenerate : Regenerate salary even if already processed (overwrites existing invoice and log)}';
 
     /**
      * Command description
      */
-    protected $description = 'Interactive salary processing for development team members';
+    protected $description = 'Interactive salary processing for development team members (use --regenerate to reprocess an already-sent salary)';
 
     /**
      * Salary calculation service
@@ -160,14 +160,28 @@ class ProcessMonthlySalaries extends Command
             // Check if salary has already been processed and payment sent
             $existingLog = $this->checkExistingPayment($user->id);
             if ($existingLog) {
-                $this->error("⚠ DUPLICATE PAYMENT PREVENTION");
-                $this->error("Salary for {$user->name} has already been processed and payment sent for {$this->currentMonth}.");
-                $this->line("  Invoice Number: {$existingLog->invoice_number}");
-                $this->line("  Payment Sent At: {$existingLog->email_sent_at}");
-                $this->line("  Net Salary: {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
-                $this->error("Cannot process salary twice for the same month to prevent duplicate payments.");
+                if (!$this->option('regenerate')) {
+                    $this->error("⚠ DUPLICATE PAYMENT PREVENTION");
+                    $this->error("Salary for {$user->name} has already been processed and payment sent for {$this->currentMonth}.");
+                    $this->line("  Invoice Number: {$existingLog->invoice_number}");
+                    $this->line("  Payment Sent At: {$existingLog->email_sent_at}");
+                    $this->line("  Net Salary: {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
+                    $this->error("Cannot process salary twice for the same month to prevent duplicate payments.");
+                    $this->warn("Use --regenerate flag to force regenerate the salary invoice.");
+                    $this->newLine();
+                    return false;
+                }
+
+                $this->warn("⚠ REGENERATE MODE — Existing salary record will be overwritten");
+                $this->line("  Invoice Number : {$existingLog->invoice_number}");
+                $this->line("  Previously Sent: {$existingLog->email_sent_at}");
+                $this->line("  Old Net Salary : {$existingLog->currency} " . number_format($existingLog->net_salary, 2));
                 $this->newLine();
-                return false;
+
+                if (!$this->confirm("Overwrite and resend salary for {$user->name}?", false)) {
+                    $this->warn("Skipped regeneration for {$user->name}");
+                    return false;
+                }
             }
 
             // Calculate initial salary
@@ -606,7 +620,22 @@ class ProcessMonthlySalaries extends Command
         $this->line("  Total: {$data['leaves']['total_leave_days']} days | Exceeded: {$data['leaves']['exceeded_leave_days']} days");
 
         if ($data['leaves']['exceeded_leave_days'] > 0) {
+            $deductionDays = $data['leaves']['exceeded_leave_deduction_days'] ?? $data['leaves']['exceeded_leave_days'];
+
+            // Show if there are Saturday half-days
+            if ($deductionDays != $data['leaves']['exceeded_leave_days']) {
+                $this->line("  <fg=cyan>Deduction Days (adjusted for Saturday half-days): {$deductionDays}</>");
+            }
+
             $this->line("  Adjustment: {$currency} " . number_format($data['leaves']['leave_deduction'], 2));
+
+            // Show exceeded leave details with Saturday info
+            if (isset($data['leaves']['exceeded_details']) && !empty($data['leaves']['exceeded_details'])) {
+                foreach ($data['leaves']['exceeded_details'] as $detail) {
+                    $dayInfo = $detail['is_saturday'] ? "(Saturday - Half Day: 0.5)" : "(Full Day: 1)";
+                    $this->line("    - {$detail['date']} {$dayInfo}");
+                }
+            }
         }
 
         $this->newLine();
@@ -666,31 +695,35 @@ class ProcessMonthlySalaries extends Command
     {
         $currency = $data['contract']['currency'];
 
-        $this->line("Gross Salary:        {$currency} " . number_format($data['summary']['gross_salary'], 2));
+        $this->line("Gross Salary:              {$currency} " . number_format($data['summary']['gross_salary'], 2));
 
         if ($data['fines']['fines_for_deduction'] > 0) {
-            $this->line("Fines:               - {$currency} " . number_format($data['fines']['fines_for_deduction'], 2));
+            $this->line("Fines Deduction:           - {$currency} " . number_format($data['fines']['fines_for_deduction'], 2));
+            $this->line("<fg=yellow>Salary After Fines:        {$currency} " . number_format($data['summary']['salary_after_fines'], 2) . "</>");
         }
 
-        $this->line('─────────────────────────────────────────────────────────');
-        $this->line("<fg=green;options=bold>NET SALARY:          {$currency} " . number_format($data['summary']['net_salary'], 2) . "</>");
-        $this->newLine();
-
-        // Show additional deductions after Net Salary
         if ($data['leaves']['leave_deduction'] > 0) {
-            $days = $data['leaves']['exceeded_leave_days'];
-            $this->line("Extra Leave Days ({$days} days): - {$currency} " . number_format($data['leaves']['leave_deduction'], 2));
+            $days = $data['leaves']['exceeded_leave_deduction_days'] ?? $data['leaves']['exceeded_leave_days'];
+            $this->line("Extra Leave ({$days} days):     - {$currency} " . number_format($data['leaves']['leave_deduction'], 2));
+
+            // Show Saturday half-day info if applicable
+            if (isset($data['leaves']['exceeded_details'])) {
+                foreach ($data['leaves']['exceeded_details'] as $detail) {
+                    if ($detail['is_saturday']) {
+                        $this->line("  <fg=yellow>↳ {$detail['date']} ({$detail['day_name']}): 0.5 day (Half Day)</>");
+                    }
+                }
+            }
+
+            $this->line("<fg=yellow>Salary After Leaves:       {$currency} " . number_format($data['summary']['salary_after_leaves'], 2) . "</>");
         }
 
         if ($data['advances']['total_advance'] > 0) {
-            $this->line("Advance Salary:      - {$currency} " . number_format($data['advances']['total_advance'], 2));
+            $this->line("Advance Salary:            - {$currency} " . number_format($data['advances']['total_advance'], 2));
         }
 
-        // Show final payable amount if there are additional deductions
-        if ($data['leaves']['leave_deduction'] > 0 || $data['advances']['total_advance'] > 0) {
-            $this->line('─────────────────────────────────────────────────────────');
-            $this->line("<fg=cyan;options=bold>FINAL PAYABLE:       {$currency} " . number_format($data['summary']['final_payable'], 2) . "</>");
-        }
+        $this->line('─────────────────────────────────────────────────────────');
+        $this->line("<fg=green;options=bold>NET SALARY:                {$currency} " . number_format($data['summary']['net_salary'], 2) . "</>");
     }
 
     /**
