@@ -11,6 +11,9 @@ class Leave extends Model
 {
     use HasFactory, SoftDeletes;
 
+    const MANAGEMENT_APPROVAL_PENDING  = 'pending';
+    const MANAGEMENT_APPROVAL_APPROVED = 'approved';
+
     protected $fillable = [
         'user_id',
         'start_date',
@@ -19,9 +22,14 @@ class Leave extends Model
         'coo_required',
         'coo_approved_at',
         'coo_approved_by',
+        'management_approval',
     ];
 
     protected $dates = ['deleted_at', 'start_date', 'end_date', 'coo_approved_at'];
+
+    protected $casts = [
+        'management_approval' => 'string',
+    ];
 
     protected static function booted()
     {

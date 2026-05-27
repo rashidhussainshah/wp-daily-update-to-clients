@@ -157,6 +157,13 @@ class ProcessMonthlySalaries extends Command
             // Display user header
             $this->displayUserHeader($user);
 
+            // Allow operator to skip this user before any processing
+            if ($this->confirm("Process salary for {$user->name}?", true) === false) {
+                $reason = $this->ask('Enter reason for skipping (e.g., leaves not recorded yet)');
+                $this->warn("Skipped {$user->name}" . ($reason ? " — Reason: {$reason}" : ''));
+                return false;
+            }
+
             // Check if salary has already been processed and payment sent
             $existingLog = $this->checkExistingPayment($user->id);
             if ($existingLog) {
@@ -617,7 +624,9 @@ class ProcessMonthlySalaries extends Command
     protected function displayLeaveSummary(array $data, string $currency): void
     {
         $this->line('<fg=yellow>Leaves:</>');
-        $this->line("  Total: {$data['leaves']['total_leave_days']} days | Exceeded: {$data['leaves']['exceeded_leave_days']} days");
+        $approvedDays = $data['leaves']['management_approved_days'] ?? 0;
+        $this->line("  Total: {$data['leaves']['total_leave_days']} days | Exceeded: {$data['leaves']['exceeded_leave_days']} days" .
+            ($approvedDays > 0 ? " | <fg=green>Management Approved (exempt): {$approvedDays} days</>" : ''));
 
         if ($data['leaves']['exceeded_leave_days'] > 0) {
             $deductionDays = $data['leaves']['exceeded_leave_deduction_days'] ?? $data['leaves']['exceeded_leave_days'];

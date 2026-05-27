@@ -42,8 +42,8 @@ class SalaryCalculationService
         // Get allowed monthly leaves from settings
         $allowedMonthlyLeaves = (int) setting('leaves.max_monthly_leaves', 2);
 
-        // Get all leaves for the month
-        $leaves = Leave::where('user_id', $userId)
+        // Get all leaves for the month (split by management approval for display vs deduction)
+        $allLeavesQuery = Leave::where('user_id', $userId)
             ->where(function ($query) use ($monthStart, $monthEnd) {
                 $query->whereBetween('start_date', [$monthStart, $monthEnd])
                     ->orWhereBetween('end_date', [$monthStart, $monthEnd])
@@ -52,44 +52,53 @@ class SalaryCalculationService
                             ->where('end_date', '>=', $monthEnd);
                     });
             })
-            ->orderBy('start_date')
-            ->get();
+            ->orderBy('start_date');
 
-        // Calculate total leave days in this month
-        $totalLeaveDays = 0;
+        $leaves             = $allLeavesQuery->get();
+        $deductibleLeaves   = $leaves->where('management_approval', '!=', Leave::MANAGEMENT_APPROVAL_APPROVED);
+        $approvedLeaves     = $leaves->where('management_approval', Leave::MANAGEMENT_APPROVAL_APPROVED);
+
+        // Build leave details for display (all leaves including management-approved)
         $leaveDetails = [];
-        $allLeaveDates = []; // Track individual leave dates for exceeded calculation
-
         foreach ($leaves as $leave) {
-            $leaveStart = Carbon::parse($leave->start_date);
-            $leaveEnd = $leave->end_date ? Carbon::parse($leave->end_date) : $leaveStart->copy();
+            $leaveStart  = Carbon::parse($leave->start_date);
+            $leaveEnd    = $leave->end_date ? Carbon::parse($leave->end_date) : $leaveStart->copy();
+            $rangeStart  = $leaveStart->greaterThan($monthStart) ? $leaveStart : $monthStart;
+            $rangeEnd    = $leaveEnd->lessThan($monthEnd) ? $leaveEnd : $monthEnd;
+            $daysInMonth = $rangeStart->diffInDays($rangeEnd) + 1;
 
-            // Calculate days within the month
-            $rangeStart = $leaveStart->greaterThan($monthStart) ? $leaveStart : $monthStart;
-            $rangeEnd = $leaveEnd->lessThan($monthEnd) ? $leaveEnd : $monthEnd;
+            $leaveDetails[] = [
+                'id'                  => $leave->id,
+                'start_date'          => $leave->start_date,
+                'end_date'            => $leave->end_date,
+                'reason'              => $leave->reason,
+                'days_in_month'       => $daysInMonth,
+                'management_approval' => $leave->management_approval ?? 'pending',
+            ];
+        }
 
+        // Only deductible leaves (management_approval != approved) count toward the quota
+        $totalLeaveDays = 0;
+        $allLeaveDates  = [];
+
+        foreach ($deductibleLeaves as $leave) {
+            $leaveStart  = Carbon::parse($leave->start_date);
+            $leaveEnd    = $leave->end_date ? Carbon::parse($leave->end_date) : $leaveStart->copy();
+            $rangeStart  = $leaveStart->greaterThan($monthStart) ? $leaveStart : $monthStart;
+            $rangeEnd    = $leaveEnd->lessThan($monthEnd) ? $leaveEnd : $monthEnd;
             $daysInMonth = $rangeStart->diffInDays($rangeEnd) + 1;
             $totalLeaveDays += $daysInMonth;
 
-            // Track individual dates for this leave
             $currentDate = $rangeStart->copy();
             while ($currentDate->lte($rangeEnd)) {
                 $allLeaveDates[] = [
-                    'date' => $currentDate->copy(),
+                    'date'      => $currentDate->copy(),
                     'is_saturday' => $currentDate->isSaturday(),
-                    'leave_id' => $leave->id,
-                    'reason' => $leave->reason,
+                    'leave_id'  => $leave->id,
+                    'reason'    => $leave->reason,
                 ];
                 $currentDate->addDay();
             }
-
-            $leaveDetails[] = [
-                'id' => $leave->id,
-                'start_date' => $leave->start_date,
-                'end_date' => $leave->end_date,
-                'reason' => $leave->reason,
-                'days_in_month' => $daysInMonth,
-            ];
         }
 
         // Calculate exceeded leave days with Saturday half-day logic
@@ -200,13 +209,20 @@ class SalaryCalculationService
                 'end' => $monthEnd->format('Y-m-d'),
             ],
             'leaves' => [
-                'allowed_monthly_leaves' => $allowedMonthlyLeaves,
-                'total_leave_days' => $totalLeaveDays,
-                'exceeded_leave_days' => $exceededLeaveDays,
-                'exceeded_leave_deduction_days' => $exceededLeaveDeductionDays, // Adjusted for Saturday half-days
-                'leave_deduction' => $leaveDeduction,
-                'details' => $leaveDetails,
-                'exceeded_details' => $exceededLeaveDetails, // Details of exceeded leaves with Saturday info
+                'allowed_monthly_leaves'        => $allowedMonthlyLeaves,
+                'total_leave_days'              => $totalLeaveDays,
+                'management_approved_days'      => $approvedLeaves->sum(function ($leave) use ($monthStart, $monthEnd) {
+                    $s = Carbon::parse($leave->start_date);
+                    $e = $leave->end_date ? Carbon::parse($leave->end_date) : $s->copy();
+                    return ($s->greaterThan($monthStart) ? $s : $monthStart)->diffInDays(
+                        ($e->lessThan($monthEnd) ? $e : $monthEnd)
+                    ) + 1;
+                }),
+                'exceeded_leave_days'           => $exceededLeaveDays,
+                'exceeded_leave_deduction_days' => $exceededLeaveDeductionDays,
+                'leave_deduction'               => $leaveDeduction,
+                'details'                       => $leaveDetails,
+                'exceeded_details'              => $exceededLeaveDetails,
             ],
             'fines' => [
                 'fines_for_deduction' => $finesForDeduction, // Only deducted fines
