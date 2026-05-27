@@ -182,7 +182,7 @@ TEXT,
             'subject'     => 'Your Houzez Site Goes Down. Your Leads Stop. Who Do You Call?',
             'from_name'   => 'Rashid | Webpenter',
             'from_email'  => 'sales@webpenter.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>

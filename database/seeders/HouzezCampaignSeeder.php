@@ -14,7 +14,7 @@ class HouzezCampaignSeeder extends Seeder
             'subject'     => 'Your Houzez Site, Now a Branded iOS & Android App — Ready in 7 Days',
             'from_name'   => 'Rashid | Webpenter',
             'from_email'  => 'sales@webpenter.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
@@ -106,7 +106,7 @@ TEXT,
             'subject'     => '90% of Real Estate Leads Go Cold Because Nobody Followed Up in Time',
             'from_name'   => 'Zahid Khurshid | Webpenter',
             'from_email'  => 'zaars59208@gmail.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
@@ -201,7 +201,7 @@ TEXT,
             'subject'     => 'Write 50 SEO-Optimised Property Listings in Under an Hour',
             'from_name'   => 'Rashid | Webpenter',
             'from_email'  => 'sales@webpenter.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
@@ -300,7 +300,7 @@ TEXT,
             'subject'     => 'Buyers Reply to WhatsApp 5× Faster Than Email — Is Your Houzez Site Ready?',
             'from_name'   => 'Zahid Khurshid | Webpenter',
             'from_email'  => 'zaars59208@gmail.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
@@ -371,7 +371,7 @@ TEXT,
             'subject'     => 'Publish to Bayut, Zameen & Rightmove — From One Houzez Dashboard',
             'from_name'   => 'Zahid Khurshid | Webpenter',
             'from_email'  => 'zaars59208@gmail.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
@@ -475,7 +475,7 @@ TEXT,
             'subject'     => 'Every Visitor Who Leaves Without Enquiring Is a Lost Lead — Here\'s the Fix',
             'from_name'   => 'Rashid | Webpenter',
             'from_email'  => 'sales@webpenter.com',
-            'target_role' => 'houzez_client',
+            'target_role' => 'homey_client',
             'status'      => 'draft',
             'html_body'   => <<<'HTML'
 <p>Hi {{first_name}},</p>
