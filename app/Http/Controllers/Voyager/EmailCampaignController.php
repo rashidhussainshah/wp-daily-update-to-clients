@@ -129,7 +129,7 @@ class EmailCampaignController extends Controller
         $testName  = $request->input('test_name', 'Test User');
 
         try {
-            $this->configureMailer();
+            // $this->configureMailer();
             Mail::to($testEmail, $testName)
                 ->send(new MarketingCampaignMail($campaign, $testName));
 
@@ -159,7 +159,7 @@ class EmailCampaignController extends Controller
         $toName  = $request->input('to_name', '');
 
         try {
-            $this->configureMailer();
+            // $this->configureMailer();
             Mail::to($toEmail, $toName)
                 ->send(new MarketingCampaignMail($campaign, $toName));
 
@@ -296,7 +296,7 @@ class EmailCampaignController extends Controller
             }
 
             try {
-                $this->configureMailer();
+                // $this->configureMailer();
                 Mail::to($user->email, $user->name ?? '')
                     ->send(new MarketingCampaignMail($campaign, $user->name ?? ''));
 
