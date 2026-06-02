@@ -33,17 +33,17 @@ class SendCampaignBatchJob implements ShouldQueue
             return;
         }
 
-        Config::set('mail.mailers.smtp', [
-            'transport'  => 'smtp',
-            'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
-            'port'       => (int) (setting('marketing.smtp_port') ?: 465),
-            'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
-            'username'   => setting('marketing.smtp_username')   ?: '',
-            'password'   => setting('marketing.smtp_password')   ?: '',
-            'timeout'    => null,
-            'auth_mode'  => null,
-        ]);
-        app('mail.manager')->purge('smtp');
+        // Config::set('mail.mailers.smtp', [
+        //     'transport'  => 'smtp',
+        //     'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
+        //     'port'       => (int) (setting('marketing.smtp_port') ?: 465),
+        //     'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
+        //     'username'   => setting('marketing.smtp_username')   ?: '',
+        //     'password'   => setting('marketing.smtp_password')   ?: '',
+        //     'timeout'    => null,
+        //     'auth_mode'  => null,
+        // ]);
+        // app('mail.manager')->purge('smtp');
 
         $delayMs = (int) (setting('marketing.delay_ms') ?? 100);
 
