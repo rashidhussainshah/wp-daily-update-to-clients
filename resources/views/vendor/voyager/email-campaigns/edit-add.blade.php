@@ -124,8 +124,8 @@
                         </div>
                     </div>
                     <div class="panel-body" style="padding:0;">
-                        <textarea id="html_body" name="html_body" style="display:none;">{{ old('html_body', $campaign->html_body ?? '') }}</textarea>
-                        <div id="editor" style="min-height:480px;"></div>
+                        <textarea id="html_body" name="html_body"
+                                  style="width:100%;min-height:500px;font-family:monospace;font-size:12px;line-height:1.5;border:none;outline:none;resize:vertical;padding:16px;box-sizing:border-box;white-space:pre;overflow-wrap:normal;overflow-x:auto;background:#1e1e2e;color:#cdd6f4;">{{ old('html_body', $campaign->html_body ?? '') }}</textarea>
                     </div>
                 </div>
 
@@ -143,41 +143,14 @@
 @stop
 
 @section('css')
-<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+<style>
+#html_body:focus { outline: 2px solid #0066cc; }
+</style>
 @stop
 
 @section('javascript')
-<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 @verbatim
 <script>
-// ── Quill rich text editor ─────────────────────────────────────────────────
-const toolbarOptions = [
-    ['bold','italic','underline','strike'],
-    ['blockquote','code-block'],
-    [{'header': [1,2,3,false]}],
-    [{'list':'ordered'},{'list':'bullet'}],
-    [{'color':[]},{'background':[]}],
-    ['link','image'],
-    ['clean']
-];
-
-const quill = new Quill('#editor', {
-    modules: { toolbar: toolbarOptions },
-    theme: 'snow',
-    placeholder: 'Write your email content here...'
-});
-
-// Sync Quill → hidden textarea on form submit
-const htmlInput = document.getElementById('html_body');
-const initialHtml = htmlInput.value;
-if (initialHtml) {
-    quill.clipboard.dangerouslyPasteHTML(initialHtml);
-}
-
-document.getElementById('campaign-form').addEventListener('submit', function () {
-    htmlInput.value = quill.root.innerHTML;
-});
-
 // ── Toggle plain text panel ────────────────────────────────────────────────
 function toggleTextMode() {
     const panel = document.getElementById('plain-text-panel');
@@ -250,7 +223,7 @@ const templates = {
 function loadTemplate(key) {
     if (!confirm('This will replace the current email content. Continue?')) return;
     const t = templates[key];
-    quill.clipboard.dangerouslyPasteHTML(t.html);
+    document.getElementById('html_body').value = t.html;
     document.querySelector('[name="subject"]').value = t.subject;
     document.querySelector('[name="from_name"]').value = t.from_name;
     document.querySelector('[name="from_email"]').value = t.from_email;
