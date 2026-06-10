@@ -63,7 +63,7 @@
     </td>
   </tr>
 
-  {{-- Footer ──────────────────────────────────────────────────────────── --}}
+  {{-- Footer commented out — triggers "Malicious URL" spam filter rejection
   <tr>
     <td class="footer-cell">
       <p>{{ $unsubscribeText }}</p>
@@ -91,6 +91,7 @@
       </p>
     </td>
   </tr>
+  --}}
 
 </table>
 </td></tr>
