@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'verify.api.source' => \App\Http\Middleware\VerifyApiSource::class,
         'campaign.access'   => \App\Http\Middleware\EnsureCampaignAccess::class,
+        'financials.access' => \App\Http\Middleware\EnsureFinancialsAccess::class,
 
     ];
 }

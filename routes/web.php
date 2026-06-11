@@ -5,6 +5,7 @@ use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EmailCampaignController;
+use App\Http\Controllers\Voyager\FinancialsController;
 use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
@@ -95,6 +96,22 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
         Route::get('/{id}/recipients',         [EmailCampaignController::class, 'searchRecipients'])->name('recipients');
         Route::post('/{id}/send-to-selected',  [EmailCampaignController::class, 'sendToSelected'])->name('send-to-selected');
+    });
+
+    // Financials / P&L
+    Route::prefix('financials')->name('financials.')->group(function () {
+        Route::get('/',                              [FinancialsController::class, 'index'])->name('index');
+        Route::get('/charts',                        [FinancialsController::class, 'charts'])->name('charts');
+        Route::post('/bank-balances',                [FinancialsController::class, 'storeBankBalance'])->name('store-bank-balance');
+        Route::get('/cash',                          [FinancialsController::class, 'cash'])->name('cash');
+        Route::post('/cash',                         [FinancialsController::class, 'storeCash'])->name('store-cash');
+        Route::delete('/cash/{id}',                  [FinancialsController::class, 'destroyCash'])->name('destroy-cash');
+        Route::post('/expenses',                     [FinancialsController::class, 'storeExpense'])->name('store-expense');
+        Route::delete('/expenses/{id}',              [FinancialsController::class, 'destroyExpense'])->name('destroy-expense');
+        Route::post('/expenses/seed-fixed',          [FinancialsController::class, 'seedFixedExpenses'])->name('seed-fixed');
+        Route::post('/bd-targets',                   [FinancialsController::class, 'storeBdTarget'])->name('store-bd-target');
+        Route::post('/domains',                      [FinancialsController::class, 'storeDomain'])->name('store-domain');
+        Route::patch('/domains/{id}/renew',          [FinancialsController::class, 'renewDomain'])->name('renew-domain');
     });
 
     Voyager::routes();
