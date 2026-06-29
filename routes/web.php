@@ -5,6 +5,7 @@ use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EmailCampaignController;
+use App\Http\Controllers\Voyager\EmailSignatureController;
 use App\Http\Controllers\Voyager\FinancialsController;
 use App\Http\Controllers\Voyager\LeaveController;
 use App\Http\Controllers\Voyager\EodController;
@@ -96,6 +97,17 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
         Route::get('/{id}/recipients',         [EmailCampaignController::class, 'searchRecipients'])->name('recipients');
         Route::post('/{id}/send-to-selected',  [EmailCampaignController::class, 'sendToSelected'])->name('send-to-selected');
+    });
+
+    // Email Signatures
+    Route::prefix('email-signatures')->name('email-signatures.')->group(function () {
+        Route::get('/',          [EmailSignatureController::class, 'index'])->name('index');
+        Route::get('/create',    [EmailSignatureController::class, 'create'])->name('create');
+        Route::post('/',         [EmailSignatureController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [EmailSignatureController::class, 'edit'])->name('edit');
+        Route::put('/{id}',      [EmailSignatureController::class, 'update'])->name('update');
+        Route::delete('/{id}',   [EmailSignatureController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/preview', [EmailSignatureController::class, 'preview'])->name('preview');
     });
 
     // Financials / P&L

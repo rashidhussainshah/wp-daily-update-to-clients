@@ -14,11 +14,16 @@ class EnsureCampaignAccess
         'rashid.bukhari78600@gmail.com',
     ];
 
+    public static function isAllowed(string $email): bool
+    {
+        return in_array(strtolower($email), self::ALLOWED, true);
+    }
+
     public function handle(Request $request, Closure $next)
     {
         $user = auth()->user();
 
-        if (!$user || !in_array(strtolower($user->email), self::ALLOWED, true)) {
+        if (!$user || !self::isAllowed($user->email)) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Access denied.'], 403);
             }

@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Models\EmailCampaign;
+use App\Models\EmailSignature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -34,9 +35,19 @@ class MarketingCampaignMail extends Mailable
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
         $this->recipientName   = $recipientName;
-        $this->htmlBody        = $this->personalise($campaign->html_body, $recipientName);
-        $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
         $this->campaignSubject = $this->personalise($campaign->subject, $recipientName);
+
+        $body = $this->sanitiseUrls($this->personalise($campaign->html_body, $recipientName));
+
+        $signature = EmailSignature::where('sender_email', $campaign->from_email)
+            ->where('is_active', true)
+            ->first();
+        if ($signature) {
+            $body .= $signature->renderHtml();
+        }
+
+        $this->htmlBody = $body;
+        $this->textBody = $this->personalise($campaign->text_body ?? '', $recipientName);
 
         $this->campaignFromEmail = setting('marketing.from_email') ?: 'contact@webpenter.com';
         $this->campaignFromName  = setting('marketing.from_name')  ?: 'Webpenter';
@@ -92,5 +103,11 @@ class MarketingCampaignMail extends Mailable
             [$name ?: 'there', $firstName],
             $template
         );
+    }
+
+    // Strip ?subject=... from mailto: links — triggers "Malicious URL" SMTP rejection
+    private function sanitiseUrls(string $html): string
+    {
+        return preg_replace('/mailto:([^"\'>\s]+)\?subject=[^"\'>\s]*/i', 'mailto:$1', $html);
     }
 }
