@@ -35,6 +35,8 @@ class MarketingCampaignMail extends Mailable
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
         $this->recipientName   = $recipientName;
+        $this->htmlBody        = $this->sanitiseUrls($this->personalise($campaign->html_body, $recipientName));
+        $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
         $this->campaignSubject = $this->personalise($campaign->subject, $recipientName);
 
         $body = $this->sanitiseUrls($this->personalise($campaign->html_body, $recipientName));
@@ -105,7 +107,7 @@ class MarketingCampaignMail extends Mailable
         );
     }
 
-    // Strip ?subject=... from mailto: links — triggers "Malicious URL" SMTP rejection
+    // Strip ?subject=... from mailto: links — triggers "Malicious URL" rejection on many SMTP servers
     private function sanitiseUrls(string $html): string
     {
         return preg_replace('/mailto:([^"\'>\s]+)\?subject=[^"\'>\s]*/i', 'mailto:$1', $html);
