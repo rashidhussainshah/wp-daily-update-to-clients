@@ -30,7 +30,23 @@
 
         </div>
         <div id="adminmenu">
-            <admin-menu :items="{{ menu('admin', '_json') }}"></admin-menu>
+            @php
+                // Items restricted to campaign-access users only
+                $restrictedTitles = ['Email Campaigns', 'Email Signatures', 'Signature Settings'];
+
+                $userEmail = strtolower(Auth::user()->email ?? '');
+                $campaignAllowed = \App\Http\Middleware\EnsureCampaignAccess::isAllowed($userEmail);
+
+                $menuJson  = menu('admin', '_json');
+                if (!$campaignAllowed) {
+                    $items = json_decode($menuJson, true) ?: [];
+                    $items = array_values(array_filter($items, function ($item) use ($restrictedTitles) {
+                        return !in_array($item['title'] ?? '', $restrictedTitles, true);
+                    }));
+                    $menuJson = json_encode($items);
+                }
+            @endphp
+            <admin-menu :items="{{ $menuJson }}"></admin-menu>
         </div>
     </nav>
 </div>

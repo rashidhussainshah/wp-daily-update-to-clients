@@ -20,7 +20,15 @@
       "Bash(curl -s \"https://dns.google/resolve?name=webpenter.com&type=TXT\")",
       "WebFetch(domain:bookhere.tech)",
       "WebFetch(domain:simplifyres.com)",
-      "WebFetch(domain:codecanyon.net)"
+      "WebFetch(domain:codecanyon.net)",
+      "Bash(New-Item -ItemType Directory -Force \"D:\\\\laragon\\\\www\\\\p\\\\resources\\\\views\\\\vendor\\\\voyager\\\\financials\")",
+      "Bash(Out-Null)",
+      "Bash(php -l \"D:\\\\laragon\\\\www\\\\p\\\\app\\\\Http\\\\Controllers\\\\Voyager\\\\FinancialsController.php\")",
+      "Bash(php -l \"D:\\\\laragon\\\\www\\\\p\\\\app\\\\Models\\\\MonthlyExpense.php\")",
+      "Bash(php -l \"D:\\\\laragon\\\\www\\\\p\\\\app\\\\Models\\\\Domain.php\")",
+      "Bash(php *)",
+      "Bash(New-Item -ItemType Directory -Force \"D:\\\\laragon\\\\www\\\\p\\\\docs\")",
+      "PowerShell(New-Item *)"
     ]
   }
 }
