@@ -35,9 +35,8 @@ class MarketingCampaignMail extends Mailable
     public function __construct(EmailCampaign $campaign, string $recipientName)
     {
         $this->recipientName   = $recipientName;
-        $this->htmlBody        = $this->sanitiseUrls($this->personalise($campaign->html_body, $recipientName));
-        $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
         $this->campaignSubject = $this->personalise($campaign->subject, $recipientName);
+        $this->textBody        = $this->personalise($campaign->text_body ?? '', $recipientName);
 
         $body = $this->sanitiseUrls($this->personalise($campaign->html_body, $recipientName));
 
@@ -49,7 +48,6 @@ class MarketingCampaignMail extends Mailable
         }
 
         $this->htmlBody = $body;
-        $this->textBody = $this->personalise($campaign->text_body ?? '', $recipientName);
 
         $this->campaignFromEmail = setting('marketing.from_email') ?: 'contact@webpenter.com';
         $this->campaignFromName  = setting('marketing.from_name')  ?: 'Webpenter';
