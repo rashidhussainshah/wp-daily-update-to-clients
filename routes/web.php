@@ -5,6 +5,7 @@ use App\Http\Controllers\ClockifyController;
 use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EmailCampaignController;
+use App\Http\Controllers\Voyager\CampaignAutomationController;
 use App\Http\Controllers\Voyager\EmailSignatureController;
 use App\Http\Controllers\Voyager\FinancialsController;
 use App\Http\Controllers\Voyager\LeaveController;
@@ -97,6 +98,21 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
         Route::get('/{id}/recipients',         [EmailCampaignController::class, 'searchRecipients'])->name('recipients');
         Route::post('/{id}/send-to-selected',  [EmailCampaignController::class, 'sendToSelected'])->name('send-to-selected');
+    });
+
+    // Campaign Automations
+    Route::prefix('campaign-automations')->name('campaign-automations.')->group(function () {
+        Route::get('/',          [CampaignAutomationController::class, 'index'])->name('index');
+        Route::get('/create',    [CampaignAutomationController::class, 'create'])->name('create');
+        Route::post('/',         [CampaignAutomationController::class, 'store'])->name('store');
+        Route::get('/{id}',      [CampaignAutomationController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [CampaignAutomationController::class, 'edit'])->name('edit');
+        Route::put('/{id}',      [CampaignAutomationController::class, 'update'])->name('update');
+        Route::delete('/{id}',   [CampaignAutomationController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/pause',   [CampaignAutomationController::class, 'pause'])->name('pause');
+        Route::post('/{id}/resume',  [CampaignAutomationController::class, 'resume'])->name('resume');
+        Route::post('/{id}/cancel',  [CampaignAutomationController::class, 'cancel'])->name('cancel');
+        Route::post('/{id}/run-now', [CampaignAutomationController::class, 'runNow'])->name('run-now');
     });
 
     // Email Signatures
