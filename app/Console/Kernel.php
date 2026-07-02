@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
 
 // Log current time with timezone
         Log::info("Current time with timezone: " . $current_time->format('Y-m-d H:i:s') . ' ' . $timezone);
-        $schedule->command('eod:check')->everyMinute();
+//        $schedule->command('eod:check')->everyMinute();
         $schedule->command('automations:process')->everyMinute()->withoutOverlapping();
 //            ->timezone('Asia/Karachi') // Set timezone to Pakistan Standard Time
 //            ->dailyAt('22:00'); // Run daily at 10 PM (22:00)
