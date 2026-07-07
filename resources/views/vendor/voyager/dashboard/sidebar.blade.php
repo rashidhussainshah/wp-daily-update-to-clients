@@ -32,7 +32,7 @@
         <div id="adminmenu">
             @php
                 // Items restricted to campaign-access users only
-                $restrictedTitles = ['Email Campaigns', 'Email Signatures', 'Signature Settings', 'Campaign Automations'];
+                $restrictedTitles = ['Email Campaigns', 'Email Signatures', 'Signature Settings', 'Campaign Automations', 'SMTP Accounts'];
 
                 $userEmail = strtolower(Auth::user()->email ?? '');
                 $campaignAllowed = \App\Http\Middleware\EnsureCampaignAccess::isAllowed($userEmail);

@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Models\EmailCampaign;
 use App\Models\EmailSignature;
+use App\Models\SmtpAccount;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
@@ -32,7 +33,7 @@ class MarketingCampaignMail extends Mailable
     public string $companyLogoUrl;
     public string $unsubscribeText;
 
-    public function __construct(EmailCampaign $campaign, string $recipientName)
+    public function __construct(EmailCampaign $campaign, string $recipientName, ?SmtpAccount $smtp = null)
     {
         $this->recipientName   = $recipientName;
         $this->campaignSubject = $this->personalise($campaign->subject, $recipientName);
@@ -49,15 +50,17 @@ class MarketingCampaignMail extends Mailable
 
         $this->htmlBody = $body;
 
-        // Use the campaign's own from_email/from_name — set when the campaign was created.
-        // Fall back to global setting only if the campaign has no from address.
-        $this->campaignFromEmail = $campaign->from_email
+        // from: smtp account → campaign fields → global setting fallback
+        $this->campaignFromEmail = $smtp?->from_address
+            ?? $campaign->from_email
             ?: setting('marketing.from_email')
             ?: 'contact@webpenter.com';
-        $this->campaignFromName  = $campaign->from_name
+        $this->campaignFromName  = $smtp?->from_name
+            ?? $campaign->from_name
             ?: setting('marketing.from_name')
             ?: 'Webpenter';
-        $this->campaignReplyTo   = $campaign->from_email
+        $this->campaignReplyTo   = $smtp?->from_address
+            ?? $campaign->from_email
             ?: setting('marketing.reply_to')
             ?: 'contact@webpenter.com';
 
@@ -80,18 +83,6 @@ class MarketingCampaignMail extends Mailable
             from: new Address($this->campaignFromEmail, $this->campaignFromName),
             replyTo: [new Address($replyTo)],
             subject: $this->campaignSubject,
-            // using: [
-            //     function (\Symfony\Component\Mime\Email $message) use ($replyTo) {
-            //         $headers = $message->getHeaders();
-            //         $headers->addTextHeader(
-            //             'List-Unsubscribe',
-            //             '<mailto:' . $replyTo . '?subject=unsubscribe>'
-            //         );
-            //         $headers->addTextHeader('List-Unsubscribe-Post', 'List-Unsubscribe=One-Click');
-            //         $headers->addTextHeader('Precedence', 'bulk');
-            //         $headers->addTextHeader('X-Mailer', 'Webpenter Mailer 1.0');
-            //     },
-            // ]
         );
     }
 
