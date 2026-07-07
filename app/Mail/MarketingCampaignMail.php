@@ -57,7 +57,9 @@ class MarketingCampaignMail extends Mailable
         $this->campaignFromName  = $campaign->from_name
             ?: setting('marketing.from_name')
             ?: 'Webpenter';
-        $this->campaignReplyTo   = setting('marketing.reply_to') ?: 'contact@webpenter.com';
+        $this->campaignReplyTo   = $campaign->from_email
+            ?: setting('marketing.reply_to')
+            ?: 'contact@webpenter.com';
 
         $this->companyName     = setting('marketing.company_name')     ?: 'Webpenter';
         $this->companyTagline  = setting('marketing.company_tagline')  ?: 'Software & Development';
