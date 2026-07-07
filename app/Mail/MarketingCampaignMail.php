@@ -49,9 +49,15 @@ class MarketingCampaignMail extends Mailable
 
         $this->htmlBody = $body;
 
-        $this->campaignFromEmail = setting('marketing.from_email') ?: 'contact@webpenter.com';
-        $this->campaignFromName  = setting('marketing.from_name')  ?: 'Webpenter';
-        $this->campaignReplyTo   = setting('marketing.reply_to')   ?: 'contact@webpenter.com';
+        // Use the campaign's own from_email/from_name — set when the campaign was created.
+        // Fall back to global setting only if the campaign has no from address.
+        $this->campaignFromEmail = $campaign->from_email
+            ?: setting('marketing.from_email')
+            ?: 'contact@webpenter.com';
+        $this->campaignFromName  = $campaign->from_name
+            ?: setting('marketing.from_name')
+            ?: 'Webpenter';
+        $this->campaignReplyTo   = setting('marketing.reply_to') ?: 'contact@webpenter.com';
 
         $this->companyName     = setting('marketing.company_name')     ?: 'Webpenter';
         $this->companyTagline  = setting('marketing.company_tagline')  ?: 'Software & Development';
