@@ -6,6 +6,7 @@ use App\Mail\MarketingCampaignMail;
 use App\Models\CampaignAutomation;
 use App\Models\CampaignAutomationLog;
 use App\Models\User;
+use App\Utils\Traits\CampaignMailerTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -14,6 +15,7 @@ use TCG\Voyager\Models\Role;
 
 class ProcessCampaignAutomations extends Command
 {
+    use CampaignMailerTrait;
     protected $signature   = 'automations:process {--id= : Run a specific automation regardless of next_run_at}';
     protected $description = 'Send scheduled campaign automation batches';
 
@@ -80,11 +82,13 @@ class ProcessCampaignAutomations extends Command
 
         $sent   = 0;
         $failed = 0;
+        $smtp   = $campaign->smtpAccount;
+        $mailer = $this->getMailer($smtp);
 
         foreach ($recipients as $user) {
             try {
-                Mail::to($user->email, $user->name ?? '')
-                    ->send(new MarketingCampaignMail($campaign, $user->name ?? ''));
+                $mailer->to($user->email, $user->name ?? '')
+                    ->send(new MarketingCampaignMail($campaign, $user->name ?? '', $smtp));
 
                 CampaignAutomationLog::create([
                     'automation_id' => $auto->id,

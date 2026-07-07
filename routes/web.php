@@ -6,6 +6,7 @@ use App\Http\Controllers\SalaryInvoiceController;
 use App\Http\Controllers\Voyager\DeveloperPaymentController;
 use App\Http\Controllers\Voyager\EmailCampaignController;
 use App\Http\Controllers\Voyager\CampaignAutomationController;
+use App\Http\Controllers\Voyager\SmtpAccountController;
 use App\Http\Controllers\Voyager\EmailSignatureController;
 use App\Http\Controllers\Voyager\FinancialsController;
 use App\Http\Controllers\Voyager\LeaveController;
@@ -76,6 +77,9 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('/checkout', [CheckinController::class, 'storeCheckout'])->name('checkout.store');
     Route::get('eod-content', [EodController::class, 'eodContent'])->name('eod.get');
     Route::get('mark-user-payment-paid/{id}', [DeveloperPaymentController::class, 'markUserPaymentPaid'])->name('mark-user-payment-paid');
+    Route::post('user-payments/{id}/rate-approve', [DeveloperPaymentController::class, 'rateApprove'])->name('user-payments.rate-approve');
+    Route::post('user-payments/quick-add-project', [DeveloperPaymentController::class, 'quickAddProject'])->name('user-payments.quick-add-project');
+    Route::post('user-payments/quick-add-target', [DeveloperPaymentController::class, 'quickAddTarget'])->name('user-payments.quick-add-target');
     Route::get('leaves/{id}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
 
     // Salary Invoice routes
@@ -98,6 +102,17 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/{id}/mark-complete',     [EmailCampaignController::class, 'markComplete'])->name('mark-complete');
         Route::get('/{id}/recipients',         [EmailCampaignController::class, 'searchRecipients'])->name('recipients');
         Route::post('/{id}/send-to-selected',  [EmailCampaignController::class, 'sendToSelected'])->name('send-to-selected');
+    });
+
+    // SMTP Accounts
+    Route::prefix('smtp-accounts')->name('smtp-accounts.')->group(function () {
+        Route::get('/',              [SmtpAccountController::class, 'index'])->name('index');
+        Route::get('/create',        [SmtpAccountController::class, 'create'])->name('create');
+        Route::post('/',             [SmtpAccountController::class, 'store'])->name('store');
+        Route::get('/{id}/edit',     [SmtpAccountController::class, 'edit'])->name('edit');
+        Route::put('/{id}',          [SmtpAccountController::class, 'update'])->name('update');
+        Route::delete('/{id}',       [SmtpAccountController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/send-test', [SmtpAccountController::class, 'sendTest'])->name('send-test');
     });
 
     // Campaign Automations

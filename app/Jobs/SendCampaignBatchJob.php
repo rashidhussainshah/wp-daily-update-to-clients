@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Mail\MarketingCampaignMail;
 use App\Models\EmailCampaign;
 use App\Models\EmailCampaignLog;
+use App\Utils\Traits\CampaignMailerTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SendCampaignBatchJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, CampaignMailerTrait;
 
     public int $tries = 3;
     public int $timeout = 300;
@@ -28,23 +29,13 @@ class SendCampaignBatchJob implements ShouldQueue
 
     public function handle(): void
     {
-        $campaign = EmailCampaign::find($this->campaignId);
+        $campaign = EmailCampaign::with('smtpAccount')->find($this->campaignId);
         if (!$campaign) {
             return;
         }
 
-        // Config::set('mail.mailers.smtp', [
-        //     'transport'  => 'smtp',
-        //     'host'       => setting('marketing.smtp_host')       ?: 'smtp.titan.email',
-        //     'port'       => (int) (setting('marketing.smtp_port') ?: 465),
-        //     'encryption' => setting('marketing.smtp_encryption') ?: 'ssl',
-        //     'username'   => setting('marketing.smtp_username')   ?: '',
-        //     'password'   => setting('marketing.smtp_password')   ?: '',
-        //     'timeout'    => null,
-        //     'auth_mode'  => null,
-        // ]);
-        // app('mail.manager')->purge('smtp');
-
+        $smtp    = $campaign->smtpAccount;
+        $mailer  = $this->getMailer($smtp);
         $delayMs = (int) (setting('marketing.delay_ms') ?? 100);
 
         foreach ($this->recipients as $recipient) {
@@ -61,8 +52,8 @@ class SendCampaignBatchJob implements ShouldQueue
                     continue;
                 }
 
-                Mail::to($email, $name)
-                    ->send(new MarketingCampaignMail($campaign, $name));
+                $mailer->to($email, $name)
+                    ->send(new MarketingCampaignMail($campaign, $name, $smtp));
 
                 EmailCampaignLog::updateOrCreate(
                     ['campaign_id' => $this->campaignId, 'email' => $email],

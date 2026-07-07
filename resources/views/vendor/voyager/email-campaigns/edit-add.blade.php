@@ -72,6 +72,20 @@
                         </div>
 
                         <div class="form-group">
+                            <label>SMTP Account <span class="text-danger">*</span></label>
+                            <select name="smtp_account_id" class="form-control" required>
+                                <option value="">— select sender SMTP —</option>
+                                @foreach($smtpAccounts ?? [] as $smtp)
+                                    <option value="{{ $smtp->id }}"
+                                        {{ old('smtp_account_id', $campaign->smtp_account_id ?? '') == $smtp->id ? 'selected' : '' }}>
+                                        {{ $smtp->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <span class="help-block">Emails will be sent from this account's address.</span>
+                        </div>
+
+                        <div class="form-group">
                             <label>Target Role</label>
                             <select name="target_role" class="form-control">
                                 @foreach($roles as $role)

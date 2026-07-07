@@ -6,7 +6,9 @@ use App\Jobs\SendCampaignBatchJob;
 use App\Mail\MarketingCampaignMail;
 use App\Models\EmailCampaign;
 use App\Models\EmailCampaignLog;
+use App\Models\SmtpAccount;
 use App\Models\User;
+use App\Utils\Traits\CampaignMailerTrait;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Config;
@@ -16,6 +18,7 @@ use TCG\Voyager\Models\Role;
 
 class EmailCampaignController extends Controller
 {
+    use CampaignMailerTrait;
     public function __construct()
     {
         $this->middleware(['campaign.access']);
@@ -31,23 +34,25 @@ class EmailCampaignController extends Controller
     // ── Create ──────────────────────────────────────────────────────────────
     public function create()
     {
-        $roles = Role::orderBy('display_name')->get();
-        return view('vendor.voyager.email-campaigns.edit-add', compact('roles'));
+        $roles        = Role::orderBy('display_name')->get();
+        $smtpAccounts = SmtpAccount::where('is_active', true)->orderBy('name')->get();
+        return view('vendor.voyager.email-campaigns.edit-add', compact('roles', 'smtpAccounts'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'subject'     => 'required|string|max:255',
-            'html_body'   => 'required|string',
-            'text_body'   => 'nullable|string',
-            'from_name'   => 'required|string|max:255',
-            'from_email'  => 'required|email',
-            'target_role' => 'required|string',
+            'name'             => 'required|string|max:255',
+            'subject'          => 'required|string|max:255',
+            'html_body'        => 'required|string',
+            'text_body'        => 'nullable|string',
+            'from_name'        => 'required|string|max:255',
+            'from_email'       => 'required|email',
+            'target_role'      => 'required|string',
+            'smtp_account_id'  => 'nullable|exists:smtp_accounts,id',
         ]);
 
-        $data['text_body'] = $data['text_body'] ?? strip_tags($data['html_body']);
+        $data['text_body']  = $data['text_body'] ?? strip_tags($data['html_body']);
         $data['created_by'] = auth()->id();
 
         $campaign = EmailCampaign::create($data);
@@ -59,9 +64,10 @@ class EmailCampaignController extends Controller
     // ── Edit ────────────────────────────────────────────────────────────────
     public function edit(int $id)
     {
-        $campaign = EmailCampaign::findOrFail($id);
-        $roles = Role::orderBy('display_name')->get();
-        return view('vendor.voyager.email-campaigns.edit-add', compact('campaign', 'roles'));
+        $campaign     = EmailCampaign::findOrFail($id);
+        $roles        = Role::orderBy('display_name')->get();
+        $smtpAccounts = SmtpAccount::where('is_active', true)->orderBy('name')->get();
+        return view('vendor.voyager.email-campaigns.edit-add', compact('campaign', 'roles', 'smtpAccounts'));
     }
 
     public function update(Request $request, int $id)
@@ -73,13 +79,14 @@ class EmailCampaignController extends Controller
         }
 
         $data = $request->validate([
-            'name'        => 'required|string|max:255',
-            'subject'     => 'required|string|max:255',
-            'html_body'   => 'required|string',
-            'text_body'   => 'nullable|string',
-            'from_name'   => 'required|string|max:255',
-            'from_email'  => 'required|email',
-            'target_role' => 'required|string',
+            'name'            => 'required|string|max:255',
+            'subject'         => 'required|string|max:255',
+            'html_body'       => 'required|string',
+            'text_body'       => 'nullable|string',
+            'from_name'       => 'required|string|max:255',
+            'from_email'      => 'required|email',
+            'target_role'     => 'required|string',
+            'smtp_account_id' => 'nullable|exists:smtp_accounts,id',
         ]);
 
         $campaign->update($data);
@@ -129,9 +136,10 @@ class EmailCampaignController extends Controller
         $testName  = $request->input('test_name', 'Test User');
 
         try {
-            // $this->configureMailer();
-            Mail::to($testEmail, $testName)
-                ->send(new MarketingCampaignMail($campaign, $testName));
+            $smtp = $campaign->smtpAccount;
+            $this->getMailer($smtp)
+                ->to($testEmail, $testName)
+                ->send(new MarketingCampaignMail($campaign, $testName, $smtp));
 
             return back()->with('success', "Test email sent to {$testEmail}");
         } catch (\Throwable $e) {
@@ -159,9 +167,10 @@ class EmailCampaignController extends Controller
         $toName  = $request->input('to_name', '');
 
         try {
-            // $this->configureMailer();
-            Mail::to($toEmail, $toName)
-                ->send(new MarketingCampaignMail($campaign, $toName));
+            $smtp = $campaign->smtpAccount;
+            $this->getMailer($smtp)
+                ->to($toEmail, $toName)
+                ->send(new MarketingCampaignMail($campaign, $toName, $smtp));
 
             EmailCampaignLog::updateOrCreate(
                 ['campaign_id' => $id, 'email' => $toEmail],
@@ -280,9 +289,11 @@ class EmailCampaignController extends Controller
             ->whereNotNull('email')
             ->get();
 
-        $sent   = 0;
-        $failed = 0;
+        $sent    = 0;
+        $failed  = 0;
         $skipped = 0;
+        $smtp    = $campaign->smtpAccount;
+        $mailer  = $this->getMailer($smtp);
 
         foreach ($users as $user) {
             $alreadySent = EmailCampaignLog::where('campaign_id', $id)
@@ -296,9 +307,8 @@ class EmailCampaignController extends Controller
             }
 
             try {
-                // $this->configureMailer();
-                Mail::to($user->email, $user->name ?? '')
-                    ->send(new MarketingCampaignMail($campaign, $user->name ?? ''));
+                $mailer->to($user->email, $user->name ?? '')
+                    ->send(new MarketingCampaignMail($campaign, $user->name ?? '', $smtp));
 
                 EmailCampaignLog::updateOrCreate(
                     ['campaign_id' => $id, 'email' => $user->email],
