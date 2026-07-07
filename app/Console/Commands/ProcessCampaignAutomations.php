@@ -165,14 +165,23 @@ class ProcessCampaignAutomations extends Command
 
     private function getSkipEmails(CampaignAutomation $auto): array
     {
-        $query = CampaignAutomationLog::where('automation_id', $auto->id)
+        // Always skip permanently failed emails — never retry a bounced address
+        $failed = CampaignAutomationLog::where('automation_id', $auto->id)
+            ->where('status', 'failed')
+            ->pluck('email')
+            ->all();
+
+        // Skip sent emails (respect resend gap window if set)
+        $sentQuery = CampaignAutomationLog::where('automation_id', $auto->id)
             ->where('status', 'sent');
 
         if ($auto->resend_gap_days > 0) {
-            $query->where('sent_at', '>=', now()->subDays($auto->resend_gap_days));
+            $sentQuery->where('sent_at', '>=', now()->subDays($auto->resend_gap_days));
         }
 
-        return $query->pluck('email')->all();
+        $sent = $sentQuery->pluck('email')->all();
+
+        return array_unique(array_merge($failed, $sent));
     }
 
     private function calculateNextRun(CampaignAutomation $auto): ?Carbon
