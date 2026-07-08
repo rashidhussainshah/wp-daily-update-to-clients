@@ -122,7 +122,7 @@ class EmailSignatureController extends Controller
 
     private function getAllowedSenders(): array
     {
-        $raw = setting('signatures.allowed_senders') ?? '';
+        $raw = setting('email-signatures.allowed_senders') ?? '';
         return array_values(array_filter(array_map('trim', preg_split('/[\r\n,]+/', $raw))));
     }
 
