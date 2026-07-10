@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\AutomationCompletedMail;
 use App\Mail\MarketingCampaignMail;
 use App\Models\CampaignAutomation;
 use App\Models\CampaignAutomationLog;
@@ -59,6 +60,14 @@ class ProcessCampaignAutomations extends Command
             return;
         }
 
+        // Skip weekends — reschedule to next Monday at the same send_time
+        if ($auto->skip_weekends && now()->isWeekend()) {
+            $nextMonday = now()->next('Monday')->setTimeFromTimeString($auto->send_time);
+            $auto->update(['next_run_at' => $nextMonday]);
+            $this->info("Automation #{$auto->id}: weekend — rescheduled to {$nextMonday->toDateTimeString()}");
+            return;
+        }
+
         $role = Role::where('name', $auto->target_role)->first();
         if (!$role) {
             $this->warn("Automation #{$auto->id}: role '{$auto->target_role}' not found.");
@@ -69,6 +78,21 @@ class ProcessCampaignAutomations extends Command
 
         // With delay: send 1 email per cron tick. Without delay: send full batch at once.
         $sendThisRun = $delay > 0 ? 1 : $auto->batch_size;
+
+        // Daily send capacity — hard cap per calendar day for this automation
+        if ($auto->daily_send_cap > 0) {
+            $sentToday = CampaignAutomationLog::where('automation_id', $auto->id)
+                ->where('status', 'sent')
+                ->whereDate('sent_at', today())
+                ->count();
+
+            if ($sentToday >= $auto->daily_send_cap) {
+                $this->info("Automation #{$auto->id} \"{$auto->name}\": daily cap of {$auto->daily_send_cap} reached — skipping until tomorrow.");
+                return;
+            }
+
+            $sendThisRun = min($sendThisRun, $auto->daily_send_cap - $sentToday);
+        }
 
         $skipEmails = $this->getSkipEmails($auto);
 
@@ -165,6 +189,12 @@ class ProcessCampaignAutomations extends Command
         }
 
         $auto->update($updates);
+
+        // Notify on completion
+        if (!empty($updates['status']) && $updates['status'] === 'completed' && $auto->notify_email) {
+            Mail::to($auto->notify_email)
+                ->send(new AutomationCompletedMail($auto, $auto->emails_sent_total + $sent, $failed));
+        }
     }
 
     private function getSkipEmails(CampaignAutomation $auto): array

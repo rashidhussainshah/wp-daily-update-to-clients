@@ -170,7 +170,10 @@ class CampaignAutomationController extends Controller
             'resend_gap_days'      => 'required|integer|min:0',
             'email_delay_seconds'  => 'required|integer|min:0',
             'target_role'          => 'required|string',
-        ]);
+            'skip_weekends'        => 'nullable|boolean',
+            'daily_send_cap'       => 'nullable|integer|min:1|max:9999',
+            'notify_email'         => 'nullable|email|max:150',
+        ]) + ['skip_weekends' => $request->boolean('skip_weekends')];
     }
 
     private function buildFirstRun(array $data): Carbon

@@ -13,13 +13,15 @@ class CampaignAutomation extends Model
         'send_day_of_week', 'send_day_of_month', 'start_date', 'end_date',
         'batch_size', 'resend_gap_days', 'email_delay_seconds', 'emails_sent_in_batch',
         'target_role', 'emails_sent_total', 'last_run_at', 'next_run_at', 'created_by',
+        'skip_weekends', 'daily_send_cap', 'notify_email',
     ];
 
     protected $casts = [
-        'start_date'   => 'date',
-        'end_date'     => 'date',
-        'last_run_at'  => 'datetime',
-        'next_run_at'  => 'datetime',
+        'start_date'    => 'date',
+        'end_date'      => 'date',
+        'last_run_at'   => 'datetime',
+        'next_run_at'   => 'datetime',
+        'skip_weekends' => 'boolean',
     ];
 
     public function campaign(): BelongsTo
