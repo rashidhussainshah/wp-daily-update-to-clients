@@ -169,21 +169,23 @@ class ProcessCampaignAutomations extends Command
 
     private function getSkipEmails(CampaignAutomation $auto): array
     {
-        // Always skip permanently failed emails — never retry a bounced address
+        // 1. Always skip bounced/failed addresses from this automation — never retry them
         $failed = CampaignAutomationLog::where('automation_id', $auto->id)
             ->where('status', 'failed')
             ->pluck('email')
             ->all();
 
-        // Skip sent emails (respect resend gap window if set)
-        $sentQuery = CampaignAutomationLog::where('automation_id', $auto->id)
-            ->where('status', 'sent');
-
+        // 2. Resend gap cooldown (global across ALL campaigns):
+        //    If resend_gap_days = 0  → no cooldown, send to everyone every run
+        //    If resend_gap_days = 30 → skip anyone who got ANY campaign email in the last 30 days
+        //    This prevents Ayub's campaign and Ali Hassan's campaign hitting the same client
+        $sent = [];
         if ($auto->resend_gap_days > 0) {
-            $sentQuery->where('sent_at', '>=', now()->subDays($auto->resend_gap_days));
+            $sent = CampaignAutomationLog::where('status', 'sent')
+                ->where('sent_at', '>=', now()->subDays($auto->resend_gap_days))
+                ->pluck('email')
+                ->all();
         }
-
-        $sent = $sentQuery->pluck('email')->all();
 
         return array_unique(array_merge($failed, $sent));
     }
