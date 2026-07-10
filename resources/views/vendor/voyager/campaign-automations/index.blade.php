@@ -70,18 +70,18 @@
                                 </td>
                                 <td>{{ number_format($auto->emails_sent_total) }}</td>
                                 <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('campaign-automations.show', $auto->id) }}" class="btn btn-default" title="Logs">
+                                    <div style="display:flex;gap:3px;align-items:center;flex-wrap:wrap;">
+                                        <a href="{{ route('campaign-automations.show', $auto->id) }}" class="btn btn-default btn-sm" title="Logs">
                                             <i class="voyager-list"></i>
                                         </a>
-                                        <a href="{{ route('campaign-automations.edit', $auto->id) }}" class="btn btn-primary" title="Edit">
+                                        <a href="{{ route('campaign-automations.edit', $auto->id) }}" class="btn btn-primary btn-sm" title="Edit">
                                             <i class="voyager-edit"></i>
                                         </a>
 
                                         @if(in_array($auto->status, ['active','paused']))
-                                            <form method="POST" action="{{ route('campaign-automations.run-now', $auto->id) }}" style="display:inline;">
+                                            <form method="POST" action="{{ route('campaign-automations.run-now', $auto->id) }}" style="display:contents;">
                                                 @csrf
-                                                <button class="btn btn-info" title="Run Now — send next batch immediately"
+                                                <button class="btn btn-info btn-sm" title="Run Now — send next batch immediately"
                                                         onclick="return confirm('Send the next batch for \"{{ addslashes($auto->name) }}\" right now?')">
                                                     <i class="voyager-forward"></i>
                                                 </button>
@@ -89,34 +89,34 @@
                                         @endif
 
                                         @if($auto->status === 'active')
-                                            <form method="POST" action="{{ route('campaign-automations.pause', $auto->id) }}" style="display:inline;">
+                                            <form method="POST" action="{{ route('campaign-automations.pause', $auto->id) }}" style="display:contents;">
                                                 @csrf
-                                                <button class="btn btn-warning" title="Pause" onclick="return confirm('Pause this automation?')">
-                                                    <i class="voyager-spinner"></i>
+                                                <button class="btn btn-warning btn-sm" title="Pause" onclick="return confirm('Pause this automation?')">
+                                                    <i class="fa fa-pause"></i>
                                                 </button>
                                             </form>
                                         @elseif($auto->status === 'paused')
-                                            <form method="POST" action="{{ route('campaign-automations.resume', $auto->id) }}" style="display:inline;">
+                                            <form method="POST" action="{{ route('campaign-automations.resume', $auto->id) }}" style="display:contents;">
                                                 @csrf
-                                                <button class="btn btn-success" title="Resume">
+                                                <button class="btn btn-success btn-sm" title="Resume">
                                                     <i class="voyager-check"></i>
                                                 </button>
                                             </form>
                                         @endif
 
                                         @if(in_array($auto->status, ['active','paused']))
-                                            <form method="POST" action="{{ route('campaign-automations.cancel', $auto->id) }}" style="display:inline;">
+                                            <form method="POST" action="{{ route('campaign-automations.cancel', $auto->id) }}" style="display:contents;">
                                                 @csrf
-                                                <button class="btn btn-danger" title="Cancel" onclick="return confirm('Cancel this automation?')">
+                                                <button class="btn btn-danger btn-sm" title="Cancel" onclick="return confirm('Cancel this automation?')">
                                                     <i class="voyager-x"></i>
                                                 </button>
                                             </form>
                                         @endif
 
-                                        <form method="POST" action="{{ route('campaign-automations.destroy', $auto->id) }}" style="display:inline;">
+                                        <form method="POST" action="{{ route('campaign-automations.destroy', $auto->id) }}" style="display:contents;">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-danger" title="Delete" onclick="return confirm('Delete this automation and all its logs?')">
+                                            <button class="btn btn-danger btn-sm" title="Delete" onclick="return confirm('Delete this automation and all its logs?')">
                                                 <i class="voyager-trash"></i>
                                             </button>
                                         </form>
