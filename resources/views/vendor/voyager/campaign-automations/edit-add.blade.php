@@ -171,7 +171,11 @@
                                     <input type="number" name="resend_gap_days" class="form-control"
                                            value="{{ old('resend_gap_days', $automation->resend_gap_days ?? 0) }}"
                                            min="0">
-                                    <span class="help-block">0 = never send twice to the same user</span>
+                                    <span class="help-block">
+                                        Applies <strong>across all campaigns &amp; all senders</strong> — not just this one.<br>
+                                        <strong>0</strong> — once a client is emailed by <em>any</em> campaign, they will never be emailed again by any campaign.<br>
+                                        <strong>30</strong> — if Ayub emailed client X on July 1, no campaign (Ayub's or Ali Hassan's) will email client X again until July 31.
+                                    </span>
                                 </div>
                             </div>
                         </div>
