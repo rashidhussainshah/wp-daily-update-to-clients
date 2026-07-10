@@ -35,8 +35,11 @@ class ProcessCampaignAutomations extends Command
         $due = $query->get();
 
         if ($due->isEmpty()) {
+            Log::info('[Automations] Scheduler ran — no automations due at ' . now()->toDateTimeString());
             return 0;
         }
+
+        Log::info('[Automations] Scheduler ran — ' . $due->count() . ' automation(s) due: [' . $due->pluck('id')->join(', ') . ']');
 
         foreach ($due as $auto) {
             $this->processAutomation($auto);
@@ -47,14 +50,18 @@ class ProcessCampaignAutomations extends Command
 
     private function processAutomation(CampaignAutomation $auto): void
     {
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\" — processing");
+
         $campaign = $auto->campaign;
         if (!$campaign) {
+            Log::error("[Automations] #{$auto->id}: campaign missing — cancelling automation");
             $this->warn("Automation #{$auto->id}: campaign missing, cancelling.");
             $auto->update(['status' => 'cancelled']);
             return;
         }
 
         if ($auto->end_date && now()->startOfDay()->gt($auto->end_date)) {
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": past end_date — marked completed");
             $auto->update(['status' => 'completed']);
             $this->info("Automation #{$auto->id} past end_date — marked completed.");
             return;
@@ -64,12 +71,14 @@ class ProcessCampaignAutomations extends Command
         if ($auto->skip_weekends && now()->isWeekend()) {
             $nextMonday = now()->next('Monday')->setTimeFromTimeString($auto->send_time);
             $auto->update(['next_run_at' => $nextMonday]);
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": weekend skip — rescheduled to {$nextMonday->toDateTimeString()}");
             $this->info("Automation #{$auto->id}: weekend — rescheduled to {$nextMonday->toDateTimeString()}");
             return;
         }
 
         $role = Role::where('name', $auto->target_role)->first();
         if (!$role) {
+            Log::error("[Automations] #{$auto->id} \"{$auto->name}\": role '{$auto->target_role}' not found in DB");
             $this->warn("Automation #{$auto->id}: role '{$auto->target_role}' not found.");
             return;
         }
@@ -87,11 +96,13 @@ class ProcessCampaignAutomations extends Command
                 ->count();
 
             if ($sentToday >= $auto->daily_send_cap) {
+                Log::info("[Automations] #{$auto->id} \"{$auto->name}\": daily cap {$auto->daily_send_cap} reached (sent today: {$sentToday}) — skipping until tomorrow");
                 $this->info("Automation #{$auto->id} \"{$auto->name}\": daily cap of {$auto->daily_send_cap} reached — skipping until tomorrow.");
                 return;
             }
 
             $sendThisRun = min($sendThisRun, $auto->daily_send_cap - $sentToday);
+            Log::info("[Automations] #{$auto->id}: daily cap {$auto->daily_send_cap}, sent today {$sentToday}, allowed this run: {$sendThisRun}");
         }
 
         $skipEmails = $this->getSkipEmails($auto);
@@ -103,6 +114,13 @@ class ProcessCampaignAutomations extends Command
             ->select(['id', 'email', 'name'])
             ->limit($sendThisRun)
             ->get();
+
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": role={$auto->target_role}, skip_count=" . count($skipEmails) . ", recipients_found={$recipients->count()}, send_limit={$sendThisRun}");
+
+        if ($recipients->isEmpty()) {
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": no eligible recipients — all sent or skipped");
+            return;
+        }
 
         $sent   = 0;
         $failed = 0;
@@ -123,6 +141,7 @@ class ProcessCampaignAutomations extends Command
                     'status'        => 'sent',
                     'sent_at'       => now(),
                 ]);
+                Log::info("[Automations] #{$auto->id}: sent → {$user->email}");
                 $sent++;
             } catch (\Throwable $e) {
                 CampaignAutomationLog::create([
@@ -136,7 +155,7 @@ class ProcessCampaignAutomations extends Command
                     'sent_at'       => now(),
                 ]);
                 $failed++;
-                Log::error("Automation #{$auto->id} send failed to {$user->email}: " . $e->getMessage());
+                Log::error("[Automations] #{$auto->id}: FAILED → {$user->email} — " . $e->getMessage());
             }
         }
 
@@ -189,6 +208,10 @@ class ProcessCampaignAutomations extends Command
         }
 
         $auto->update($updates);
+
+        $nextInfo = !empty($updates['next_run_at']) ? $updates['next_run_at']->toDateTimeString() : 'none';
+        $statusInfo = $updates['status'] ?? $auto->status;
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": done — sent={$sent}, failed={$failed}, status={$statusInfo}, next_run={$nextInfo}");
 
         // Notify on completion
         if (!empty($updates['status']) && $updates['status'] === 'completed' && $auto->notify_email) {

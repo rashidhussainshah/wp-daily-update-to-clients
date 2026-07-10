@@ -81,7 +81,8 @@
                                         @if(in_array($auto->status, ['active','paused']))
                                             <form method="POST" action="{{ route('campaign-automations.run-now', $auto->id) }}" style="display:contents;">
                                                 @csrf
-                                                <button class="btn btn-info btn-sm" title="Run Now — send next batch immediately"
+                                                <button class="btn btn-sm" title="Run Now — send next batch immediately"
+                                                        style="background:#8e44ad;color:#fff;border-color:#7d3c98;"
                                                         onclick="return confirm('Send the next batch for \"{{ addslashes($auto->name) }}\" right now?')">
                                                     <i class="voyager-forward"></i>
                                                 </button>
@@ -92,7 +93,7 @@
                                             <form method="POST" action="{{ route('campaign-automations.pause', $auto->id) }}" style="display:contents;">
                                                 @csrf
                                                 <button class="btn btn-warning btn-sm" title="Pause" onclick="return confirm('Pause this automation?')">
-                                                    <i class="fa fa-pause"></i>
+                                                    Pause
                                                 </button>
                                             </form>
                                         @elseif($auto->status === 'paused')
