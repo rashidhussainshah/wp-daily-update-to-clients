@@ -18,14 +18,16 @@ class User extends \TCG\Voyager\Models\User
 
     protected static function booted()
     {
-        static::created(function ($user) {
-            $clockifyService = app(ClockifyService::class);
-            $clockifyUser = $clockifyService->createUser($user->email, $user->name);
-
-            // Save the Clockify user ID
-            $user->clockify_user_id = $clockifyUser['id'];
-            $user->save();
-        });
+        // Disabled: Clockify free plan rejects adding users via API (400 "Upgrade to paid plan").
+        // Re-enable if the workspace is upgraded, or sync later via clockify:sync-users.
+        // static::created(function ($user) {
+        //     $clockifyService = app(ClockifyService::class);
+        //     $clockifyUser = $clockifyService->createUser($user->email, $user->name);
+        //
+        //     // Save the Clockify user ID
+        //     $user->clockify_user_id = $clockifyUser['id'];
+        //     $user->save();
+        // });
 
         // Keep homey_client (marketing imports) out of all normal User queries.
         // Console commands and campaign dispatch use DB::table() or withoutGlobalScope().

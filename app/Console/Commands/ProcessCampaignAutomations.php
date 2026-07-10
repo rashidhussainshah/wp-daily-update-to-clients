@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Mail\AutomationCompletedMail;
 use App\Mail\MarketingCampaignMail;
 use App\Models\CampaignAutomation;
 use App\Models\CampaignAutomationLog;
@@ -34,8 +35,11 @@ class ProcessCampaignAutomations extends Command
         $due = $query->get();
 
         if ($due->isEmpty()) {
+            Log::info('[Automations] Scheduler ran — no automations due at ' . now()->toDateTimeString());
             return 0;
         }
+
+        Log::info('[Automations] Scheduler ran — ' . $due->count() . ' automation(s) due: [' . $due->pluck('id')->join(', ') . ']');
 
         foreach ($due as $auto) {
             $this->processAutomation($auto);
@@ -46,21 +50,35 @@ class ProcessCampaignAutomations extends Command
 
     private function processAutomation(CampaignAutomation $auto): void
     {
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\" — processing");
+
         $campaign = $auto->campaign;
         if (!$campaign) {
+            Log::error("[Automations] #{$auto->id}: campaign missing — cancelling automation");
             $this->warn("Automation #{$auto->id}: campaign missing, cancelling.");
             $auto->update(['status' => 'cancelled']);
             return;
         }
 
         if ($auto->end_date && now()->startOfDay()->gt($auto->end_date)) {
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": past end_date — marked completed");
             $auto->update(['status' => 'completed']);
             $this->info("Automation #{$auto->id} past end_date — marked completed.");
             return;
         }
 
+        // Skip weekends — reschedule to next Monday at the same send_time
+        if ($auto->skip_weekends && now()->isWeekend()) {
+            $nextMonday = now()->next('Monday')->setTimeFromTimeString($auto->send_time);
+            $auto->update(['next_run_at' => $nextMonday]);
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": weekend skip — rescheduled to {$nextMonday->toDateTimeString()}");
+            $this->info("Automation #{$auto->id}: weekend — rescheduled to {$nextMonday->toDateTimeString()}");
+            return;
+        }
+
         $role = Role::where('name', $auto->target_role)->first();
         if (!$role) {
+            Log::error("[Automations] #{$auto->id} \"{$auto->name}\": role '{$auto->target_role}' not found in DB");
             $this->warn("Automation #{$auto->id}: role '{$auto->target_role}' not found.");
             return;
         }
@@ -69,6 +87,23 @@ class ProcessCampaignAutomations extends Command
 
         // With delay: send 1 email per cron tick. Without delay: send full batch at once.
         $sendThisRun = $delay > 0 ? 1 : $auto->batch_size;
+
+        // Daily send capacity — hard cap per calendar day for this automation
+        if ($auto->daily_send_cap > 0) {
+            $sentToday = CampaignAutomationLog::where('automation_id', $auto->id)
+                ->where('status', 'sent')
+                ->whereDate('sent_at', today())
+                ->count();
+
+            if ($sentToday >= $auto->daily_send_cap) {
+                Log::info("[Automations] #{$auto->id} \"{$auto->name}\": daily cap {$auto->daily_send_cap} reached (sent today: {$sentToday}) — skipping until tomorrow");
+                $this->info("Automation #{$auto->id} \"{$auto->name}\": daily cap of {$auto->daily_send_cap} reached — skipping until tomorrow.");
+                return;
+            }
+
+            $sendThisRun = min($sendThisRun, $auto->daily_send_cap - $sentToday);
+            Log::info("[Automations] #{$auto->id}: daily cap {$auto->daily_send_cap}, sent today {$sentToday}, allowed this run: {$sendThisRun}");
+        }
 
         $skipEmails = $this->getSkipEmails($auto);
 
@@ -79,6 +114,13 @@ class ProcessCampaignAutomations extends Command
             ->select(['id', 'email', 'name'])
             ->limit($sendThisRun)
             ->get();
+
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": role={$auto->target_role}, skip_count=" . count($skipEmails) . ", recipients_found={$recipients->count()}, send_limit={$sendThisRun}");
+
+        if ($recipients->isEmpty()) {
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": no eligible recipients — all sent or skipped");
+            return;
+        }
 
         $sent   = 0;
         $failed = 0;
@@ -99,6 +141,7 @@ class ProcessCampaignAutomations extends Command
                     'status'        => 'sent',
                     'sent_at'       => now(),
                 ]);
+                Log::info("[Automations] #{$auto->id}: sent → {$user->email}");
                 $sent++;
             } catch (\Throwable $e) {
                 CampaignAutomationLog::create([
@@ -112,7 +155,7 @@ class ProcessCampaignAutomations extends Command
                     'sent_at'       => now(),
                 ]);
                 $failed++;
-                Log::error("Automation #{$auto->id} send failed to {$user->email}: " . $e->getMessage());
+                Log::error("[Automations] #{$auto->id}: FAILED → {$user->email} — " . $e->getMessage());
             }
         }
 
@@ -165,25 +208,37 @@ class ProcessCampaignAutomations extends Command
         }
 
         $auto->update($updates);
+
+        $nextInfo = !empty($updates['next_run_at']) ? $updates['next_run_at']->toDateTimeString() : 'none';
+        $statusInfo = $updates['status'] ?? $auto->status;
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": done — sent={$sent}, failed={$failed}, status={$statusInfo}, next_run={$nextInfo}");
+
+        // Notify on completion
+        if (!empty($updates['status']) && $updates['status'] === 'completed' && $auto->notify_email) {
+            Mail::to($auto->notify_email)
+                ->send(new AutomationCompletedMail($auto, $auto->emails_sent_total + $sent, $failed));
+        }
     }
 
     private function getSkipEmails(CampaignAutomation $auto): array
     {
-        // Always skip permanently failed emails — never retry a bounced address
+        // 1. Always skip bounced/failed addresses from this automation — never retry them
         $failed = CampaignAutomationLog::where('automation_id', $auto->id)
             ->where('status', 'failed')
             ->pluck('email')
             ->all();
 
-        // Skip sent emails (respect resend gap window if set)
-        $sentQuery = CampaignAutomationLog::where('automation_id', $auto->id)
-            ->where('status', 'sent');
-
+        // 2. Resend gap cooldown (global across ALL campaigns):
+        //    If resend_gap_days = 0  → no cooldown, send to everyone every run
+        //    If resend_gap_days = 30 → skip anyone who got ANY campaign email in the last 30 days
+        //    This prevents Ayub's campaign and Ali Hassan's campaign hitting the same client
+        $sent = [];
         if ($auto->resend_gap_days > 0) {
-            $sentQuery->where('sent_at', '>=', now()->subDays($auto->resend_gap_days));
+            $sent = CampaignAutomationLog::where('status', 'sent')
+                ->where('sent_at', '>=', now()->subDays($auto->resend_gap_days))
+                ->pluck('email')
+                ->all();
         }
-
-        $sent = $sentQuery->pluck('email')->all();
 
         return array_unique(array_merge($failed, $sent));
     }
