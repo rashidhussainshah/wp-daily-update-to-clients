@@ -28,7 +28,7 @@ trait EmailTrait
             'payable' => $data->payable,
             'paid' => $data->paid,
             'client_source' => $data->client_source,
-            'current_currency_rate' => $data->current_currency_rate,
+            'current_currency_rate' => $data->currency_current_rate,
             'fee' => $data->fee,
             'notes' => $data->notes,
             'is_payment_approve_req' => $updateReq,
@@ -39,7 +39,7 @@ trait EmailTrait
     {
         EmailsHandlerJob::dispatch([
             'mail_name' => 'DeveloperPaymentRequest',
-            'to' => $data->developer->emai,
+            'to' => $data->developer->email,
             'id' => $data->id,
             'subject' => 'Your Payment Request Approved' . $data->title,
             'developer_name' => $data->developer->name,

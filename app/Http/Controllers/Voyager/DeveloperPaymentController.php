@@ -2,10 +2,15 @@
 
 namespace App\Http\Controllers\Voyager;
 
-use App\Jobs\EmailsHandlerJob;
+use App\Models\Expense;
+use App\Models\Income;
+use App\Models\Project;
+use App\Models\ProjectTarget;
 use App\Models\User;
 use App\Models\UserPayment;
+use App\Services\PaymentCalculationService;
 use App\utils\traits\EmailTrait;
+use App\utils\traits\ResolvesDatePresets;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +21,223 @@ use TCG\Voyager\Facades\Voyager;
 
 class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBaseController
 {
-    use EmailTrait;
+    use EmailTrait, ResolvesDatePresets;
+
+    protected PaymentCalculationService $calculator;
+
+    public function __construct(PaymentCalculationService $calculator)
+    {
+        $this->calculator = $calculator;
+    }
+
+    /**
+     * Browse with advanced filters and totals for the user-payments listing.
+     */
+    public function index(Request $request)
+    {
+        $slug = $this->getSlug($request);
+        if ($slug !== 'user-payments') {
+            return parent::index($request);
+        }
+
+        $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
+        $this->authorize('browse', app($dataType->model_name));
+
+        $filters = $this->resolveDateFilters($request->only([
+            'developer_id', 'business_developer_id', 'status', 'share_type', 'earning_type',
+            'client_source', 'project_id', 'income_id', 'paid_state', 'generated',
+            'date_from', 'date_to', 'period',
+        ]));
+
+        $query = UserPayment::with(['developer', 'project', 'projectTarget', 'businessDeveloper', 'income'])
+            ->currentUserAndManagement()
+            ->filter($filters);
+
+        $totals = (clone $query)
+            ->selectRaw('COUNT(*) as requests, COALESCE(SUM(total_earning),0) as total_earning, COALESCE(SUM(dev_earning),0) as dev_earning, COALESCE(SUM(payable),0) as payable, COALESCE(SUM(paid),0) as paid')
+            ->reorder()
+            ->first();
+
+        // Advance (Credit To Dev) deduction context when a single developer is filtered.
+        $advancePkr = null;
+        $advanceUsd = null;
+        if (!empty($filters['developer_id'])) {
+            $advancePkr = Expense::getAdvance($filters['developer_id'], Expense::IN_PKR);
+            $advanceUsd = Expense::getAdvance($filters['developer_id'], Expense::IN_USD);
+        }
+
+        // Grouped mode shows each partner request with its linked BD commission
+        // as a child row. Fall back to the flat list when the filters focus on
+        // BD/system rows, which grouping would otherwise hide.
+        $grouped = ($filters['share_type'] ?? null) !== UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
+            && ($filters['generated'] ?? null) !== 'system'
+            && !in_array((int) ($filters['developer_id'] ?? 0), [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID]);
+
+        if ($grouped) {
+            $query->with(['linkedCommission.developer', 'linkedCommission.income'])
+                ->where(function ($q) {
+                    // primary rows, plus children orphaned by a soft-deleted parent
+                    $q->whereNull('second_entry_id')
+                        ->orWhereDoesntHave('sourceRequest');
+                });
+        }
+
+        $payments = $query->paginate(25)->withQueryString();
+
+        $canManage = $this->userCanManagePayments();
+        $developers = $canManage
+            ? User::whereIn('id', UserPayment::query()->select('developer_id')->distinct()->pluck('developer_id'))->orderBy('name')->get(['id', 'name'])
+            : collect();
+        $businessDevelopers = User::whereIn('id', [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])->get(['id', 'name']);
+        $projects = Project::orderBy('name')->get(['id', 'name']);
+
+        return Voyager::view('voyager::user-payments.browse', [
+            'dataType' => $dataType,
+            'payments' => $payments,
+            'totals' => $totals,
+            'filters' => $filters,
+            'developers' => $developers,
+            'businessDevelopers' => $businessDevelopers,
+            'projects' => $projects,
+            'advancePkr' => $advancePkr,
+            'advanceUsd' => $advanceUsd,
+            'canManage' => $canManage,
+            'canPay' => isBusinessPartners() || isAdministrator(),
+            'grouped' => $grouped,
+        ]);
+    }
+
+    /**
+     * Administrator statistics page for the payments module. Uses the same
+     * filters as the listing so numbers can be sliced the same way.
+     */
+    public function statistics(Request $request)
+    {
+        if (!isAdministrator()) {
+            abort(403, 'Only administrators can view payment statistics.');
+        }
+
+        $filters = $this->resolveDateFilters($request->only([
+            'developer_id', 'business_developer_id', 'status', 'share_type', 'earning_type',
+            'client_source', 'project_id', 'income_id', 'paid_state', 'generated',
+            'date_from', 'date_to', 'period',
+        ]));
+
+        $base = UserPayment::query()->filter($filters);
+
+        // Gross volume must not double-count the partner request + auto BD
+        // commission pair carrying the same total_earning: count only primary
+        // rows (not system-generated copies), same dedupe FinancialsController
+        // uses. Historic income_id values are reused as buckets, so grouping
+        // by income would badly understate gross. Pre-2024 BD rows predate the
+        // generated_by_system flag, so a manual BD row that mirrors a partner
+        // request (same project + amount) is also excluded as a duplicate.
+        $primaryRows = $this->primaryEarnings(clone $base)
+            ->selectRaw('client_source, COUNT(*) as cnt, COALESCE(SUM(total_earning),0) as gross')
+            ->groupBy('client_source')
+            ->get();
+
+        $grossTotal = (float) $primaryRows->sum('gross');
+        $primaryCount = (int) $primaryRows->sum('cnt');
+        $bySource = [];
+        foreach ($primaryRows as $row) {
+            $gross = (float) $row->gross;
+            $fee = round($gross * $this->calculator->feeRate($row->client_source), 2);
+            $bySource[$row->client_source ?: 'unknown'] = [
+                'incomes' => $row->cnt,
+                'gross' => $gross,
+                'fee' => $fee,
+                'net' => round($gross - $fee, 2),
+            ];
+        }
+        $fiverrFee = $bySource['fiverr']['fee'] ?? 0;
+        $upworkFee = $bySource['upwork']['fee'] ?? 0;
+        $totalFees = round(array_sum(array_column($bySource, 'fee')), 2);
+        $netAfterFees = round($grossTotal - $totalFees, 2);
+
+        $partnerShare = (float) (clone $base)->where('share_type', UserPayment::SHARE_TYPE_DEVELOPMENT_PARTNER)->sum('dev_earning');
+        $bdShare = (float) (clone $base)->where('share_type', UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER)->sum('dev_earning');
+        $companyRemainder = round($netAfterFees - $partnerShare - $bdShare, 2);
+
+        // Average PKR rate over the filtered rows, to express the USD figures
+        // in PKR (same approach as FinancialsController::avgConversionRate).
+        $avgRate = (float) ((clone $base)->whereNotNull('currency_current_rate')->where('currency_current_rate', '>', 0)->avg('currency_current_rate') ?: 279.0);
+
+        $pkr = (clone $base)
+            ->selectRaw('COUNT(*) as requests, COALESCE(SUM(payable),0) as payable, COALESCE(SUM(paid),0) as paid')
+            ->first();
+        $unpaidPkr = (float) (clone $base)->approved()->notPaid()->sum('payable');
+        $awaitingRate = (clone $base)->requested()->count();
+
+        // Actual PKR payable/paid split per share type (real sums, not rate estimates).
+        $pkrByShareType = (clone $base)
+            ->selectRaw('share_type, COALESCE(SUM(payable),0) as payable, COALESCE(SUM(paid),0) as paid')
+            ->groupBy('share_type')
+            ->get()
+            ->keyBy('share_type');
+
+        // Per-source share split for the breakdown table.
+        $shareBySource = (clone $base)
+            ->selectRaw('client_source, share_type, COALESCE(SUM(dev_earning),0) as share')
+            ->groupBy('client_source', 'share_type')
+            ->get()
+            ->groupBy('client_source');
+
+        // Per-user breakdowns, split by share type.
+        $byUser = (clone $base)
+            ->selectRaw('developer_id, share_type, COUNT(*) as requests, COALESCE(SUM(total_earning),0) as gross, COALESCE(SUM(dev_earning),0) as share, COALESCE(SUM(payable),0) as payable, COALESCE(SUM(paid),0) as paid')
+            ->groupBy('developer_id', 'share_type')
+            ->with('developer:id,name')
+            ->get();
+        $partnersBreakdown = $byUser->where('share_type', UserPayment::SHARE_TYPE_DEVELOPMENT_PARTNER)->values();
+        $bdBreakdown = $byUser->where('share_type', UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER)->values();
+        $advances = $partnersBreakdown->mapWithKeys(fn($row) => [
+            $row->developer_id => [
+                'pkr' => Expense::getAdvance($row->developer_id, Expense::IN_PKR),
+                'usd' => Expense::getAdvance($row->developer_id, Expense::IN_USD),
+            ],
+        ]);
+
+        $byEarningType = (clone $base)
+            ->selectRaw('earning_type, COUNT(*) as requests, COALESCE(SUM(dev_earning),0) as share, COALESCE(SUM(payable),0) as payable')
+            ->groupBy('earning_type')
+            ->get();
+
+        // Monthly series for the charts: last 12 months unless a date filter narrows it.
+        $monthlyQuery = UserPayment::query()->filter($filters);
+        if (empty($filters['date_from']) && empty($filters['date_to'])) {
+            $monthlyQuery->where('created_at', '>=', now()->subMonths(11)->startOfMonth());
+        }
+        $monthlyRows = (clone $monthlyQuery)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, share_type, COALESCE(SUM(dev_earning),0) as share, COUNT(*) as requests")
+            ->groupBy('month', 'share_type')
+            ->orderBy('month')
+            ->get();
+        $monthlyGross = $this->primaryEarnings(clone $monthlyQuery)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COALESCE(SUM(total_earning),0) as gross")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('gross', 'month');
+        $months = $monthlyRows->pluck('month')->merge($monthlyGross->keys())->unique()->sort()->values();
+        $monthly = [
+            'labels' => $months,
+            'partner' => $months->map(fn($m) => (float) $monthlyRows->where('month', $m)->where('share_type', UserPayment::SHARE_TYPE_DEVELOPMENT_PARTNER)->sum('share')),
+            'bd' => $months->map(fn($m) => (float) $monthlyRows->where('month', $m)->where('share_type', UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER)->sum('share')),
+            // gross only from primary rows so partner + commission pairs count once
+            'gross' => $months->map(fn($m) => (float) ($monthlyGross[$m] ?? 0)),
+        ];
+
+        $developers = User::whereIn('id', UserPayment::query()->select('developer_id')->distinct()->pluck('developer_id'))->orderBy('name')->get(['id', 'name']);
+        $businessDevelopers = User::whereIn('id', [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])->get(['id', 'name']);
+        $projects = Project::orderBy('name')->get(['id', 'name']);
+
+        return Voyager::view('voyager::user-payments.statistics', compact(
+            'filters', 'grossTotal', 'bySource', 'fiverrFee', 'upworkFee', 'totalFees', 'netAfterFees',
+            'partnerShare', 'bdShare', 'companyRemainder', 'avgRate', 'pkr', 'unpaidPkr', 'awaitingRate', 'pkrByShareType',
+            'shareBySource', 'partnersBreakdown', 'bdBreakdown', 'advances', 'byEarningType',
+            'monthly', 'developers', 'businessDevelopers', 'projects'
+        ) + ['primaryCount' => $primaryCount]);
+    }
 
     /**
      * POST BRE(A)D - Store data.
@@ -36,29 +257,94 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         // Validate fields with ajax
         $val = $this->validateBread($request->all(), $dataType->addRows)->validate();
-        // Add the authenticated user's developer_id
-        $data = $request->merge(['developer_id' => Auth::user()->id]);
+
+        // A payment request is only valid when tied to an income, project and target.
+        $request->validate([
+            'income_id' => 'required|exists:incomes,id',
+            'project_id' => 'required|exists:projects,id',
+            'project_target_id' => 'required|exists:project_targets,id',
+            'client_source' => 'required|in:' . implode(',', UserPayment::CLIENT_SOURCES),
+            'total_earning' => 'required|numeric|min:0.01',
+        ]);
+
+        $submitter = Auth::user();
+        $income = Income::findOrFail($request->income_id);
+        $totalEarning = (float) $request->total_earning;
+        $clientSource = $request->client_source;
+        $currencyRate = is_numeric($request->currency_current_rate) ? (float) $request->currency_current_rate : null;
+        $businessDevUser = $request->select_business_developer_id ? User::find($request->select_business_developer_id) : null;
+        $submitterIsBusinessDeveloper = in_array($submitter->id, [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID]);
+
+        $this->calculator->assertEarningWithinIncome($income, $totalEarning);
+        // Hard block: one request per user per income.
+        $this->calculator->assertNoDuplicate($income->id, $submitter->id);
+
+        if ($submitterIsBusinessDeveloper) {
+            // Manual commission request (e.g. income earned by a salary employee):
+            // only the business developer's 5-6% applies, no partner share.
+            $shareType = UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER;
+            $earningType = UserPayment::EARNING_TYPE_SALARY_EMPLOYEE;
+            $devEarning = $this->calculator->businessDeveloperEarning($totalEarning, $clientSource, $submitter);
+            $capRate = $this->calculator->businessDeveloperRate($submitter);
+        } else {
+            $shareType = UserPayment::SHARE_TYPE_DEVELOPMENT_PARTNER;
+            $earningType = UserPayment::EARNING_TYPE_PROJECT;
+            $devEarning = $this->calculator->developmentPartnerEarning($totalEarning, $clientSource, $submitter);
+            $capRate = PaymentCalculationService::DEV_PARTNER_CAP;
+        }
+
+        // Hard block: never allocate beyond the allowed share of this income.
+        $this->calculator->assertIncomeCapNotExceeded($income, $shareType, $clientSource, $devEarning, $capRate);
+
+        // Pre-check the auto-generated commission BEFORE anything is saved, so
+        // a blocked commission never leaves a half-created pair behind.
+        $generateCommission = false;
+        $commissionWarning = null;
+        if (!$submitterIsBusinessDeveloper
+            && $businessDevUser
+            && in_array($businessDevUser->id, [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])) {
+            $existingCommission = $this->calculator->existingRequestForIncome($income->id, $businessDevUser->id);
+            if ($existingCommission) {
+                // Hard block on duplicates: keep the earlier manual/auto request,
+                // never create a second commission for the same income.
+                $commissionWarning = "No commission was generated for {$businessDevUser->name}: request #{$existingCommission->id} already exists against income #{$income->id}.";
+            } else {
+                $commissionShare = $this->calculator->businessDeveloperEarning($totalEarning, $clientSource, $businessDevUser);
+                $this->calculator->assertIncomeCapNotExceeded(
+                    $income,
+                    UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER,
+                    $clientSource,
+                    $commissionShare,
+                    $this->calculator->businessDeveloperRate($businessDevUser)
+                );
+                $generateCommission = true;
+            }
+        }
+
+        // Server-side calculated values always win over anything typed in the form.
+        $request->merge([
+            'developer_id' => $submitter->id,
+            'dev_earning' => $devEarning,
+            'payable' => $this->calculator->payable($devEarning, $currencyRate),
+            'fee' => (int) round($this->calculator->feeRate($clientSource) * 100),
+        ]);
+
         // Begin a transaction
         DB::beginTransaction();
         try {
             $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
+            $data->share_type = $shareType;
+            $data->earning_type = $earningType;
+            $data->save();
+
             event(new BreadDataAdded($dataType, $data));
             $this->sendEmail($data);
 
-            if ( auth() && auth()->user() && auth()->user()->email) {
-                $businessDevUser = \App\Models\User::find($request->select_business_developer_id);
-                if (auth()->user()->email != 'ayubkhokhar786@gmail.com' && $businessDevUser && $businessDevUser->email == 'ayubkhokhar786@gmail.com') {
-                    // Add an entry for "ayubkhokar786@gmail.com" after the data is saved
-                    $this->addEntryForAyubKhokar($request, $data->id);
-                } elseif (auth()->user()->email != 'alihasanwebpenter@gmail.com' && $businessDevUser && $businessDevUser->email == 'alihasanwebpenter@gmail.com') {
-                    // Add an entry for "alihasanwebpenter@gmail.com" after the data is saved
-                    $this->addEntryForAliHasan($request, $data->id);
-                } else {
-                }
+            if ($generateCommission) {
+                $this->createBusinessDeveloperEntry($request, $data, $businessDevUser);
             }
 
             DB::commit();
-
 
             if (!$request->has('_tagging')) {
                 if (auth()->user()->can('browse', $data)) {
@@ -67,10 +353,16 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
                     $redirect = redirect()->back();
                 }
 
-                return $redirect->with([
+                $flash = [
                     'message' => __('voyager::generic.successfully_added_new') . " {$dataType->getTranslatedAttribute('display_name_singular')}",
                     'alert-type' => 'success',
-                ]);
+                ];
+                if ($commissionWarning) {
+                    $flash['message'] .= ' | ' . $commissionWarning;
+                    $flash['alert-type'] = 'warning';
+                }
+
+                return $redirect->with($flash);
             } else {
                 return response()->json(['success' => true, 'data' => $data]);
             }
@@ -79,207 +371,67 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             DB::rollback();
             // Handle the exception as needed
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
-
-        }
-
-    }
-
-    private function addEntryForAyubKhokar($request, $firstPaymentId)
-    {
-        $ayubUser = User::where('email', 'ayubkhokhar786@gmail.com')->first();
-        // Get references to the input fields by name from the request
-        $totalEarning = $request->input('total_earning');
-        $selectedClientSource = $request->input('client_source');
-        $currentCurrencyRate = $request->input('currency_current_rate');
-
-        if (!empty($totalEarning) && is_numeric($totalEarning)) {
-            $devEarning = 0;
-
-            if ($selectedClientSource === "fiverr") {
-                // Calculate dev earning for Fiverr (total earning - 20%)
-                $devEarning = $totalEarning * 0.8;
-            } else if ($selectedClientSource === "upwork") {
-                // Calculate dev earning for Upwork (total earning - 10%)
-                $devEarning = $totalEarning * 0.9;
-            } else if ($selectedClientSource === "payonner" || $selectedClientSource === "other") {
-                // Assign total earning for Payonner and Other without deductions
-                $devEarning = $totalEarning;
-            }
-
-            // Calculate percentage of employee
-            $devNetEarning = $devEarning * ($ayubUser->percentage ?? 0.04);
-
-            // Calculate the payable amount by multiplying devNetEarning with the currency rate
-            if ($currentCurrencyRate) {
-                $payableAmount = $devNetEarning * $currentCurrencyRate;
-            }
-
-
-            $up = new UserPayment();
-            $up->developer_id = $ayubUser->id;
-            $up->income_id = $request->income_id;
-            $up->project_id = $request->project_id;
-            $up->project_target_id = $request->project_target_id;
-            $up->client_source = $request->client_source;
-            $up->total_earning = $totalEarning;
-
-            $up->dev_earning = $devNetEarning;
-            if ($currentCurrencyRate) {
-                $up->payable = $payableAmount;
-            }
-            $up->fee = $request->fee;
-            $up->currency_current_rate = $request->currency_current_rate;
-//            $up->status = $request->status;
-            $notes = $request->input('notes');
-            $notes .= "\nAutomatically generated by system";
-            $up->notes = $notes;
-            $up->created_at = now();
-            $up->updated_at = now();
-            // Update the first entry with the second entry's ID
-            $firstEntry = UserPayment::find($firstPaymentId);
-            if ($firstEntry) {
-                $up->second_entry_id = $firstEntry->id;
-            }
-            $up->generated_by_system =true;
-            $up->select_business_developer_id = $request->select_business_developer_id;
-            $up->save();
-            $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->find($up->id);
-            $this->sendEmail($ayubPayment);
-
-
         }
     }
 
-    private function addEntryForAliHasan($request, $firstPaymentId)
+    /**
+     * Auto-generate the business developer commission entry linked to a
+     * development partner request. Replaces the old per-user copies.
+     */
+    private function createBusinessDeveloperEntry(Request $request, UserPayment $sourcePayment, User $businessDevUser): void
     {
-        $aliHasanUser = User::where('email', 'alihasanwebpenter@gmail.com')->first();
-        // Get references to the input fields by name from the request
-        $totalEarning = $request->input('total_earning');
-        $selectedClientSource = $request->input('client_source');
-        $currentCurrencyRate = $request->input('currency_current_rate');
+        $totalEarning = (float) $request->input('total_earning');
+        $clientSource = $request->input('client_source');
+        $currencyRate = is_numeric($request->input('currency_current_rate')) ? (float) $request->input('currency_current_rate') : null;
 
-        if (!empty($totalEarning) && is_numeric($totalEarning)) {
-            $devEarning = 0;
+        $devEarning = $this->calculator->businessDeveloperEarning($totalEarning, $clientSource, $businessDevUser);
 
-            if ($selectedClientSource === "fiverr") {
-                // Calculate dev earning for Fiverr (total earning - 20%)
-                $devEarning = $totalEarning * 0.8;
-            } else if ($selectedClientSource === "upwork") {
-                // Calculate dev earning for Upwork (total earning - 10%)
-                $devEarning = $totalEarning * 0.9;
-            } else if ($selectedClientSource === "payonner" || $selectedClientSource === "other") {
-                // Assign total earning for Payonner and Other without deductions
-                $devEarning = $totalEarning;
-            }
+        $up = new UserPayment();
+        $up->developer_id = $businessDevUser->id;
+        $up->income_id = $request->income_id;
+        $up->project_id = $request->project_id;
+        $up->project_target_id = $request->project_target_id;
+        $up->client_source = $clientSource;
+        $up->total_earning = $totalEarning;
+        $up->dev_earning = $devEarning;
+        $up->payable = $this->calculator->payable($devEarning, $currencyRate);
+        $up->fee = (int) round($this->calculator->feeRate($clientSource) * 100);
+        $up->currency_current_rate = $currencyRate;
+        $up->share_type = UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER;
+        $up->earning_type = UserPayment::EARNING_TYPE_PROJECT;
+        $up->notes = trim(($request->input('notes') ?? '') . "\nAutomatically generated by system");
+        $up->second_entry_id = $sourcePayment->id;
+        $up->generated_by_system = true;
+        $up->select_business_developer_id = $businessDevUser->id;
+        $up->save();
 
-            // Calculate percentage of employee
-            $devNetEarning = $devEarning * ($aliHasanUser->percentage ?? 0.03);
-
-            // Calculate the payable amount by multiplying devNetEarning with the currency rate
-            if ($currentCurrencyRate) {
-                $payableAmount = $devNetEarning * $currentCurrencyRate;
-            }
-
-
-            $up = new UserPayment();
-            $up->developer_id = $aliHasanUser->id;
-            $up->income_id = $request->income_id;
-            $up->project_id = $request->project_id;
-            $up->project_target_id = $request->project_target_id;
-            $up->client_source = $request->client_source;
-            $up->total_earning = $totalEarning;
-
-            $up->dev_earning = $devNetEarning;
-            if ($currentCurrencyRate) {
-                $up->payable = $payableAmount;
-            }
-            $up->fee = $request->fee;
-            $up->currency_current_rate = $request->currency_current_rate;
-//            $up->status = $request->status;
-            $notes = $request->input('notes');
-            $notes .= "\nAutomatically generated by system";
-            $up->notes = $notes;
-            $up->created_at = now();
-            $up->updated_at = now();
-            // Update the first entry with the second entry's ID
-            $firstEntry = UserPayment::find($firstPaymentId);
-            if ($firstEntry) {
-                $up->second_entry_id = $firstEntry->id;
-            }
-            $up->generated_by_system =true;
-            $up->select_business_developer_id = $request->select_business_developer_id;
-            $up->save();
-            $aliHasanPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->find($up->id);
-            $this->sendEmail($aliHasanPayment);
-
-
-        }
+        $commission = UserPayment::with(['developer', 'project', 'projectTarget'])->find($up->id);
+        $this->sendEmail($commission);
     }
 
-    private function updateAyubKhokarUserPayment($request, $developerPaymentReq)
+    /**
+     * When a development partner request is approved, approve its linked
+     * commission with a payable recalculated at the same PKR rate.
+     */
+    private function approveLinkedCommission(?float $currencyRate, UserPayment $developerPaymentReq): void
     {
-        $ayubPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->where('second_entry_id', $developerPaymentReq->id)->first();
-        if ($ayubPayment && $ayubPayment->developer_id == User::AYUB_USER_ID) {
-            if ($ayubPayment->status == UserPayment::REQUESTED_STATUS); {
-                $totalEarning = $ayubPayment->total_earning;
-                $currentCurrencyRate = $request->input('currency_current_rate');
+        $commission = UserPayment::with(['developer', 'project', 'projectTarget'])
+            ->where('second_entry_id', $developerPaymentReq->id)
+            ->where('status', UserPayment::REQUESTED_STATUS)
+            ->first();
 
-                if (!empty($totalEarning) && is_numeric($totalEarning)) {
-
-                    // Calculate the payable amount by multiplying devNetEarning with the currency rate
-                    if ($currentCurrencyRate) {
-                        $payableAmount = $ayubPayment->dev_earning * $currentCurrencyRate;
-                    }
-
-                    if ($currentCurrencyRate && $payableAmount) {
-                        $ayubPayment->payable = $payableAmount;
-                    }
-
-                    $ayubPayment->fee = $request->fee;
-                    $ayubPayment->currency_current_rate = $request->currency_current_rate;
-                    $ayubPayment->status = UserPayment::APPROVED_STATUS;
-                    $notes = $request->input('notes');
-                    $notes .= "\nAutomatically approved and calculate payable by system";
-                    $ayubPayment->notes = $notes;
-                    $ayubPayment->updated_at = now();
-                    $ayubPayment->save();
-                    $this->sendEmail($ayubPayment, true);
-                }
-            }
+        if (!$commission || !$currencyRate) {
+            return;
         }
-    }
 
-    private function updateAliHasanUserPayment($request, $developerPaymentReq)
-    {
-        $aliHasanPayment = UserPayment::with(['developer', 'project', 'projectTarget'])->where('second_entry_id', $developerPaymentReq->id)->first();
-        if ($aliHasanPayment && $aliHasanPayment->developer_id == User::ALI_HASAN_USER_ID) {
-            if ($aliHasanPayment->status == UserPayment::REQUESTED_STATUS); {
-                $totalEarning = $aliHasanPayment->total_earning;
-                $currentCurrencyRate = $request->input('currency_current_rate');
+        $commission->payable = $this->calculator->payable((float) $commission->dev_earning, $currencyRate);
+        $commission->currency_current_rate = $currencyRate;
+        $commission->fee = $developerPaymentReq->fee;
+        $commission->status = UserPayment::APPROVED_STATUS;
+        $commission->notes = trim(($commission->notes ?? '') . "\nAutomatically approved and calculate payable by system");
+        $commission->save();
 
-                if (!empty($totalEarning) && is_numeric($totalEarning)) {
-
-                    // Calculate the payable amount by multiplying devNetEarning with the currency rate
-                    if ($currentCurrencyRate) {
-                        $payableAmount = $aliHasanPayment->dev_earning * $currentCurrencyRate;
-                    }
-
-                    if ($currentCurrencyRate && $payableAmount) {
-                        $aliHasanPayment->payable = $payableAmount;
-                    }
-
-                    $aliHasanPayment->fee = $request->fee;
-                    $aliHasanPayment->currency_current_rate = $request->currency_current_rate;
-                    $aliHasanPayment->status = UserPayment::APPROVED_STATUS;
-                    $notes = $request->input('notes');
-                    $notes .= "\nAutomatically approved and calculate payable by system";
-                    $aliHasanPayment->notes = $notes;
-                    $aliHasanPayment->updated_at = now();
-                    $aliHasanPayment->save();
-                    $this->sendEmail($aliHasanPayment, true);
-                }
-            }
-        }
+        $this->sendEmail($commission, true);
     }
 
     // POST BR(E)AD
@@ -318,14 +470,21 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         $this->insertUpdateData($request, $slug, $dataType->editRows, $data);
 
+        // Recalculate payable server-side whenever a PKR rate is present,
+        // instead of trusting the value typed in the form.
+        $currencyRate = is_numeric($request->currency_current_rate) ? (float) $request->currency_current_rate : null;
+        if ($currencyRate && $data->dev_earning) {
+            $data->payable = $this->calculator->payable((float) $data->dev_earning, $currencyRate);
+            $data->save();
+        }
+
         // Delete Images
         $this->deleteBreadImages($original_data, $to_remove);
 
         event(new BreadDataUpdated($dataType, $data));
         if ($data->status == UserPayment::APPROVED_STATUS) {
             $this->sendEmail($data, true);
-            $this->updateAyubKhokarUserPayment($request, $data);
-            $this->updateAliHasanUserPayment($request, $data);
+            $this->approveLinkedCommission($currencyRate, $data);
         }
         if (auth()->user()->can('browse', app($dataType->model_name))) {
             $redirect = redirect()->route("voyager.{$dataType->slug}.index");
@@ -339,8 +498,48 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         ]);
     }
 
+    /**
+     * One-click accountant action from the listing: set the PKR rate,
+     * calculate payable server-side and approve the request together with
+     * its linked commission.
+     */
+    public function rateApprove(Request $request, $id): \Illuminate\Http\RedirectResponse
+    {
+        if (!$this->userCanManagePayments()) {
+            return redirect()->back()->with(['message' => 'You are not allowed to approve payment requests.', 'alert-type' => 'error']);
+        }
+
+        $request->validate([
+            'currency_current_rate' => 'required|numeric|min:1',
+        ]);
+
+        $userPayment = UserPayment::find($id);
+        if (!$userPayment) {
+            return redirect()->back()->with(['message' => 'Payment not found.', 'alert-type' => 'error']);
+        }
+        if ($userPayment->status !== UserPayment::REQUESTED_STATUS) {
+            return redirect()->back()->with(['message' => "Payment #{$id} is not in Requested status.", 'alert-type' => 'error']);
+        }
+
+        $currencyRate = (float) $request->currency_current_rate;
+        $userPayment->currency_current_rate = $currencyRate;
+        $userPayment->payable = $this->calculator->payable((float) $userPayment->dev_earning, $currencyRate);
+        $userPayment->status = UserPayment::APPROVED_STATUS;
+        $userPayment->notes = trim(($userPayment->notes ?? '') . "\nApproved with rate {$currencyRate} through quick approve on " . now()->format('Y-m-d H:i:s'));
+        $userPayment->save();
+
+        $this->sendEmail($userPayment, true);
+        $this->approveLinkedCommission($currencyRate, $userPayment);
+
+        return redirect()->back()->with(['message' => "Payment #{$id} approved at rate {$currencyRate}.", 'alert-type' => 'success']);
+    }
+
     public function markUserPaymentPaid($id): \Illuminate\Http\RedirectResponse
     {
+        if (!(isBusinessPartners() || isAdministrator())) {
+            return redirect()->back()->with(['message' => 'You are not allowed to mark payments as paid.', 'alert-type' => 'error']);
+        }
+
         // Find the UserPayment record by ID
         $userPayment = UserPayment::find($id);
 
@@ -373,4 +572,75 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         return redirect()->back()->with('success', 'Payment marked as paid successfully.');
     }
 
+    /**
+     * Create a minimal project from inside the payment request form.
+     */
+    public function quickAddProject(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'client_id' => 'nullable|exists:users,id',
+        ]);
+
+        $project = new Project();
+        $project->name = $request->name;
+        $project->client_id = $request->client_id ?: Auth::id();
+        $project->payment_mode = 'Direct';
+        $project->start_date = now();
+        $project->expected_delivery_date = now();
+        $project->save();
+
+        return response()->json(['id' => $project->id, 'name' => $project->name]);
+    }
+
+    /**
+     * Create a minimal project target from inside the payment request form.
+     */
+    public function quickAddTarget(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'project_id' => 'required|exists:projects,id',
+        ]);
+
+        $target = new ProjectTarget();
+        $target->project_id = $request->project_id;
+        $target->developer_id = Auth::id();
+        $target->title = $request->title;
+        $target->save();
+
+        return response()->json(['id' => $target->id, 'title' => $target->title]);
+    }
+
+    /**
+     * Restrict a UserPayment query to primary earning rows for gross-volume
+     * statistics: excludes auto-generated commission copies and legacy manual
+     * BD rows that mirror a partner request on the same project and amount.
+     */
+    private function primaryEarnings($query)
+    {
+        return $query
+            ->where('generated_by_system', false)
+            ->where(function ($q) {
+                $q->where('share_type', '!=', UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER)
+                    ->orWhereNotExists(function ($sub) {
+                        $sub->selectRaw('1')
+                            ->from('user_payments as partner_req')
+                            ->whereColumn('partner_req.project_id', 'user_payments.project_id')
+                            ->whereColumn('partner_req.total_earning', 'user_payments.total_earning')
+                            ->where('partner_req.share_type', UserPayment::SHARE_TYPE_DEVELOPMENT_PARTNER)
+                            ->whereNull('partner_req.deleted_at');
+                    });
+            });
+    }
+
+    private function userCanManagePayments(): bool
+    {
+        $user = Auth::user();
+
+        return $user && $user->role && in_array($user->role->name, [
+            User::ADMINISTRATOR_ROLE_NAME,
+            User::ACCOUNTANT_ROLE_NAME,
+        ]);
+    }
 }

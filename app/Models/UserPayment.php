@@ -18,6 +18,14 @@ class UserPayment extends Model
     const APPROVED_STATUS = 'Approved';
     const REQUESTED_STATUS = 'Requested';
 
+    const SHARE_TYPE_DEVELOPMENT_PARTNER = 'development_partner';
+    const SHARE_TYPE_BUSINESS_DEVELOPER = 'business_developer';
+
+    const EARNING_TYPE_PROJECT = 'project';
+    const EARNING_TYPE_SALARY_EMPLOYEE = 'salary_employee';
+
+    const CLIENT_SOURCES = ['fiverr', 'upwork', 'payonner', 'other'];
+
 //    public function setDeveloperIdAttribute()
 //    {
 //        if ($this->isDeveloper() && auth()->user()->email != 'ayubkhokar786@gmail.com') {
@@ -88,5 +96,54 @@ class UserPayment extends Model
     public function developer(): belongsTo
     {
         return $this->belongsTo(User::class, 'developer_id');
+    }
+
+    public function income(): belongsTo
+    {
+        return $this->belongsTo(Income::class);
+    }
+
+    public function businessDeveloper(): belongsTo
+    {
+        return $this->belongsTo(User::class, 'select_business_developer_id');
+    }
+
+    /**
+     * The auto-generated business developer commission linked to this
+     * development partner request.
+     */
+    public function linkedCommission()
+    {
+        return $this->hasOne(UserPayment::class, 'second_entry_id');
+    }
+
+    /**
+     * The development partner request this commission was generated from.
+     */
+    public function sourceRequest(): belongsTo
+    {
+        return $this->belongsTo(UserPayment::class, 'second_entry_id');
+    }
+
+    /**
+     * Listing filters used by the user-payments browse page.
+     */
+    public function scopeFilter($query, array $filters)
+    {
+        return $query
+            ->when($filters['developer_id'] ?? null, fn($q, $v) => $q->where('developer_id', $v))
+            ->when($filters['business_developer_id'] ?? null, fn($q, $v) => $q->where('select_business_developer_id', $v))
+            ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
+            ->when($filters['share_type'] ?? null, fn($q, $v) => $q->where('share_type', $v))
+            ->when($filters['earning_type'] ?? null, fn($q, $v) => $q->where('earning_type', $v))
+            ->when($filters['client_source'] ?? null, fn($q, $v) => $q->where('client_source', $v))
+            ->when($filters['project_id'] ?? null, fn($q, $v) => $q->where('project_id', $v))
+            ->when($filters['income_id'] ?? null, fn($q, $v) => $q->where('income_id', $v))
+            ->when(isset($filters['paid_state']) && $filters['paid_state'] === 'paid', fn($q) => $q->paid())
+            ->when(isset($filters['paid_state']) && $filters['paid_state'] === 'unpaid', fn($q) => $q->notPaid())
+            ->when(isset($filters['generated']) && $filters['generated'] === 'system', fn($q) => $q->where('generated_by_system', true))
+            ->when(isset($filters['generated']) && $filters['generated'] === 'manual', fn($q) => $q->where('generated_by_system', false))
+            ->when($filters['date_from'] ?? null, fn($q, $v) => $q->whereDate('created_at', '>=', $v))
+            ->when($filters['date_to'] ?? null, fn($q, $v) => $q->whereDate('created_at', '<=', $v));
     }
 }
