@@ -28,7 +28,18 @@
       "Bash(php -l \"D:\\\\laragon\\\\www\\\\p\\\\app\\\\Models\\\\Domain.php\")",
       "Bash(php *)",
       "Bash(New-Item -ItemType Directory -Force \"D:\\\\laragon\\\\www\\\\p\\\\docs\")",
-      "PowerShell(New-Item *)"
+      "PowerShell(New-Item *)",
+      "Bash(grep -n \"INSERT INTO \\\\`data_rows\\\\`\" \"D:\\\\laragon\\\\www\\\\p\\\\webpenterportal.sql\")",
+      "Bash(grep -o \"INSERT INTO \\\\`data_types\\\\`[^;]*;\" \"D:\\\\laragon\\\\www\\\\p\\\\database\\\\prod_db_backup硸26149_portal_db_1_26_2025.sql\")",
+      "Bash(grep -n \"INSERT INTO \\\\`data_types\\\\`\" \"D:\\\\laragon\\\\www\\\\p\\\\database\\\\prod_db_backup硸26149_portal_db_1_26_2025.sql\")",
+      "Bash(grep -n \"INSERT INTO \\\\`data_rows\\\\`\" /d/laragon/www/p/database/prod_db_backup/u787826149_portal_db_1_26_2025.sql)",
+      "Bash(git push *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git mv *)",
+      "Bash(echo \"step1: $?\")",
+      "Bash(echo \"done: $?\")",
+      "Bash(git commit *)"
     ]
   }
 }

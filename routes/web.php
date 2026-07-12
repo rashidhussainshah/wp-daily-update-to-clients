@@ -80,6 +80,8 @@ Route::group(['prefix' => 'admin'], function () {
     Route::post('user-payments/{id}/rate-approve', [DeveloperPaymentController::class, 'rateApprove'])->name('user-payments.rate-approve');
     Route::post('user-payments/quick-add-project', [DeveloperPaymentController::class, 'quickAddProject'])->name('user-payments.quick-add-project');
     Route::post('user-payments/quick-add-target', [DeveloperPaymentController::class, 'quickAddTarget'])->name('user-payments.quick-add-target');
+    Route::get('user-payments-statistics', [DeveloperPaymentController::class, 'statistics'])->name('user-payments.statistics');
+    Route::get('team-statistics', [\App\Http\Controllers\Voyager\TeamStatisticsController::class, 'index'])->name('team-statistics.index');
     Route::get('leaves/{id}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
 
     // Salary Invoice routes

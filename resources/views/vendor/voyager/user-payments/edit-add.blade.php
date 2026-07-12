@@ -114,6 +114,53 @@
         </div>
     </div>
 
+    {{-- Quick add project modal --}}
+    <div class="modal fade" id="quick_add_project_modal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add New Project</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="quick_project_name">Project name</label>
+                        <input type="text" id="quick_project_name" class="form-control" placeholder="Project name">
+                    </div>
+                    <p class="text-danger" id="quick_project_error" style="display:none;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="quick_project_save">Save Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Quick add project target modal --}}
+    <div class="modal fade" id="quick_add_target_modal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add New Project Target</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="quick_target_title">Target title</label>
+                        <input type="text" id="quick_target_title" class="form-control" placeholder="Target title">
+                    </div>
+                    <p class="text-muted"><small>The target will be created under the project selected in the form.</small></p>
+                    <p class="text-danger" id="quick_target_error" style="display:none;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
+                    <button type="button" class="btn btn-primary" id="quick_target_save">Save Target</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade modal-danger" id="confirm_delete_modal">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -223,7 +270,20 @@
         $(clientSourceSelect).on('select2:select', function (e) {
             autofillFields();
         });
-            const userPercentage = {{ Auth::user()->percentage ?? 0.375 }}; // Fetch the percentage value for the logged-in user
+            @php
+                // The share rate must belong to the OWNER of the payment request,
+                // not the logged-in editor (e.g. accountant editing a business
+                // developer's request must use his 5-6%, not 37.5%).
+                $calculator = app(\App\Services\PaymentCalculationService::class);
+                $rateOwner = ($edit ? $dataTypeContent->developer : null) ?? Auth::user();
+                $isBusinessDeveloperShare = $edit
+                    ? $dataTypeContent->share_type === \App\Models\UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
+                    : in_array(Auth::id(), [\App\Models\User::AYUB_USER_ID, \App\Models\User::ALI_HASAN_USER_ID]);
+                $userPercentageValue = $isBusinessDeveloperShare
+                    ? $calculator->businessDeveloperRate($rateOwner)
+                    : $calculator->developmentPartnerRate($rateOwner);
+            @endphp
+            const userPercentage = {{ $userPercentageValue }}; // Share rate of the payment's owner
             // console.log(userPercentage);
             // console.log(typeof userPercentage);
         function autofillFields() {
@@ -275,5 +335,77 @@
                 devEarningInput.value = "";
             }
         }
+    </script>
+
+    <script>
+        // Quick-add buttons for project and project target, injected next to their selects.
+        $(function () {
+            var csrf = $('meta[name="csrf-token"]').attr('content');
+            var projectSelect = $('select[name="project_id"]');
+            var targetSelect = $('select[name="project_target_id"]');
+
+            if (projectSelect.length) {
+                projectSelect.closest('.form-group').append(
+                    '<a href="#" class="btn btn-xs btn-default" id="quick_add_project_btn" style="margin-top:5px;"><i class="voyager-plus"></i> Add new project</a>'
+                );
+            }
+            if (targetSelect.length) {
+                targetSelect.closest('.form-group').append(
+                    '<a href="#" class="btn btn-xs btn-default" id="quick_add_target_btn" style="margin-top:5px;"><i class="voyager-plus"></i> Add new target</a>'
+                );
+            }
+
+            $(document).on('click', '#quick_add_project_btn', function (e) {
+                e.preventDefault();
+                $('#quick_project_name').val('');
+                $('#quick_project_error').hide();
+                $('#quick_add_project_modal').modal('show');
+            });
+
+            $(document).on('click', '#quick_add_target_btn', function (e) {
+                e.preventDefault();
+                if (!projectSelect.val()) {
+                    alert('Select (or add) a project first, then add its target.');
+                    return;
+                }
+                $('#quick_target_title').val('');
+                $('#quick_target_error').hide();
+                $('#quick_add_target_modal').modal('show');
+            });
+
+            $('#quick_project_save').on('click', function () {
+                var name = $.trim($('#quick_project_name').val());
+                if (!name) {
+                    $('#quick_project_error').text('Project name is required.').show();
+                    return;
+                }
+                $.post('{{ route('user-payments.quick-add-project') }}', {_token: csrf, name: name})
+                    .done(function (data) {
+                        projectSelect.append(new Option(data.name, data.id, true, true)).trigger('change');
+                        $('#quick_add_project_modal').modal('hide');
+                    })
+                    .fail(function (xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Could not create the project.';
+                        $('#quick_project_error').text(msg).show();
+                    });
+            });
+
+            $('#quick_target_save').on('click', function () {
+                var title = $.trim($('#quick_target_title').val());
+                if (!title) {
+                    $('#quick_target_error').text('Target title is required.').show();
+                    return;
+                }
+                $.post('{{ route('user-payments.quick-add-target') }}', {_token: csrf, title: title, project_id: projectSelect.val()})
+                    .done(function (data) {
+                        targetSelect.append(new Option(data.title, data.id, true, true)).trigger('change');
+                        $('#quick_add_target_modal').modal('hide');
+                    })
+                    .fail(function (xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Could not create the target.';
+                        $('#quick_target_error').text(msg).show();
+                    });
+            });
+        });
     </script>
 @stop
