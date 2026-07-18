@@ -43,12 +43,16 @@ class User extends \TCG\Voyager\Models\User
     const AYUB_USER_ID = 3;
     const ALI_HASAN_USER_ID = 147;
     const CLIENT_ID = 4;
+    /** Only user allowed to mark payment requests as paid. */
+    const RASHID_USER_ID = 1;
     public $disable_export = true;
     protected $dates = ['deleted_at'];
 
     const ADMINISTRATOR_ROLE_NAME = 'Administrator';
     const ACCOUNTANT_ROLE_NAME = 'Accountant';
     const DEVELOPER_ROLE_NAME = 'Developer';
+    /** Actual role name in the roles table (typo included). */
+    const BUSINESS_DEVELOPER_ROLE_NAME = 'Bussiness Developer';
 
     /**
      * The attributes that are mass assignable.
@@ -136,6 +140,17 @@ class User extends \TCG\Voyager\Models\User
     public function scopeBusinessDeveloper($query)
     {
         return $query->where('role_id', setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
+    }
+
+    /**
+     * Per-instance check mirroring scopeBusinessDeveloper() - used wherever a
+     * single user (not a query) needs to be classified, e.g. deciding payment
+     * request flow. Role-based so any current/future business developer is
+     * recognized, not just a hardcoded list of user ids.
+     */
+    public function isBusinessDeveloper(): bool
+    {
+        return (int) $this->role_id === (int) (setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
     }
 
     public function clientPortfolios()

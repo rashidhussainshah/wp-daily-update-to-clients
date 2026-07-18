@@ -18,6 +18,9 @@ class ProjectTarget extends Model
      */
     protected $dates = ['deleted_at'];
 
+    /** Exposes dropdown_label as a relationship label option in Voyager BREAD. */
+    public $additional_attributes = ['dropdown_label'];
+
     /**
      * The attributes that should be appended in models.
      *
@@ -42,6 +45,24 @@ class ProjectTarget extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * Newest targets first - used by the payment-request dropdown (BREAD
+     * relationship scope).
+     */
+    public function scopeLatestFirst($query)
+    {
+        return $query->orderByDesc('id');
+    }
+
+    /**
+     * Label shown in the payment-request Project Target dropdown: id + title,
+     * so it's easy to tell targets with the same/similar title apart.
+     */
+    public function getDropdownLabelAttribute(): string
+    {
+        return '#' . $this->id . ' - ' . $this->title;
     }
 
     public function tasks(): HasMany

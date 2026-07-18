@@ -22,8 +22,8 @@ class PaymentCalculationService
     const DEV_PARTNER_CAP = 0.375;
 
     /** Fallback commission rates when users.percentage is not set. */
-    const AYUB_DEFAULT_RATE = 0.06;
-    const ALI_HASAN_DEFAULT_RATE = 0.05;
+    const AYUB_DEFAULT_RATE = 0.05;
+    const ALI_HASAN_DEFAULT_RATE = 0.04;
 
     /** Allowed rounding drift when comparing allocations against caps. */
     const EPSILON = 0.01;

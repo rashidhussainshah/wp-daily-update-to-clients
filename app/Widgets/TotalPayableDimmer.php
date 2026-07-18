@@ -23,26 +23,21 @@ class TotalPayableDimmer extends BaseDimmer
      */
     public function run(Request $request)
     {
-        $totalPayable = 0 ;
-        if ($request->query('user_id')) {
-            $totalPayable = UserPayment::getPayable($request->query('user_id'));
-        }
-        else {
-            $loggedInUserId = Auth::id();
-            $totalPayable = UserPayment::getPayable($loggedInUserId);
-        }
+        $userId = dashboardTargetUserId($request);
+        $totalPayable = UserPayment::getPayable($userId);
         $string = trans_choice('eod.total_payable', $totalPayable);
         $currency  = setting('admin.currency');
         return view('voyager::dimmer', array_merge($this->config, [
             'icon'   => 'voyager-credit-cards',
             'title'  => " {$string} {$currency} {$totalPayable}",
             'text'   => __('eod.payable_text', ['currency' => $currency, 'count' => $totalPayable]),
+            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
+        ] + (isAdministrator() ? [
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),
             ],
-            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
-        ]));
+        ] : [])));
     }
 
     /**
@@ -52,6 +47,6 @@ class TotalPayableDimmer extends BaseDimmer
      */
     public function shouldBeDisplayed(): bool
     {
-        return isBusinessPartners();
+        return canViewPaymentDimmers();
     }
 }

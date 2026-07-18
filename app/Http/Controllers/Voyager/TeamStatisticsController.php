@@ -38,8 +38,15 @@ class TeamStatisticsController extends Controller
         $from = $filters['date_from'] ?? null;
         $to = $filters['date_to'] ?? null;
 
+        // Only development team members are relevant here (users flagged
+        // is_development_team_member) - clients/students also have records.
+        $teamIds = User::withoutGlobalScopes()
+            ->where('is_development_team_member', true)
+            ->pluck('id');
+
         // ---- Leaves (dated by start_date) ----
         $leaves = Leave::query()
+            ->whereIn('user_id', $teamIds)
             ->when($userId, fn($q, $v) => $q->where('user_id', $v))
             ->when($from, fn($q, $v) => $q->whereDate('start_date', '>=', $v))
             ->when($to, fn($q, $v) => $q->whereDate('start_date', '<=', $v));
@@ -88,6 +95,7 @@ class TeamStatisticsController extends Controller
 
         // ---- Fines (dated by fine date, falling back to created_at) ----
         $fines = Fine::query()
+            ->whereIn('user_id', $teamIds)
             ->when($userId, fn($q, $v) => $q->where('user_id', $v))
             ->when($from, fn($q, $v) => $q->whereRaw('DATE(COALESCE(date, created_at)) >= ?', [$v]))
             ->when($to, fn($q, $v) => $q->whereRaw('DATE(COALESCE(date, created_at)) <= ?', [$v]));
@@ -108,6 +116,7 @@ class TeamStatisticsController extends Controller
 
         // ---- Checkins (dated by checkin time, falling back to created_at) ----
         $checkins = Checkin::query()
+            ->whereIn('developer_id', $teamIds)
             ->when($userId, fn($q, $v) => $q->where('developer_id', $v))
             ->when($from, fn($q, $v) => $q->whereRaw('DATE(COALESCE(checkin_at, created_at)) >= ?', [$v]))
             ->when($to, fn($q, $v) => $q->whereRaw('DATE(COALESCE(checkin_at, created_at)) <= ?', [$v]));
@@ -172,15 +181,16 @@ class TeamStatisticsController extends Controller
             'checkins' => $months->map(fn($m) => (float) ($checkinsMonthly[$m] ?? 0)),
         ];
 
-        $users = User::whereIn('id', collect()
-            ->merge(Leave::query()->select('user_id')->distinct()->pluck('user_id'))
-            ->merge(Fine::query()->select('user_id')->distinct()->pluck('user_id'))
-            ->merge(Checkin::query()->select('developer_id')->distinct()->pluck('developer_id'))
-            ->unique())->orderBy('name')->get(['id', 'name']);
+        // Resolve names without the exclude-homey global scope so no team
+        // member's row falls back to a bare #id.
+        $userNames = User::withoutGlobalScopes()->withTrashed()
+            ->whereIn('id', $teamIds)->pluck('name', 'id');
+        $users = User::withoutGlobalScopes()
+            ->whereIn('id', $teamIds)->orderBy('name')->get(['id', 'name']);
 
         return Voyager::view('voyager::team-statistics.index', compact(
             'filters', 'leaveStats', 'leavesByUser', 'fineStats', 'finesByUser',
-            'checkinStats', 'checkinsByUser', 'monthly', 'users',
+            'checkinStats', 'checkinsByUser', 'monthly', 'users', 'userNames',
             'leaveCompliance', 'followingCount', 'exceedingCount', 'avgLeavePerUserMonth'
         ));
     }

@@ -14,3 +14,63 @@
 .chart-heading-text {
     color: black !important;
 }
+
+/* ------------------------------------------------------------------
+   Admin readability: Voyager's default text is light grey and hard to
+   read. Darken body text, table cells, form labels and inputs.
+------------------------------------------------------------------- */
+body,
+.app-container,
+.panel-body,
+p, li, dd, dt {
+    color: #1f2430;
+}
+
+.table > thead > tr > th {
+    color: #16202b;
+    font-weight: 700;
+}
+
+.table > tbody > tr > td,
+.table > tfoot > tr > th {
+    color: #1f2430;
+}
+
+label,
+.control-label,
+.form-group > label {
+    color: #16202b !important;
+    font-weight: 600;
+}
+
+.form-control,
+select.form-control,
+textarea.form-control,
+input.form-control {
+    color: #111827 !important;
+}
+
+.form-control::placeholder {
+    color: #7b8794;
+    opacity: 1;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    color: #111827;
+}
+
+.panel-title,
+.page-title,
+h1, h2, h3, h4 {
+    color: #16202b;
+}
+
+small,
+.text-muted {
+    color: #5b6570 !important;
+}
+
+.breadcrumb a,
+.breadcrumb .active {
+    color: #2a3542;
+}

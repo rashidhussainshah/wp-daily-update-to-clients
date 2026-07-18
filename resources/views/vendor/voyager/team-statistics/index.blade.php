@@ -139,7 +139,7 @@
                             @forelse($leavesByUser as $row)
                                 @php $comp = $leaveCompliance[$row->user_id] ?? null; @endphp
                                 <tr>
-                                    <td>{{ $row->user->name ?? ('#' . $row->user_id) }}
+                                    <td>{{ $userNames[$row->user_id] ?? ('#' . $row->user_id) }}
                                         <br><small class="text-muted">{{ $row->requests }} req &middot; {{ $row->approved }} approved &middot; {{ $row->pending }} pending</small>
                                     </td>
                                     <td class="text-right">{{ $row->days }}</td>
@@ -172,7 +172,7 @@
                             <tbody>
                             @forelse($finesByUser as $row)
                                 <tr>
-                                    <td>{{ $row->user->name ?? ('#' . $row->user_id) }}</td>
+                                    <td>{{ $userNames[$row->user_id] ?? ('#' . $row->user_id) }}</td>
                                     <td class="text-right">{{ $row->fines }}</td>
                                     <td class="text-right">{{ number_format($row->amount, 0) }}</td>
                                     <td class="text-right">{{ number_format($row->deducted_amount, 0) }}</td>
@@ -196,7 +196,7 @@
                             <tbody>
                             @forelse($checkinsByUser as $row)
                                 <tr>
-                                    <td>{{ $row->developer->name ?? ('#' . $row->developer_id) }}</td>
+                                    <td>{{ $userNames[$row->developer_id] ?? ('#' . $row->developer_id) }}</td>
                                     <td class="text-right">{{ $row->days }}</td>
                                     <td class="text-right"><small>{{ $row->avg_in ? substr($row->avg_in, 0, 5) : '-' }} / {{ $row->avg_out ? substr($row->avg_out, 0, 5) : '-' }}</small></td>
                                     <td class="text-right {{ ($row->avg_hours ?? 0) < 9 ? 'text-danger' : 'text-success' }}">{{ $row->avg_hours ?? '-' }}</td>
