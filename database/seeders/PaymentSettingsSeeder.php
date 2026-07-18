@@ -21,6 +21,6 @@ class PaymentSettingsSeeder extends Seeder
                 'group'        => 'Payments',
             ]
         );
-        
+
     }
 }

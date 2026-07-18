@@ -316,7 +316,10 @@
     <link rel="stylesheet" href="{{ voyager_asset('lib/css/responsive.dataTables.min.css') }}">
 @endif
     <style>
-        /* Bolder dropdown text + clearer input borders, for readability */
+        /* Bolder labels/dropdown text + clearer input borders, for readability */
+        .page-content .control-label {
+            font-weight: 700;
+        }
         .page-content select.form-control,
         .page-content select.form-control option,
         .page-content .select2-container .select2-selection__rendered {

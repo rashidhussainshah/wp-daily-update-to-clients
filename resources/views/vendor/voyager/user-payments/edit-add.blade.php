@@ -19,7 +19,10 @@
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        /* Bolder dropdown text + clearer input borders, for readability */
+        /* Bolder labels/dropdown text + clearer input borders, for readability */
+        .page-content .control-label {
+            font-weight: 700;
+        }
         .page-content select.form-control,
         .page-content select.form-control option,
         .page-content .select2-container .select2-selection__rendered {
@@ -336,8 +339,13 @@
         const currentCurrencyRateInput = document.querySelector('input[name="currency_current_rate"]');
         const clientSourceSelect = document.querySelector('select[name="client_source"]');
 
-        // Add a focus-out event listener to the total earning input field
-        currentCurrencyRateInput.addEventListener("blur", autofillFields);
+        // currency_current_rate is hidden on the add form (partners/BD never
+        // see rates) - only bind if it's actually rendered (edit form), so a
+        // null-reference error here doesn't silently kill every script below
+        // it, including the income_id -> autofillFields wiring.
+        if (currentCurrencyRateInput) {
+            currentCurrencyRateInput.addEventListener("blur", autofillFields);
+        }
         // Using Select2's event binding to detect changes
         $(clientSourceSelect).on('select2:select', function (e) {
             autofillFields();
@@ -397,16 +405,18 @@
             // Get references to the input fields by name
             const totalEarningInput = document.querySelector('input[name="total_earning"]');
             const clientSourceSelect = document.querySelector('select[name="client_source"]');
+            // dev_earning/currency_current_rate/payable are hidden on the add
+            // form (add=0 - partners/BD never see rates or shares), so these
+            // may not exist in the DOM at all here; guard every use.
             const devEarningInput = document.querySelector('input[name="dev_earning"]');
             const currentCurrencyRateInput = document.querySelector('input[name="currency_current_rate"]');
             const payableInput = document.querySelector('input[name="payable"]');
-
 
             // Get the selected client source
             const selectedClientSource = clientSourceSelect.value;
             // Get the total earning value
             const totalEarning = parseFloat(totalEarningInput.value);
-            const currentCurrencyRate = parseFloat(currentCurrencyRateInput.value);
+            const currentCurrencyRate = currentCurrencyRateInput ? parseFloat(currentCurrencyRateInput.value) : NaN;
             if (!isNaN(totalEarning)) {
                 let devEarning = 0;
 
@@ -424,11 +434,15 @@
                 const devNetEarning = devEarning * userPercentage;
 
                 // Update the dev earning input field with the calculated value
-                devEarningInput.value = devNetEarning.toFixed(2); // Format the result to two decimal places
+                if (devEarningInput) {
+                    devEarningInput.value = devNetEarning.toFixed(2); // Format the result to two decimal places
+                }
                 // Calculate the payable amount by multiplying devNetEarning with the currency rate
-                const payableAmount = devNetEarning * currentCurrencyRate;
-                payableInput.value = payableAmount.toFixed(2); // Format the result to two decimal places
-            } else {
+                if (payableInput) {
+                    const payableAmount = devNetEarning * currentCurrencyRate;
+                    payableInput.value = payableAmount.toFixed(2); // Format the result to two decimal places
+                }
+            } else if (devEarningInput) {
                 // If total earning is not a valid number, clear the dev earning input
                 devEarningInput.value = "";
             }

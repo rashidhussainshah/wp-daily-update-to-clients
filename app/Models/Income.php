@@ -34,6 +34,10 @@ class Income extends Model
         static::saving(function (Income $income) {
             // Converted PKR is tracked automatically: amount x conversion rate.
             // Historic rows without a conversion_rate keep their manual value.
+            // Note: amount_in only controls this tracking calculation - the
+            // payment-request flow (PaymentCalculationService, store()) always
+            // treats total_earning as USD and never reads amount_in, so a
+            // PKR-denominated income does not get converted differently there.
             if ($income->amount && $income->conversion_rate
                 && strtolower($income->amount_in ?? 'usd') === 'usd') {
                 $income->converted_pkr = round($income->amount * $income->conversion_rate, 2);
