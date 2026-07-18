@@ -9,6 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentCalculationService
 {
+    // Note: total_earning (and every calculation below) is always treated as
+    // USD. Income::amount_in (USD/PKR) is not read anywhere in this service
+    // or in DeveloperPaymentController::store() - it only controls Income's
+    // own converted_pkr tracking figure, not share/payable calculation.
+
     /**
      * Platform fees deducted before any share is calculated.
      * fiverr 20%, upwork 10%, payoneer/other no fee.
