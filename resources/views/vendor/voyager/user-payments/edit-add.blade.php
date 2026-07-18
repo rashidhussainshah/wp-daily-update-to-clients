@@ -1,12 +1,83 @@
 @php
     $edit = !is_null($dataTypeContent->getKey());
     $add  = is_null($dataTypeContent->getKey());
+
+    // True when the request belongs to a business developer submitting their
+    // own salary-employee commission - editing an existing BD request looks
+    // at its stored share_type, adding a new one looks at the logged-in
+    // user's role (User::isBusinessDeveloper(), any current/future business
+    // developer, not a hardcoded list of people). These requests never
+    // involve a development partner, so "Select Business Developer" (who to
+    // attribute a partner's commission to) doesn't apply and must not be shown.
+    $submitterIsBusinessDeveloper = $edit
+        ? $dataTypeContent->share_type === \App\Models\UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
+        : Auth::user()->isBusinessDeveloper();
 @endphp
 
 @extends('voyager::master')
 
 @section('css')
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <style>
+        /* Bolder dropdown text + clearer input borders, for readability */
+        .page-content select.form-control,
+        .page-content select.form-control option,
+        .page-content .select2-container .select2-selection__rendered {
+            font-weight: 600;
+        }
+        /* select2's open dropdown list of options (rendered separately, not
+           inside the <select>) */
+        .select2-results__option {
+            font-weight: 600;
+        }
+        .page-content .form-control {
+            border: 1.5px solid #97a3af;
+        }
+        .page-content .form-control:focus {
+            border-color: #55606c;
+            box-shadow: 0 0 0 2px rgba(85, 96, 108, .15);
+        }
+        .page-content .select2-container--default .select2-selection--single,
+        .page-content .select2-container--default .select2-selection--multiple {
+            border: 1.5px solid #97a3af !important;
+        }
+
+        /* Mobile responsiveness - desktop layout above is untouched.
+           Bootstrap's col-md-* grid already stacks fields full-width below
+           768px on its own; this covers the pieces that don't. */
+        @media (max-width: 767px) {
+            .page-content.edit-add .select2-container,
+            .page-content.edit-add select.form-control,
+            .page-content.edit-add input.form-control,
+            .page-content.edit-add textarea.form-control {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            /* Quick-add links: full-width block under the select instead of
+               a cramped inline link */
+            #quick_add_project_btn,
+            #quick_add_target_btn {
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin-top: 6px !important;
+            }
+
+            /* Save button: full-width, easier to tap */
+            .panel-footer .btn.save {
+                display: block;
+                width: 100%;
+            }
+
+            /* Modal footers with two buttons side by side: stack them */
+            .modal-footer .btn {
+                display: block;
+                width: 100%;
+                margin: 4px 0 !important;
+            }
+        }
+    </style>
 @stop
 
 @section('page_title', __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular'))
@@ -56,6 +127,7 @@
                             @endphp
 
                             @foreach($dataTypeRows as $row)
+                                @continue(($row->field === 'user_payment_hasone_user_relationship' || ($row->details->column ?? null) === 'select_business_developer_id') && $submitterIsBusinessDeveloper)
                                 <!-- GET THE DISPLAY OPTIONS -->
                                 @php
                                     $display_options = $row->details->display ?? NULL;
@@ -270,22 +342,57 @@
         $(clientSourceSelect).on('select2:select', function (e) {
             autofillFields();
         });
+        // Recalculate when the earning amount itself changes.
+        const totalEarningField = document.querySelector('input[name="total_earning"]');
+        if (totalEarningField) {
+            totalEarningField.addEventListener("blur", autofillFields);
+        }
+
+        // Income-driven prefills: picking the income fills the source, the
+        // earning amount and the PKR rate so nothing is typed twice.
+        @php
+            $incomePrefillMap = \App\Models\Income::query()->get()->mapWithKeys(fn($i) => [$i->id => [
+                'source' => $i->clientSource(),
+                'amount' => (float) $i->amount,
+                'rate' => $i->conversion_rate ? (float) $i->conversion_rate : null,
+            ]]);
+        @endphp
+        const incomePrefillMap = @json($incomePrefillMap);
+
+        function applyIncomePrefills(incomeId) {
+            const info = incomePrefillMap[incomeId];
+            if (!info) return;
+            const sourceSelect = document.querySelector('select[name="client_source"]');
+            if (sourceSelect && info.source) {
+                $(sourceSelect).val(info.source).trigger('change');
+            }
+            const totalInput = document.querySelector('input[name="total_earning"]');
+            if (totalInput && !totalInput.value && info.amount) {
+                totalInput.value = info.amount;
+            }
+            const rateInput = document.querySelector('input[name="currency_current_rate"]');
+            if (rateInput && !rateInput.value && info.rate) {
+                rateInput.value = info.rate;
+            }
+            autofillFields();
+        }
+
+        $('select[name="income_id"]').on('select2:select', function () {
+            applyIncomePrefills(this.value);
+        });
             @php
                 // The share rate must belong to the OWNER of the payment request,
                 // not the logged-in editor (e.g. accountant editing a business
                 // developer's request must use his 5-6%, not 37.5%).
                 $calculator = app(\App\Services\PaymentCalculationService::class);
                 $rateOwner = ($edit ? $dataTypeContent->developer : null) ?? Auth::user();
-                $isBusinessDeveloperShare = $edit
-                    ? $dataTypeContent->share_type === \App\Models\UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
-                    : in_array(Auth::id(), [\App\Models\User::AYUB_USER_ID, \App\Models\User::ALI_HASAN_USER_ID]);
-                $userPercentageValue = $isBusinessDeveloperShare
+                // Reuses $submitterIsBusinessDeveloper computed at the top of
+                // this file - single source of truth.
+                $userPercentageValue = $submitterIsBusinessDeveloper
                     ? $calculator->businessDeveloperRate($rateOwner)
                     : $calculator->developmentPartnerRate($rateOwner);
             @endphp
             const userPercentage = {{ $userPercentageValue }}; // Share rate of the payment's owner
-            // console.log(userPercentage);
-            // console.log(typeof userPercentage);
         function autofillFields() {
             // Get references to the input fields by name
             const totalEarningInput = document.querySelector('input[name="total_earning"]');
@@ -297,12 +404,9 @@
 
             // Get the selected client source
             const selectedClientSource = clientSourceSelect.value;
-            // console.log(selectedClientSource)
             // Get the total earning value
             const totalEarning = parseFloat(totalEarningInput.value);
             const currentCurrencyRate = parseFloat(currentCurrencyRateInput.value);
-            // console.log(totalEarning)
-            // console.log(currentCurrencyRate)
             if (!isNaN(totalEarning)) {
                 let devEarning = 0;
 
@@ -316,14 +420,8 @@
                     // Assign total earning for Payonner and Other without deductions
                     devEarning = totalEarning;
                 }
-                // console.log('devEarning');
-                // console.log(devEarning);
                 // Calculate percentage of employee
                 const devNetEarning = devEarning * userPercentage;
-                // devEarning -= devNetEarning;
-                // console.log('devNetEarning');
-                // console.log(devNetEarning);
-
 
                 // Update the dev earning input field with the calculated value
                 devEarningInput.value = devNetEarning.toFixed(2); // Format the result to two decimal places
@@ -344,6 +442,22 @@
             var projectSelect = $('select[name="project_id"]');
             var targetSelect = $('select[name="project_target_id"]');
 
+            // Newest records first in the relationship dropdowns (options come
+            // from Voyager ordered oldest-first; ids descend = latest on top).
+            ['project_id', 'project_target_id', 'income_id', 'select_business_developer_id'].forEach(function (field) {
+                var sel = document.querySelector('select[name="' + field + '"]');
+                if (!sel) return;
+                var opts = Array.prototype.slice.call(sel.options);
+                opts.sort(function (a, b) {
+                    if (a.value === '') return -1; // keep the empty placeholder on top
+                    if (b.value === '') return 1;
+                    return parseInt(b.value, 10) - parseInt(a.value, 10);
+                });
+                var selected = sel.value;
+                opts.forEach(function (o) { sel.appendChild(o); });
+                sel.value = selected;
+            });
+
             if (projectSelect.length) {
                 projectSelect.closest('.form-group').append(
                     '<a href="#" class="btn btn-xs btn-default" id="quick_add_project_btn" style="margin-top:5px;"><i class="voyager-plus"></i> Add new project</a>'
@@ -354,6 +468,7 @@
                     '<a href="#" class="btn btn-xs btn-default" id="quick_add_target_btn" style="margin-top:5px;"><i class="voyager-plus"></i> Add new target</a>'
                 );
             }
+
 
             $(document).on('click', '#quick_add_project_btn', function (e) {
                 e.preventDefault();

@@ -3,9 +3,9 @@
 @section('page_title', __('voyager::generic.viewing').' '.$dataType->getTranslatedAttribute('display_name_plural'))
 @section('page_header')
     <div class="container-fluid">
-        <div>
-            <p>{!! getIncomeDetails() !!}</p>
-        </div>
+{{--        <div>--}}
+{{--            <p>{!! getIncomeDetails() !!}</p>--}}
+{{--        </div>--}}
         <h1 class="page-title">
             <i class="{{ $dataType->icon }}"></i> {{ $dataType->getTranslatedAttribute('display_name_plural') }}
         </h1>
@@ -315,6 +315,30 @@
 @if(!$dataType->server_side && config('dashboard.data_tables.responsive'))
     <link rel="stylesheet" href="{{ voyager_asset('lib/css/responsive.dataTables.min.css') }}">
 @endif
+    <style>
+        /* Bolder dropdown text + clearer input borders, for readability */
+        .page-content select.form-control,
+        .page-content select.form-control option,
+        .page-content .select2-container .select2-selection__rendered {
+            font-weight: 600;
+        }
+        /* select2's open dropdown list of options (rendered separately, not
+           inside the <select>) */
+        .select2-results__option {
+            font-weight: 600;
+        }
+        .page-content .form-control {
+            border: 1.5px solid #97a3af;
+        }
+        .page-content .form-control:focus {
+            border-color: #55606c;
+            box-shadow: 0 0 0 2px rgba(85, 96, 108, .15);
+        }
+        .page-content .select2-container--default .select2-selection--single,
+        .page-content .select2-container--default .select2-selection--multiple {
+            border: 1.5px solid #97a3af !important;
+        }
+    </style>
 @stop
 
 @section('javascript')

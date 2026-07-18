@@ -152,3 +152,57 @@ if (!function_exists('isBusinessPartners')) {
         return in_array(strtolower($user->email), $allowedEmails, true);
     }
 }
+
+if (!function_exists('canViewPaymentDimmers')) {
+    /**
+     * The dashboard's payable/paid/remaining totals widgets: development
+     * partners and business developers see their own totals; administrators
+     * see everything too. Everyone else (accountant, etc.) doesn't get these.
+     *
+     * @return bool
+     */
+    function canViewPaymentDimmers(): bool
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return false;
+        }
+
+        return isAdministrator() || ($user->role && in_array($user->role->name, [
+            User::DEVELOPER_ROLE_NAME,
+            User::BUSINESS_DEVELOPER_ROLE_NAME,
+        ]));
+    }
+}
+
+if (!function_exists('canViewOthersDashboard')) {
+    /**
+     * Only Ayub or an Administrator may view another person's payment
+     * dashboard totals (the /admin?user_id=X dimmers). Everyone else only
+     * ever sees their own numbers, regardless of what user_id is in the URL.
+     *
+     * @return bool
+     */
+    function canViewOthersDashboard(): bool
+    {
+        return isAdministrator() || Auth::id() === User::AYUB_USER_ID;
+    }
+}
+
+if (!function_exists('dashboardTargetUserId')) {
+    /**
+     * Resolve which user's payment totals the dashboard dimmers should show:
+     * the requested ?user_id, but only when the viewer is allowed to look at
+     * someone else's data (see canViewOthersDashboard()) - otherwise always
+     * the logged-in user's own id.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return int|null
+     */
+    function dashboardTargetUserId($request)
+    {
+        $requested = $request->query('user_id');
+
+        return ($requested && canViewOthersDashboard()) ? $requested : Auth::id();
+    }
+}

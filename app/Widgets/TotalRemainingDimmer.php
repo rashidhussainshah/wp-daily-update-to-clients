@@ -26,27 +26,12 @@ class TotalRemainingDimmer extends BaseDimmer
      */
     public function run(Request $request)
     {
-        $advanceGivenPayment = 0;
-        $advanceGivenPaymentInUsd = 0;
-        $countPaid = 0;
-        $count = 0;
-        if ($request->query('user_id')) {
-            $countPayable = UserPayment::getPayable($request->query('user_id'));
-            $countPaid = UserPayment::getPaid($request->query('user_id'));
-            $advanceGivenPayment = Expense::getAdvance($request->query('user_id'), Expense::IN_PKR);
-            $count = ($countPayable - $advanceGivenPayment ) - $countPaid;
-            $advanceGivenPaymentInUsd = Expense::getAdvance($request->query('user_id'), Expense::IN_USD);
-        }
-        else {
-            $loggedInUserId = Auth::id();
-            $countPayable = UserPayment::getPayable($loggedInUserId);
-            $countPaid = UserPayment::getPaid($loggedInUserId);
-            $advanceGivenPayment = Expense::getAdvance($loggedInUserId, Expense::IN_PKR);
-            $count = ( $countPayable - $advanceGivenPayment ) - $countPaid;
-            $advanceGivenPaymentInUsd = Expense::getAdvance($loggedInUserId, Expense::IN_USD);
-
-        }
-
+        $userId = dashboardTargetUserId($request);
+        $countPayable = UserPayment::getPayable($userId);
+        $countPaid = UserPayment::getPaid($userId);
+        $advanceGivenPayment = Expense::getAdvance($userId, Expense::IN_PKR);
+        $count = ($countPayable - $advanceGivenPayment) - $countPaid;
+        $advanceGivenPaymentInUsd = Expense::getAdvance($userId, Expense::IN_USD);
 
         $string = trans_choice('eod.total_remaining', $count);
         $currency  = setting('admin.currency');
@@ -54,12 +39,13 @@ class TotalRemainingDimmer extends BaseDimmer
             'icon'   => 'voyager-truck',
             'title'  => " {$string} {$currency} {$count}",
             'text'   => __('eod.remaining_text', ['currency' => $currency, 'count' => $count, 'advance' => $advanceGivenPayment, 'advance_in_usd' => $advanceGivenPaymentInUsd]),
+            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
+        ] + (isAdministrator() ? [
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),
             ],
-            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
-        ]));
+        ] : [])));
     }
     /**
      * Determine if the widget should be displayed.
@@ -68,6 +54,6 @@ class TotalRemainingDimmer extends BaseDimmer
      */
     public function shouldBeDisplayed(): bool
     {
-        return isBusinessPartners();
+        return canViewPaymentDimmers();
     }
 }

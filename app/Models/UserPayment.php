@@ -6,6 +6,7 @@ use App\utils\traits\CommonRelationship;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
@@ -126,11 +127,64 @@ class UserPayment extends Model
     }
 
     /**
+     * Who changed what on this request, newest first (see UserPaymentObserver).
+     */
+    public function logs(): HasMany
+    {
+        return $this->hasMany(UserPaymentLog::class)->latest();
+    }
+
+    /**
+     * SQL fragment (with bindings) for the absolute PKR difference between
+     * the stored payable and share x currency rate.
+     */
+    public static function payableMismatchExpression(): array
+    {
+        return [
+            'sql' => 'ABS(payable - (dev_earning * currency_current_rate))',
+            'bindings' => [],
+        ];
+    }
+
+    /**
+     * SQL fragment (with bindings) for the absolute USD difference between
+     * the stored share (dev_earning) and what it should be: the income's
+     * net-after-fee amount times a flat development partner rate you pick
+     * explicitly (35% or 37.5% - the two rates that have applied over
+     * time). Explicit rather than date-based so it also works on rows with
+     * a bad/missing created_at (the admin picks which rate to check). A
+     * users.percentage override still wins when one is set. Development
+     * partner rows only - see scopeFilter()'s use of this expression.
+     */
+    public static function shareMismatchExpression(float $rate): array
+    {
+        $sql = "ABS(dev_earning - ROUND(
+                (total_earning * (1 - CASE client_source
+                    WHEN 'fiverr' THEN 0.20
+                    WHEN 'upwork' THEN 0.10
+                    ELSE 0 END))
+                * COALESCE(
+                    (SELECT percentage FROM users WHERE users.id = user_payments.developer_id),
+                    ?
+                ), 2))";
+
+        return [
+            'sql' => $sql,
+            'bindings' => [$rate],
+        ];
+    }
+
+    /**
      * Listing filters used by the user-payments browse page.
      */
     public function scopeFilter($query, array $filters)
     {
         return $query
+            ->when($filters['ids'] ?? null, function ($q, $v) {
+                // accepts "341", "341,350" or "341 350 402"
+                $ids = array_filter(array_map('intval', preg_split('/[\s,]+/', $v, -1, PREG_SPLIT_NO_EMPTY)));
+                return $ids ? $q->whereIn('id', $ids) : $q;
+            })
             ->when($filters['developer_id'] ?? null, fn($q, $v) => $q->where('developer_id', $v))
             ->when($filters['business_developer_id'] ?? null, fn($q, $v) => $q->where('select_business_developer_id', $v))
             ->when($filters['status'] ?? null, fn($q, $v) => $q->where('status', $v))
@@ -143,6 +197,26 @@ class UserPayment extends Model
             ->when(isset($filters['paid_state']) && $filters['paid_state'] === 'unpaid', fn($q) => $q->notPaid())
             ->when(isset($filters['generated']) && $filters['generated'] === 'system', fn($q) => $q->where('generated_by_system', true))
             ->when(isset($filters['generated']) && $filters['generated'] === 'manual', fn($q) => $q->where('generated_by_system', false))
+            // Payable sanity filter: rows where the stored payable does not
+            // match share x rate (differences up to 20 PKR are ignored as
+            // rounding).
+            ->when(isset($filters['mismatch']) && $filters['mismatch'] === '1', function ($q) {
+                ['sql' => $sql, 'bindings' => $bindings] = self::payableMismatchExpression();
+                $q->whereNotNull('currency_current_rate')
+                    ->whereNotNull('payable')
+                    ->whereRaw("{$sql} > 20", $bindings);
+            })
+            // Share sanity filter (development partners only): rows where
+            // the stored share doesn't match a flat 35% or 37.5% of the net
+            // earning (differences up to $0.05 are ignored as rounding).
+            ->when(isset($filters['mismatch']) && in_array($filters['mismatch'], ['35', '37.5'], true), function ($q) use ($filters) {
+                $rate = (float) $filters['mismatch'] / 100;
+                ['sql' => $sql, 'bindings' => $bindings] = self::shareMismatchExpression($rate);
+                $q->where('share_type', self::SHARE_TYPE_DEVELOPMENT_PARTNER)
+                    ->whereNotNull('total_earning')
+                    ->whereNotNull('dev_earning')
+                    ->whereRaw("{$sql} > 0.05", $bindings);
+            })
             ->when($filters['date_from'] ?? null, fn($q, $v) => $q->whereDate('created_at', '>=', $v))
             ->when($filters['date_to'] ?? null, fn($q, $v) => $q->whereDate('created_at', '<=', $v));
     }

@@ -8,7 +8,9 @@ use App\Actions\ViewSalaryInvoicePdfAction;
 use App\Actions\DownloadSalaryInvoicePdfAction;
 use App\Actions\ViewSalaryInvoiceHtmlAction;
 use App\Models\Fine;
+use App\Models\UserPayment;
 use App\Observers\FineObserver;
+use App\Observers\UserPaymentObserver;
 use Illuminate\Support\ServiceProvider;
 use TCG\Voyager\Facades\Voyager;
 
@@ -41,5 +43,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Register Fine Observer to send email notifications
         Fine::observe(FineObserver::class);
+
+        // Track who changed what on payment requests
+        UserPayment::observe(UserPaymentObserver::class);
     }
 }

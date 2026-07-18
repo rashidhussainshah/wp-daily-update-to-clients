@@ -26,21 +26,10 @@ class TotalGivenDimmer extends BaseDimmer
      */
     public function run(Request $request)
     {
-        $advanceGivenPayment = 0;
-        $advanceGivenPaymentInUsd = 0;
-        $paidThroughUserPayment = 0;
-        if ($request->query('user_id')) {
-            $paidThroughUserPayment = UserPayment::getPaid($request->query('user_id'));
-            $advanceGivenPayment = Expense::where('developer_id',$request->query('user_id'))->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
-            $advanceGivenPaymentInUsd = Expense::where('developer_id',$request->query('user_id'))->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
-        }
-        else {
-            $loggedInUser = Auth::id();
-            $paidThroughUserPayment = UserPayment::getPaid($loggedInUser);
-            $advanceGivenPayment = Expense::where('developer_id', $loggedInUser)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
-            $advanceGivenPaymentInUsd = Expense::where('developer_id',$loggedInUser)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
-
-        }
+        $userId = dashboardTargetUserId($request);
+        $paidThroughUserPayment = UserPayment::getPaid($userId);
+        $advanceGivenPayment = Expense::where('developer_id', $userId)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_PKR)->sum('amount'); // payment that given advance
+        $advanceGivenPaymentInUsd = Expense::where('developer_id', $userId)->where('purpose', Expense::CREDIT_TO_DEV_STATUS)->where('amount_in', Expense::IN_USD)->sum('amount'); // payment that given advance
         $totalPaid = $paidThroughUserPayment + $advanceGivenPayment;
         $string = trans_choice('eod.total_paid', $totalPaid);
         $currency  = setting('admin.currency');
@@ -48,12 +37,13 @@ class TotalGivenDimmer extends BaseDimmer
             'icon'   => 'voyager-check',
             'title'  => " {$string} {$currency} {$totalPaid}",
             'text'   => __('eod.paid_text', ['currency' => $currency, 'count' => $totalPaid, 'advance' => $advanceGivenPayment, 'advance_in_usd' => $advanceGivenPaymentInUsd]),
+            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
+        ] + (isAdministrator() ? [
             'button' => [
                 'text' => __('eod.view_all_payments'),
                 'link' => route('voyager.user-payments.index'),
             ],
-            'image' => voyager_asset('images/widget-backgrounds/02.jpg'),
-        ]));
+        ] : [])));
     }
 
     /**
@@ -63,6 +53,6 @@ class TotalGivenDimmer extends BaseDimmer
      */
     public function shouldBeDisplayed(): bool
     {
-        return isBusinessPartners();
+        return canViewPaymentDimmers();
     }
 }

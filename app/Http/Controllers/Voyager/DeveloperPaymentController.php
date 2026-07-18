@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Events\BreadDataUpdated;
 use TCG\Voyager\Facades\Voyager;
@@ -44,12 +46,18 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         $this->authorize('browse', app($dataType->model_name));
 
         $filters = $this->resolveDateFilters($request->only([
-            'developer_id', 'business_developer_id', 'status', 'share_type', 'earning_type',
-            'client_source', 'project_id', 'income_id', 'paid_state', 'generated',
+            'ids', 'developer_id', 'business_developer_id', 'status', 'share_type', 'earning_type',
+            'client_source', 'project_id', 'income_id', 'paid_state', 'generated', 'mismatch',
             'date_from', 'date_to', 'period',
         ]));
 
-        $query = UserPayment::with(['developer', 'project', 'projectTarget', 'businessDeveloper', 'income'])
+        // Administrator-only filter - strip it out for everyone else even
+        // if forced via the URL.
+        if (!isAdministrator()) {
+            unset($filters['mismatch']);
+        }
+
+        $query = UserPayment::with(['developer', 'project', 'projectTarget', 'businessDeveloper', 'income', 'logs.actor'])
             ->currentUserAndManagement()
             ->filter($filters);
 
@@ -69,17 +77,30 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         // Grouped mode shows each partner request with its linked BD commission
         // as a child row. Fall back to the flat list when the filters focus on
         // BD/system rows, which grouping would otherwise hide.
-        $grouped = ($filters['share_type'] ?? null) !== UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
+        $filteredDeveloperIsBusinessDeveloper = !empty($filters['developer_id'])
+            && optional(User::find($filters['developer_id']))->isBusinessDeveloper();
+        $grouped = empty($filters['ids'])
+            && empty($filters['mismatch'])
+            && ($filters['share_type'] ?? null) !== UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
             && ($filters['generated'] ?? null) !== 'system'
-            && !in_array((int) ($filters['developer_id'] ?? 0), [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID]);
+            && !$filteredDeveloperIsBusinessDeveloper;
 
         if ($grouped) {
-            $query->with(['linkedCommission.developer', 'linkedCommission.income'])
+            $query->with(['linkedCommission.developer', 'linkedCommission.income', 'linkedCommission.logs.actor'])
                 ->where(function ($q) {
                     // primary rows, plus children orphaned by a soft-deleted parent
                     $q->whereNull('second_entry_id')
                         ->orWhereDoesntHave('sourceRequest');
                 });
+        }
+
+        // Biggest discrepancy first when reviewing mismatches.
+        if (($filters['mismatch'] ?? null) === '1') {
+            ['sql' => $sql, 'bindings' => $bindings] = UserPayment::payableMismatchExpression();
+            $query->reorder()->orderByRaw("{$sql} DESC", $bindings);
+        } elseif (in_array($filters['mismatch'] ?? null, ['35', '37.5'], true)) {
+            ['sql' => $sql, 'bindings' => $bindings] = UserPayment::shareMismatchExpression((float) $filters['mismatch'] / 100);
+            $query->reorder()->orderByRaw("{$sql} DESC", $bindings);
         }
 
         $payments = $query->paginate(25)->withQueryString();
@@ -88,8 +109,10 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         $developers = $canManage
             ? User::whereIn('id', UserPayment::query()->select('developer_id')->distinct()->pluck('developer_id'))->orderBy('name')->get(['id', 'name'])
             : collect();
-        $businessDevelopers = User::whereIn('id', [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])->get(['id', 'name']);
+        $businessDevelopers = User::businessDeveloper()->get(['id', 'name']);
         $projects = Project::orderBy('name')->get(['id', 'name']);
+        // Searchable income filter, administrators only.
+        $incomes = isAdministrator() ? Income::orderByDesc('id')->get() : collect();
 
         return Voyager::view('voyager::user-payments.browse', [
             'dataType' => $dataType,
@@ -99,10 +122,14 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             'developers' => $developers,
             'businessDevelopers' => $businessDevelopers,
             'projects' => $projects,
+            'incomes' => $incomes,
             'advancePkr' => $advancePkr,
             'advanceUsd' => $advanceUsd,
             'canManage' => $canManage,
-            'canPay' => isBusinessPartners() || isAdministrator(),
+            // Rate & Approve is an accountant-only action.
+            'canRateApprove' => $this->canRateApprovePayments(),
+            // Mark Paid is restricted to a single person.
+            'canPay' => Auth::id() === User::RASHID_USER_ID,
             'grouped' => $grouped,
         ]);
     }
@@ -228,7 +255,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         ];
 
         $developers = User::whereIn('id', UserPayment::query()->select('developer_id')->distinct()->pluck('developer_id'))->orderBy('name')->get(['id', 'name']);
-        $businessDevelopers = User::whereIn('id', [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])->get(['id', 'name']);
+        $businessDevelopers = User::businessDeveloper()->get(['id', 'name']);
         $projects = Project::orderBy('name')->get(['id', 'name']);
 
         return Voyager::view('voyager::user-payments.statistics', compact(
@@ -271,9 +298,14 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         $income = Income::findOrFail($request->income_id);
         $totalEarning = (float) $request->total_earning;
         $clientSource = $request->client_source;
-        $currencyRate = is_numeric($request->currency_current_rate) ? (float) $request->currency_current_rate : null;
+        // The rate field isn't on the add form (partners/BD never see it) - use
+        // the income's own conversion rate so payable is already calculated
+        // when the request lands, instead of sitting blank until Rate & Approve.
+        $currencyRate = is_numeric($request->currency_current_rate)
+            ? (float) $request->currency_current_rate
+            : ($income->conversion_rate ? (float) $income->conversion_rate : null);
         $businessDevUser = $request->select_business_developer_id ? User::find($request->select_business_developer_id) : null;
-        $submitterIsBusinessDeveloper = in_array($submitter->id, [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID]);
+        $submitterIsBusinessDeveloper = $submitter->isBusinessDeveloper();
 
         $this->calculator->assertEarningWithinIncome($income, $totalEarning);
         // Hard block: one request per user per income.
@@ -302,7 +334,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         $commissionWarning = null;
         if (!$submitterIsBusinessDeveloper
             && $businessDevUser
-            && in_array($businessDevUser->id, [User::AYUB_USER_ID, User::ALI_HASAN_USER_ID])) {
+            && $businessDevUser->isBusinessDeveloper()) {
             $existingCommission = $this->calculator->existingRequestForIncome($income->id, $businessDevUser->id);
             if ($existingCommission) {
                 // Hard block on duplicates: keep the earlier manual/auto request,
@@ -324,9 +356,6 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
         // Server-side calculated values always win over anything typed in the form.
         $request->merge([
             'developer_id' => $submitter->id,
-            'dev_earning' => $devEarning,
-            'payable' => $this->calculator->payable($devEarning, $currencyRate),
-            'fee' => (int) round($this->calculator->feeRate($clientSource) * 100),
         ]);
 
         // Begin a transaction
@@ -335,13 +364,22 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             $data = $this->insertUpdateData($request, $slug, $dataType->addRows, new $dataType->model_name());
             $data->share_type = $shareType;
             $data->earning_type = $earningType;
+            // dev_earning/payable/fee/currency_current_rate are hidden from the
+            // add form (add=0, by design - partners/BD never see rates or
+            // shares), so Voyager's insertUpdateData() skips them entirely and
+            // would otherwise save them as null. Assign the already-computed
+            // values explicitly.
+            $data->dev_earning = $devEarning;
+            $data->currency_current_rate = $currencyRate;
+            $data->payable = $this->calculator->payable($devEarning, $currencyRate);
+            $data->fee = (int) round($this->calculator->feeRate($clientSource) * 100);
             $data->save();
 
             event(new BreadDataAdded($dataType, $data));
             $this->sendEmail($data);
 
             if ($generateCommission) {
-                $this->createBusinessDeveloperEntry($request, $data, $businessDevUser);
+                $this->createBusinessDeveloperEntry($request, $data, $businessDevUser, $currencyRate);
             }
 
             DB::commit();
@@ -378,11 +416,10 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
      * Auto-generate the business developer commission entry linked to a
      * development partner request. Replaces the old per-user copies.
      */
-    private function createBusinessDeveloperEntry(Request $request, UserPayment $sourcePayment, User $businessDevUser): void
+    private function createBusinessDeveloperEntry(Request $request, UserPayment $sourcePayment, User $businessDevUser, ?float $currencyRate): void
     {
         $totalEarning = (float) $request->input('total_earning');
         $clientSource = $request->input('client_source');
-        $currencyRate = is_numeric($request->input('currency_current_rate')) ? (float) $request->input('currency_current_rate') : null;
 
         $devEarning = $this->calculator->businessDeveloperEarning($totalEarning, $clientSource, $businessDevUser);
 
@@ -437,6 +474,13 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
     // POST BR(E)AD
     public function update(Request $request, $id)
     {
+        if (!isAdministrator()) {
+            return redirect()->back()->with([
+                'message' => 'Only administrators can edit payment requests.',
+                'alert-type' => 'error',
+            ]);
+        }
+
         $slug = $this->getSlug($request);
 
         $dataType = Voyager::model('DataType')->where('slug', '=', $slug)->first();
@@ -505,7 +549,10 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
      */
     public function rateApprove(Request $request, $id): \Illuminate\Http\RedirectResponse
     {
-        if (!$this->userCanManagePayments()) {
+        // Administrators can still approve (e.g. covering for the accountant),
+        // they just don't get the button in the listing - see canRateApprove
+        // in index(), which stays accountant-only for the UI.
+        if (!$this->canRateApprovePayments() && !isAdministrator()) {
             return redirect()->back()->with(['message' => 'You are not allowed to approve payment requests.', 'alert-type' => 'error']);
         }
 
@@ -513,12 +560,22 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             'currency_current_rate' => 'required|numeric|min:1',
         ]);
 
-        $userPayment = UserPayment::find($id);
+        $userPayment = UserPayment::with('developer')->find($id);
         if (!$userPayment) {
             return redirect()->back()->with(['message' => 'Payment not found.', 'alert-type' => 'error']);
         }
         if ($userPayment->status !== UserPayment::REQUESTED_STATUS) {
             return redirect()->back()->with(['message' => "Payment #{$id} is not in Requested status.", 'alert-type' => 'error']);
+        }
+
+        // Self-heal: older/broken rows may have no share saved yet - calculate
+        // it now with the same PaymentCalculationService used by store()/edit,
+        // using the request owner's rate (their percentage override, else the
+        // standard development partner / business developer default).
+        if (!$userPayment->dev_earning && $userPayment->total_earning && $userPayment->developer) {
+            $userPayment->dev_earning = $userPayment->share_type === UserPayment::SHARE_TYPE_BUSINESS_DEVELOPER
+                ? $this->calculator->businessDeveloperEarning((float) $userPayment->total_earning, $userPayment->client_source, $userPayment->developer)
+                : $this->calculator->developmentPartnerEarning((float) $userPayment->total_earning, $userPayment->client_source, $userPayment->developer);
         }
 
         $currencyRate = (float) $request->currency_current_rate;
@@ -536,7 +593,7 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
     public function markUserPaymentPaid($id): \Illuminate\Http\RedirectResponse
     {
-        if (!(isBusinessPartners() || isAdministrator())) {
+        if (Auth::id() !== User::RASHID_USER_ID) {
             return redirect()->back()->with(['message' => 'You are not allowed to mark payments as paid.', 'alert-type' => 'error']);
         }
 
@@ -570,6 +627,89 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         // Redirect the user
         return redirect()->back()->with('success', 'Payment marked as paid successfully.');
+    }
+
+    /**
+     * Attach an invoice/receipt to an already-paid request - a separate,
+     * administrator-only action from Mark Paid itself, since one real
+     * invoice sometimes covers several payment requests at once and
+     * shouldn't be forced at the moment of marking paid.
+     */
+    public function attachInvoice(Request $request, $id): \Illuminate\Http\RedirectResponse
+    {
+        if (!isAdministrator()) {
+            return redirect()->back()->with(['message' => 'Only administrators can attach an invoice.', 'alert-type' => 'error']);
+        }
+
+        $userPayment = UserPayment::find($id);
+        if (!$userPayment) {
+            return redirect()->back()->with(['message' => 'Payment not found.', 'alert-type' => 'error']);
+        }
+        if (is_null($userPayment->paid)) {
+            return redirect()->back()->with(['message' => "Payment #{$id} is not marked as paid yet.", 'alert-type' => 'error']);
+        }
+
+        $request->validate([
+            'paid_attachments' => 'required|array|min:1',
+            'paid_attachments.*' => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
+        ]);
+
+        $existing = json_decode($userPayment->paid_attachments ?? '[]', true) ?: [];
+        $disk = config('voyager.storage.disk');
+        $folder = 'user-payments/paid/' . now()->format('FY');
+
+        foreach ($request->file('paid_attachments') as $file) {
+            $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs($folder, $filename, $disk);
+            $existing[] = $folder . '/' . $filename;
+        }
+
+        $userPayment->paid_attachments = json_encode($existing);
+        $userPayment->save();
+
+        return redirect()->back()->with(['message' => "Invoice attached to payment #{$id}.", 'alert-type' => 'success']);
+    }
+
+    /**
+     * DELETE - only the Administrator role may delete payment requests.
+     * Deleting a partner request also removes its auto-generated commission
+     * so no orphaned BD payment can be approved or paid later.
+     */
+    public function destroy(Request $request, $id)
+    {
+        $slug = $this->getSlug($request);
+        if ($slug !== 'user-payments') {
+            return parent::destroy($request, $id);
+        }
+
+        if (!isAdministrator()) {
+            return redirect()->back()->with([
+                'message' => 'Only administrators can delete payment requests.',
+                'alert-type' => 'error',
+            ]);
+        }
+
+        $userPayment = UserPayment::find($id);
+        if (!$userPayment) {
+            return redirect()->back()->with(['message' => 'Payment not found.', 'alert-type' => 'error']);
+        }
+
+        $message = "Payment request #{$id} deleted.";
+
+        $linked = UserPayment::where('second_entry_id', $userPayment->id)
+            ->where('generated_by_system', true)
+            ->first();
+        if ($linked) {
+            $linked->delete();
+            $message .= " Linked auto-generated commission #{$linked->id} was deleted with it.";
+        }
+
+        $userPayment->delete();
+
+        return redirect()->route('voyager.user-payments.index')->with([
+            'message' => $message,
+            'alert-type' => 'success',
+        ]);
     }
 
     /**
@@ -613,6 +753,15 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
     }
 
     /**
+     * Payment flow information page for partners, business developers,
+     * the accountant and administrators.
+     */
+    public function flowGuide()
+    {
+        return Voyager::view('voyager::user-payments.flow-guide');
+    }
+
+    /**
      * Restrict a UserPayment query to primary earning rows for gross-volume
      * statistics: excludes auto-generated commission copies and legacy manual
      * BD rows that mirror a partner request on the same project and amount.
@@ -642,5 +791,17 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             User::ADMINISTRATOR_ROLE_NAME,
             User::ACCOUNTANT_ROLE_NAME,
         ]);
+    }
+
+    /**
+     * Controls the Rate & Approve button in the listing - accountant-only,
+     * even though administrators are also allowed to actually perform the
+     * action server-side (see rateApprove()) if they ever need to.
+     */
+    private function canRateApprovePayments(): bool
+    {
+        $user = Auth::user();
+
+        return $user && $user->role && $user->role->name === User::ACCOUNTANT_ROLE_NAME;
     }
 }
