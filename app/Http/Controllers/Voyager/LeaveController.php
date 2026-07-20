@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 use TCG\Voyager\Events\BreadDataAdded;
@@ -141,7 +142,11 @@ class LeaveController extends VoyagerBaseController
             $message .= ' ⚠️ NOTE: Extra leave - Monthly quota exceeded';
         }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
-        SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+        try {
+            SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+        } catch (\Throwable $e) {
+            Log::warning('Leave request Slack notification failed: ' . $e->getMessage());
+        }
 
         // Perform Voyager store here to customize the flash message
         $slug = $this->getSlug($request);
@@ -208,7 +213,11 @@ class LeaveController extends VoyagerBaseController
         $message = "COO Approval: {$user->name} approved leave #{$leave->id} ({$startDate} to {$endDate}) for user ID {$leave->user_id}.";
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL');
         if ($slackWebhookUrl) {
-            SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+            try {
+                SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+            } catch (\Throwable $e) {
+                Log::warning('Leave approval Slack notification failed: ' . $e->getMessage());
+            }
         }
 
         return Redirect::back()->with(['message' => 'Leave approved successfully.', 'alert-type' => 'success']);
