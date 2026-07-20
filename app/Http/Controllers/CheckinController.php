@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use PHPUnit\Exception;
 use Spatie\SlackAlerts\Facades\SlackAlert;
 
 /**
@@ -128,7 +127,8 @@ class CheckinController extends Controller
                 return redirect()->back()->with($this->getSuccessMsg($msg));
             }
 
-        } catch (Exception $exception) {
+        } catch (\Throwable $exception) {
+            Log::error('Check-in failed', ['error' => $exception->getMessage()]);
             return redirect()->back()->with($this->getErrorMsg($exception->getMessage()));
         }
     }
