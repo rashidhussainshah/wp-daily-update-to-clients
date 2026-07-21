@@ -40,6 +40,12 @@ class FinancialsController extends Controller
         ));
     }
 
+    // ── Mobile quick-add expense form ──────────────────────────────────────────
+    public function quickExpense()
+    {
+        return view('vendor.voyager.financials.quick-expense');
+    }
+
     // ── Charts & Overview page ────────────────────────────────────────────────
     public function charts(Request $request)
     {
