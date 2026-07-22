@@ -22,6 +22,8 @@ class ProcessCampaignAutomations extends Command
 
     public function handle(): int
     {
+        set_time_limit(0);
+
         $specificId = $this->option('id');
 
         $query = CampaignAutomation::with('campaign')->where('status', 'active');
@@ -85,8 +87,12 @@ class ProcessCampaignAutomations extends Command
 
         $delay = (int) $auto->email_delay_seconds;
 
-        // With delay: send 1 email per cron tick. Without delay: send full batch at once.
-        $sendThisRun = $delay > 0 ? 1 : $auto->batch_size;
+        // Always attempt the full batch in a single cron run. email_delay_seconds is
+        // honored as an in-process pause between sends below, not by spreading the
+        // batch across cron ticks — the real cron here only invokes the scheduler
+        // ~once/day, so waiting for a "next tick" silently stalled batches and
+        // desynced next_run_at from send_time.
+        $sendThisRun = $auto->batch_size;
 
         // Daily send capacity — hard cap per calendar day for this automation
         if ($auto->daily_send_cap > 0) {
@@ -127,7 +133,9 @@ class ProcessCampaignAutomations extends Command
         $smtp   = $campaign->smtpAccount;
         $mailer = $this->getMailer($smtp);
 
-        foreach ($recipients as $user) {
+        $recipientCount = $recipients->count();
+
+        foreach ($recipients as $index => $user) {
             try {
                 $mailer->to($user->email, $user->name ?? '')
                     ->send(new MarketingCampaignMail($campaign, $user->name ?? '', $smtp));
@@ -157,52 +165,30 @@ class ProcessCampaignAutomations extends Command
                 $failed++;
                 Log::error("[Automations] #{$auto->id}: FAILED → {$user->email} — " . $e->getMessage());
             }
+
+            // Pace sends to avoid spam-filter throttling. Skip the wait after the
+            // last recipient — no reason to hold the process open once done.
+            if ($delay > 0 && $index < $recipientCount - 1) {
+                sleep($delay);
+            }
         }
 
         $updates = [
-            'last_run_at'       => now(),
-            'emails_sent_total' => $auto->emails_sent_total + $sent,
+            'last_run_at'          => now(),
+            'emails_sent_total'    => $auto->emails_sent_total + $sent,
+            'emails_sent_in_batch' => 0, // batches always complete within a single run now
+            'next_run_at'          => $this->calculateNextRun($auto),
         ];
 
-        if ($delay > 0) {
-            $sentInBatch   = $auto->emails_sent_in_batch + $sent;
-            $noMoreRecipients = $recipients->count() < $sendThisRun;
-            $batchComplete = $sentInBatch >= $auto->batch_size || $noMoreRecipients;
-
-            if ($batchComplete) {
-                // Batch done — schedule the next full run
-                $updates['emails_sent_in_batch'] = 0;
-                $updates['next_run_at']          = $this->calculateNextRun($auto);
-
-                if ($auto->frequency === 'once') {
-                    $updates['status']      = 'completed';
-                    $updates['next_run_at'] = null;
-                }
-
-                $this->info("Automation #{$auto->id} \"{$auto->name}\": batch complete — sent={$sent}, failed={$failed}");
-            } else {
-                // More emails remain in this batch — wait delay, then continue
-                $updates['emails_sent_in_batch'] = $sentInBatch;
-                $updates['next_run_at']          = now()->addSeconds($delay);
-
-                $remaining = $auto->batch_size - $sentInBatch;
-                $this->info("Automation #{$auto->id} \"{$auto->name}\": sent={$sent} (batch {$sentInBatch}/{$auto->batch_size}), next email in {$delay}s, {$remaining} remaining");
-            }
-        } else {
-            // No delay — entire batch sent in one run
-            $updates['emails_sent_in_batch'] = 0;
-            $updates['next_run_at']          = $this->calculateNextRun($auto);
-
-            if ($auto->frequency === 'once') {
-                $updates['status']      = 'completed';
-                $updates['next_run_at'] = null;
-            }
-
-            $this->info("Automation #{$auto->id} \"{$auto->name}\": sent={$sent}, failed={$failed}, next=" . ($updates['next_run_at'] ? $updates['next_run_at']->toDateTimeString() : 'none'));
+        if ($auto->frequency === 'once') {
+            $updates['status']      = 'completed';
+            $updates['next_run_at'] = null;
         }
 
+        $this->info("Automation #{$auto->id} \"{$auto->name}\": sent={$sent}, failed={$failed}, next=" . ($updates['next_run_at'] ? $updates['next_run_at']->toDateTimeString() : 'none'));
+
         // Check end_date against calculated next run
-        if (!empty($updates['next_run_at']) && $auto->end_date && $updates['next_run_at']->startOfDay()->gt($auto->end_date)) {
+        if (!empty($updates['next_run_at']) && $auto->end_date && $updates['next_run_at']->copy()->startOfDay()->gt($auto->end_date)) {
             $updates['status']      = 'completed';
             $updates['next_run_at'] = null;
         }
