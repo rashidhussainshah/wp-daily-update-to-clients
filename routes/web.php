@@ -148,6 +148,7 @@ Route::group(['prefix' => 'admin'], function () {
     // Financials / P&L
     Route::prefix('financials')->name('financials.')->group(function () {
         Route::get('/',                              [FinancialsController::class, 'index'])->name('index');
+        Route::get('/quick-expense',                 [FinancialsController::class, 'quickExpense'])->name('quick-expense');
         Route::get('/charts',                        [FinancialsController::class, 'charts'])->name('charts');
         Route::post('/bank-balances',                [FinancialsController::class, 'storeBankBalance'])->name('store-bank-balance');
         Route::get('/cash',                          [FinancialsController::class, 'cash'])->name('cash');
