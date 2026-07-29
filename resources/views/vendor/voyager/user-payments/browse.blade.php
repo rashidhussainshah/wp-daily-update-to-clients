@@ -129,24 +129,30 @@
                 margin: 4px 0 !important;
             }
 
-            /* Listing table: smaller text/padding so more fits before the
-               horizontal scroll (table-responsive) kicks in */
+            /* Listing table: smaller text/padding, and every cell kept on one
+               line (including the Actions buttons) so the table is forced
+               wider than the screen - that's what makes table-responsive's
+               horizontal scroll actually kick in. Letting cells wrap instead
+               shrinks the table back down to fit the screen, which leaves
+               nothing to scroll to and hides the action buttons. */
             .browse .table > thead > tr > th,
             .browse .table > tbody > tr > td {
                 font-size: 11.5px;
                 padding: 6px;
+                white-space: nowrap;
+            }
+            .browse .table {
+                min-width: 1100px;
             }
             .browse .table-responsive {
+                overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
             }
-            /* Let action buttons wrap onto multiple lines instead of forcing
-               the whole Actions column to stay on one very wide line */
             .browse .table td:last-child {
-                white-space: normal !important;
-                min-width: 90px;
+                min-width: 150px;
             }
             .browse .table .btn-xs {
-                margin: 2px 0;
+                margin: 0 2px;
             }
 
             /* Modal footers with a left + right button: stack instead of
