@@ -22,7 +22,7 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: 65002
           script: |
-            cd /home/u787826149/domains/webpenter.com/public_html/portal
+            cd /home/u787826149/domains/portal.webpenter.com/public_html
             git reset --hard
             git pull origin master
             composer install --no-dev --optimize-autoloader
