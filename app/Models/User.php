@@ -90,6 +90,7 @@ class User extends \TCG\Voyager\Models\User
     private $RYK_STUDENT_ROLE_ID = 12;
     private $ONLINE_STUDENT_ROLE_ID = 41;
     private $BUSINESS_DEVELOPER_ROLE_ID = 33;
+    private $HOMEY_CLIENT_ROLE_ID = 61;
 
     /**
      * The attributes that should be cast.
@@ -140,6 +141,16 @@ class User extends \TCG\Voyager\Models\User
     public function scopeBusinessDeveloper($query)
     {
         return $query->where('role_id', setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
+    }
+
+    /**
+     * Excludes Homey Client role users (marketing-campaign leads imported
+     * via ImportHomeyClients, not real portal staff) - used to scope the
+     * admin Users listing so it shows everyone else instead.
+     */
+    public function scopeExcludeHomeyClient($query)
+    {
+        return $query->where('role_id', '!=', setting('admin.homey_client_role_id') ?? $this->HOMEY_CLIENT_ROLE_ID);
     }
 
     /**

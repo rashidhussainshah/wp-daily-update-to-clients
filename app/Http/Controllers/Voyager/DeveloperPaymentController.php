@@ -74,6 +74,8 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
             $advanceUsd = Expense::getAdvance($filters['developer_id'], Expense::IN_USD);
         }
 
+        $canManage = $this->userCanManagePayments();
+
         // Grouped mode shows each partner request with its linked BD commission
         // as a child row. Fall back to the flat list when the filters focus on
         // BD/system rows, which grouping would otherwise hide.
@@ -87,10 +89,23 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         if ($grouped) {
             $query->with(['linkedCommission.developer', 'linkedCommission.income', 'linkedCommission.logs.actor'])
-                ->where(function ($q) {
+                ->where(function ($q) use ($canManage) {
                     // primary rows, plus children orphaned by a soft-deleted parent
                     $q->whereNull('second_entry_id')
                         ->orWhereDoesntHave('sourceRequest');
+
+                    // A non-admin/accountant viewer only ever sees their own
+                    // developer_id rows (see currentUserAndManagement()). If a
+                    // BD commission's linked development-partner request
+                    // belongs to a DIFFERENT developer, that parent row will
+                    // never appear in this person's own listing to nest it
+                    // under - so without this, the commission silently
+                    // vanishes instead of showing as its own row.
+                    if (!$canManage) {
+                        $q->orWhereHas('sourceRequest', function ($sub) {
+                            $sub->where('developer_id', '!=', Auth::id());
+                        });
+                    }
                 });
         }
 
@@ -105,7 +120,6 @@ class DeveloperPaymentController extends \TCG\Voyager\Http\Controllers\VoyagerBa
 
         $payments = $query->paginate(25)->withQueryString();
 
-        $canManage = $this->userCanManagePayments();
         $developers = $canManage
             ? User::whereIn('id', UserPayment::query()->select('developer_id')->distinct()->pluck('developer_id'))->orderBy('name')->get(['id', 'name'])
             : collect();
