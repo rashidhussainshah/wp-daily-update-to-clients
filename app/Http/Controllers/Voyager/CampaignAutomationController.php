@@ -32,6 +32,11 @@ class CampaignAutomationController extends Controller
         return view('vendor.voyager.campaign-automations.guide');
     }
 
+    public function setupGuide()
+    {
+        return view('vendor.voyager.campaign-automations.setup-guide');
+    }
+
     public function create()
     {
         $campaigns = EmailCampaign::orderBy('name')->get();

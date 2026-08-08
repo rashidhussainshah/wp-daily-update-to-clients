@@ -29,6 +29,9 @@
                         <a href="{{ route('campaign-automations.guide') }}" class="btn btn-default btn-sm">
                             <i class="voyager-info-circled"></i> How This Works
                         </a>
+                        <a href="{{ route('campaign-automations.setup-guide') }}" class="btn btn-default btn-sm">
+                            <i class="voyager-rocket"></i> Recommended Setup
+                        </a>
                         <form method="POST" action="{{ route('campaign-automations.process-queue') }}" style="display:inline;">
                             @csrf
                             <button class="btn btn-default btn-sm" title="Manual fallback if the server's queue worker cron isn't running — processes whatever is currently queued. This blocks until done, so only use it if sends aren't going out on their own."
