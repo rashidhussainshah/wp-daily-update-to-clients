@@ -28,9 +28,15 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
         public int $delaySeconds = 0
     ) {
         // Must cover the longest this batch can legitimately take — spacing
-        // emails out across a whole day means the job runs for hours, not
-        // the Laravel default hour. +30min buffer for SMTP/connection overhead.
-        $this->timeout = max(3600, count($recipients) * $delaySeconds + 1800);
+        // emails out across a whole day means the job runs for hours. But the
+        // floor must stay small: a stuck/hanging SMTP connection ties up a
+        // worker process for up to this long, and each cron tick that hits it
+        // spawns another one — a generous floor on a tiny batch (e.g. 2
+        // recipients, no delay) turned a transient SMTP hang into a pile of
+        // hour-long stuck processes eating the account's process limit. 30s
+        // per recipient covers realistic SMTP connect+send overhead beyond
+        // the configured delay.
+        $this->timeout = max(300, count($recipients) * ($delaySeconds + 30) + 300);
     }
 
     public function handle(): void

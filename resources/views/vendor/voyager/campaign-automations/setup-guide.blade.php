@@ -44,7 +44,8 @@
                         <p class="text-muted">Based on our actual numbers: 66,107 <code>homey_client</code> users, Titan Business
                         plan (200/hour, 500/day per mailbox, no domain-wide cap across our 4 senders).</p>
 
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:600px;">
                             <thead>
                                 <tr>
                                     <th style="width:20%;">Scenario</th>
@@ -90,6 +91,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                         <p class="text-muted" style="margin-top:10px;margin-bottom:0;">
                             Delay formula: <code>seconds = (hours to spread &times; 3600) &divide; batch size</code>.
                         </p>
@@ -105,7 +107,8 @@
                         split-second precision. A send landing 20–30 minutes after its Send Time is fine. Add both under
                         <strong>hPanel → Advanced → Cron Jobs</strong>.</p>
 
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:600px;">
                             <thead><tr><th style="width:18%;">Job</th><th>Schedule</th><th>Command</th></tr></thead>
                             <tbody>
                                 <tr>
@@ -120,6 +123,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
 
                         <div class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
                             <strong>If the existing scheduler cron currently runs <code>0 0 * * *</code> (once a day),

@@ -41,7 +41,8 @@
                 <div class="panel panel-bordered">
                     <div class="panel-heading"><h3 class="panel-title"><i class="voyager-calendar"></i> Frequency — how often a new batch starts</h3></div>
                     <div class="panel-body">
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:500px;">
                             <thead><tr><th style="width:20%;">Option</th><th>What it means</th></tr></thead>
                             <tbody>
                                 <tr>
@@ -62,6 +63,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
 
@@ -71,7 +73,8 @@
                     <div class="panel-body">
                         <p>Two separate, unrelated processes make an automation actually work. You don't need to operate either
                         one day-to-day, but it helps to know they exist if a send seems delayed:</p>
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:500px;">
                             <thead><tr><th style="width:22%;">Process</th><th>What it does</th></tr></thead>
                             <tbody>
                                 <tr>
@@ -84,6 +87,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                         <p style="margin-top:10px;margin-bottom:0;" class="text-muted">
                             If sends seem stuck, use <strong>Process Queue Now</strong> on the automations list — it manually runs
                             the queue worker step for whatever's currently waiting. If sends are consistently landing at the wrong
@@ -104,7 +108,8 @@
                         the delay between each — so a longer delay spreads the same batch across more hours instead of sending it
                         all in a burst.</p>
 
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:500px;">
                             <thead><tr><th>Goal</th><th>Batch Size</th><th>Delay Between Emails</th><th>Result</th></tr></thead>
                             <tbody>
                                 <tr>
@@ -127,6 +132,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                         <p class="text-muted" style="margin-top:10px;margin-bottom:0;">
                             Formula: <code>delay (seconds) = desired spread (seconds) &divide; batch size</code>.
                             Example: an 8-hour spread is 28,800 seconds; divided across 30 emails is 960 seconds each.
@@ -146,12 +152,14 @@
                         <strong>independently of anything this app does</strong> — Batch Size and Delay control our pacing,
                         but Titan can still reject sends if we go over these:</p>
 
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:500px;">
                             <thead><tr><th></th><th>Per mailbox, per hour</th><th>Per mailbox, per day</th></tr></thead>
                             <tbody>
                                 <tr class="success"><td><strong>Our plan — Business</strong></td><td><strong>200</strong></td><td><strong>500</strong></td></tr>
                             </tbody>
                         </table>
+                        </div>
 
                         <p style="margin-top:10px;">
                             On Business, <strong>there's no domain-wide cap</strong> — each of the 4 mailboxes has its own
@@ -195,7 +203,8 @@
                 <div class="panel panel-bordered">
                     <div class="panel-heading"><h3 class="panel-title"><i class="voyager-settings"></i> Other settings</h3></div>
                     <div class="panel-body">
-                        <table class="table table-condensed" style="margin-bottom:0;">
+                        <div style="overflow-x:auto;">
+                        <table class="table table-condensed" style="margin-bottom:0;min-width:500px;">
                             <thead><tr><th style="width:22%;">Setting</th><th>What it does</th></tr></thead>
                             <tbody>
                                 <tr>
@@ -216,6 +225,7 @@
                                 </tr>
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
 

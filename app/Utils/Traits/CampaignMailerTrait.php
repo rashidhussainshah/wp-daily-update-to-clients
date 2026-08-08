@@ -28,7 +28,12 @@ trait CampaignMailerTrait
             'encryption' => $smtp->encryption,
             'username'   => $smtp->username,
             'password'   => $smtp->decrypted_password,
-            'timeout'    => null,
+            // A hung/unreachable SMTP connection with no timeout can block the
+            // PHP process indefinitely — each cron tick that hits it spawns
+            // another stuck process, piling up against the account's process
+            // limit. 20s is generous for a normal SMTP handshake but fails fast
+            // if the server is actually unreachable.
+            'timeout'    => 20,
             'auth_mode'  => null,
         ]);
 

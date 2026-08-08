@@ -23,9 +23,9 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-bordered">
-                <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
-                    <h3 class="panel-title">Scheduled Automations</h3>
-                    <div>
+                <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <h3 class="panel-title" style="margin:0;">Scheduled Automations</h3>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
                         <a href="{{ route('campaign-automations.guide') }}" class="btn btn-default btn-sm">
                             <i class="voyager-info-circled"></i> How This Works
                         </a>
@@ -44,8 +44,8 @@
                         </a>
                     </div>
                 </div>
-                <div class="panel-body" style="padding:0;">
-                    <table class="table table-hover" style="margin:0;">
+                <div class="panel-body" style="padding:0;overflow-x:auto;">
+                    <table class="table table-hover" style="margin:0;min-width:900px;">
                         <thead>
                             <tr>
                                 <th>Name</th>
