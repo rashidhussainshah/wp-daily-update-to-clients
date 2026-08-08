@@ -78,7 +78,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-{{ $auto->status_badge }}">{{ ucfirst($auto->status) }}</span>
+                                    <span class="label label-{{ $auto->runtime_status['badge'] }}" style="font-size:11px;">
+                                        {{ $auto->runtime_status['text'] }}
+                                    </span>
                                 </td>
                                 <td style="font-size:12px;">
                                     {{ $auto->next_run_at ? $auto->next_run_at->format('d M Y H:i') : '—' }}

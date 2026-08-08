@@ -7,6 +7,9 @@
     <h1 class="page-title">
         <i class="voyager-list"></i> {{ $automation->name }}
         <span class="badge badge-{{ $automation->status_badge }}">{{ ucfirst($automation->status) }}</span>
+        <span class="label label-{{ $automation->runtime_status['badge'] }}" style="font-size:12px;vertical-align:middle;">
+            {{ $automation->runtime_status['text'] }}
+        </span>
     </h1>
 </div>
 @stop
