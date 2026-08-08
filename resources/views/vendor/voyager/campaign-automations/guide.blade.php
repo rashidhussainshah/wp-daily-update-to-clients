@@ -138,25 +138,28 @@
                     <div class="panel-body">
                         <p>All four sender addresses (<code>contact@</code>, <code>ayub@</code>, <code>alihassan@</code>,
                         <code>zahid@webpenter.com</code>) run through Titan Email — the mailbox service Hostinger provides
-                        for our domain. Titan enforces its own limits <strong>independently of anything this app does</strong>;
-                        Batch Size and Delay control our pacing, but Titan can still reject sends if we go over these:</p>
+                        for our domain, on our <strong>Business plan</strong>. Titan enforces its own limits
+                        <strong>independently of anything this app does</strong> — Batch Size and Delay control our pacing,
+                        but Titan can still reject sends if we go over these:</p>
 
                         <table class="table table-condensed" style="margin-bottom:0;">
-                            <thead><tr><th>Plan tier</th><th>Per mailbox (hour / day)</th><th>Per domain, all mailboxes combined (hour / day)</th></tr></thead>
+                            <thead><tr><th></th><th>Per mailbox, per hour</th><th>Per mailbox, per day</th></tr></thead>
                             <tbody>
-                                <tr><td>Free &amp; Premium</td><td>50 / 300</td><td>1,000 / 2,000</td></tr>
-                                <tr><td>Business</td><td>200 / 500</td><td>No domain-wide limit</td></tr>
-                                <tr><td>Enterprise</td><td>300 / 1,000</td><td>No domain-wide limit</td></tr>
+                                <tr class="success"><td><strong>Our plan — Business</strong></td><td><strong>200</strong></td><td><strong>500</strong></td></tr>
                             </tbody>
                         </table>
 
                         <p style="margin-top:10px;">
-                            <strong>Check hPanel → Emails → Mailboxes → View limits</strong> to see which tier we're actually
-                            on. It matters for scheduling: on Free/Premium, the per-domain cap applies across <em>all four</em>
-                            mailboxes combined, so using multiple senders doesn't multiply how much we can send. On Business or
-                            Enterprise, there's no domain-wide cap — each mailbox's own limit is independent, so sending through
-                            all four senders genuinely multiplies total daily capacity (e.g. Business: up to 4 × 500 = 2,000/day
-                            combined).
+                            On Business, <strong>there's no domain-wide cap</strong> — each of the 4 mailboxes has its own
+                            independent 200/hour, 500/day allowance. That means sending through all four senders genuinely
+                            multiplies total capacity: up to <strong>4 × 500 = 2,000 emails/day</strong> combined if every
+                            mailbox is used. A single automation on one sender should stay comfortably under 500/day and
+                            200/hour — the "Spreading sends" example below already lands well inside that.
+                        </p>
+                        <p class="text-muted" style="margin-top:6px;margin-bottom:0;font-size:12px;">
+                            (If we ever change hosting plans, re-check this — the other tiers' numbers are Free/Premium:
+                            50/hour, 300/day per mailbox with a 1,000/hour, 2,000/day cap shared across all mailboxes;
+                            Enterprise: 300/hour, 1,000/day per mailbox, also no domain-wide cap.)
                         </p>
 
                         <div class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
@@ -178,9 +181,9 @@
                         at, so it automatically sends as whoever that campaign is configured to send as.</p>
                         <p style="margin-bottom:0;">To split volume across Ayub, Ali Hassan, Zahid, etc.: create one campaign
                         per sender (each with that person's SMTP Account selected), then one automation per campaign. Each
-                        automation gets its own Batch Size, Delay, and schedule, and — on Business/Enterprise — its own
-                        independent Titan mailbox limit, so running them side by side is the way to scale total daily volume
-                        beyond what a single mailbox allows.</p>
+                        automation gets its own Batch Size, Delay, and schedule, and — since we're on the Business plan —
+                        its own independent 200/hour, 500/day Titan limit, so running them side by side is the way to scale
+                        total daily volume beyond what a single mailbox allows.</p>
                     </div>
                 </div>
 
