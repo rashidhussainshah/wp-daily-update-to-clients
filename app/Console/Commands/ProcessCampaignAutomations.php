@@ -2,21 +2,18 @@
 
 namespace App\Console\Commands;
 
-use App\Mail\AutomationCompletedMail;
-use App\Mail\MarketingCampaignMail;
+use App\Jobs\SendCampaignAutomationBatchJob;
 use App\Models\CampaignAutomation;
 use App\Models\CampaignAutomationLog;
 use App\Models\User;
-use App\Utils\Traits\CampaignMailerTrait;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use TCG\Voyager\Models\Role;
 
 class ProcessCampaignAutomations extends Command
 {
-    use CampaignMailerTrait;
     protected $signature   = 'automations:process {--id= : Run a specific automation regardless of next_run_at}';
     protected $description = 'Send scheduled campaign automation batches';
 
@@ -85,13 +82,11 @@ class ProcessCampaignAutomations extends Command
             return;
         }
 
-        $delay = (int) $auto->email_delay_seconds;
-
-        // Always attempt the full batch in a single cron run. email_delay_seconds is
-        // honored as an in-process pause between sends below, not by spreading the
-        // batch across cron ticks — the real cron here only invokes the scheduler
-        // ~once/day, so waiting for a "next tick" silently stalled batches and
-        // desynced next_run_at from send_time.
+        // Batch size is capped by daily_send_cap below. Actual sending happens in
+        // a queued job (SendCampaignAutomationBatchJob) — this command never
+        // blocks on SMTP, which matters at 66k+ recipient scale: a synchronous
+        // send loop here would tie up a PHP-FPM worker (and the shared-hosting
+        // CPU/IO quota) for the whole batch and starve every other request.
         $sendThisRun = $auto->batch_size;
 
         // Daily send capacity — hard cap per calendar day for this automation
@@ -111,71 +106,47 @@ class ProcessCampaignAutomations extends Command
             Log::info("[Automations] #{$auto->id}: daily cap {$auto->daily_send_cap}, sent today {$sentToday}, allowed this run: {$sendThisRun}");
         }
 
-        $skipEmails = $this->getSkipEmails($auto);
-
+        // Exclusions run as correlated NOT EXISTS subqueries rather than pulling
+        // every excluded email into a PHP array and building a whereNotIn(...)
+        // list — with 66k+ candidate users and a growing log table, that array
+        // approach gets slower (and more memory-hungry) every day.
         $recipients = User::withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)
             ->where('role_id', $role->id)
             ->whereNotNull('email')
-            ->whereNotIn('email', $skipEmails)
+            ->whereNotExists(function ($query) use ($auto) {
+                // Never retry an address that previously bounced/failed for this automation.
+                $query->select(DB::raw(1))
+                    ->from('campaign_automation_logs')
+                    ->whereColumn('campaign_automation_logs.email', 'users.email')
+                    ->where('campaign_automation_logs.automation_id', $auto->id)
+                    ->where('campaign_automation_logs.status', 'failed');
+            })
+            ->when($auto->resend_gap_days > 0, function ($query) use ($auto) {
+                // Resend gap cooldown, global across ALL campaigns/automations:
+                // skip anyone who got ANY campaign email in the last N days, so
+                // e.g. Ayub's campaign and Ali Hassan's campaign don't both hit
+                // the same client back-to-back.
+                $query->whereNotExists(function ($sub) use ($auto) {
+                    $sub->select(DB::raw(1))
+                        ->from('campaign_automation_logs')
+                        ->whereColumn('campaign_automation_logs.email', 'users.email')
+                        ->where('campaign_automation_logs.status', 'sent')
+                        ->where('campaign_automation_logs.sent_at', '>=', now()->subDays($auto->resend_gap_days));
+                });
+            })
             ->select(['id', 'email', 'name'])
             ->limit($sendThisRun)
             ->get();
 
-        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": role={$auto->target_role}, skip_count=" . count($skipEmails) . ", recipients_found={$recipients->count()}, send_limit={$sendThisRun}");
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": role={$auto->target_role}, recipients_found={$recipients->count()}, send_limit={$sendThisRun}");
 
         if ($recipients->isEmpty()) {
             Log::info("[Automations] #{$auto->id} \"{$auto->name}\": no eligible recipients — all sent or skipped");
             return;
         }
 
-        $sent   = 0;
-        $failed = 0;
-        $smtp   = $campaign->smtpAccount;
-        $mailer = $this->getMailer($smtp);
-
-        $recipientCount = $recipients->count();
-
-        foreach ($recipients as $index => $user) {
-            try {
-                $mailer->to($user->email, $user->name ?? '')
-                    ->send(new MarketingCampaignMail($campaign, $user->name ?? '', $smtp));
-
-                CampaignAutomationLog::create([
-                    'automation_id' => $auto->id,
-                    'campaign_id'   => $campaign->id,
-                    'user_id'       => $user->id,
-                    'email'         => $user->email,
-                    'name'          => $user->name ?? '',
-                    'status'        => 'sent',
-                    'sent_at'       => now(),
-                ]);
-                Log::info("[Automations] #{$auto->id}: sent → {$user->email}");
-                $sent++;
-            } catch (\Throwable $e) {
-                CampaignAutomationLog::create([
-                    'automation_id' => $auto->id,
-                    'campaign_id'   => $campaign->id,
-                    'user_id'       => $user->id,
-                    'email'         => $user->email,
-                    'name'          => $user->name ?? '',
-                    'status'        => 'failed',
-                    'error'         => $e->getMessage(),
-                    'sent_at'       => now(),
-                ]);
-                $failed++;
-                Log::error("[Automations] #{$auto->id}: FAILED → {$user->email} — " . $e->getMessage());
-            }
-
-            // Pace sends to avoid spam-filter throttling. Skip the wait after the
-            // last recipient — no reason to hold the process open once done.
-            if ($delay > 0 && $index < $recipientCount - 1) {
-                sleep($delay);
-            }
-        }
-
         $updates = [
             'last_run_at'          => now(),
-            'emails_sent_total'    => $auto->emails_sent_total + $sent,
             'emails_sent_in_batch' => 0, // batches always complete within a single run now
             'next_run_at'          => $this->calculateNextRun($auto),
         ];
@@ -185,48 +156,27 @@ class ProcessCampaignAutomations extends Command
             $updates['next_run_at'] = null;
         }
 
-        $this->info("Automation #{$auto->id} \"{$auto->name}\": sent={$sent}, failed={$failed}, next=" . ($updates['next_run_at'] ? $updates['next_run_at']->toDateTimeString() : 'none'));
-
         // Check end_date against calculated next run
         if (!empty($updates['next_run_at']) && $auto->end_date && $updates['next_run_at']->copy()->startOfDay()->gt($auto->end_date)) {
             $updates['status']      = 'completed';
             $updates['next_run_at'] = null;
         }
 
+        // Persist scheduling changes BEFORE dispatching — the job checks the
+        // automation's status when it runs (which, on QUEUE_CONNECTION=sync,
+        // is immediately) to decide whether to send the completion email.
         $auto->update($updates);
 
-        $nextInfo = !empty($updates['next_run_at']) ? $updates['next_run_at']->toDateTimeString() : 'none';
+        $nextInfo   = !empty($updates['next_run_at']) ? $updates['next_run_at']->toDateTimeString() : 'none';
         $statusInfo = $updates['status'] ?? $auto->status;
-        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": done — sent={$sent}, failed={$failed}, status={$statusInfo}, next_run={$nextInfo}");
+        Log::info("[Automations] #{$auto->id} \"{$auto->name}\": scheduled — status={$statusInfo}, next_run={$nextInfo}");
 
-        // Notify on completion
-        if (!empty($updates['status']) && $updates['status'] === 'completed' && $auto->notify_email) {
-            Mail::to($auto->notify_email)
-                ->send(new AutomationCompletedMail($auto, $auto->emails_sent_total + $sent, $failed));
-        }
-    }
+        SendCampaignAutomationBatchJob::dispatch(
+            $auto->id,
+            $recipients->map(fn ($u) => ['id' => $u->id, 'email' => $u->email, 'name' => $u->name])->all()
+        );
 
-    private function getSkipEmails(CampaignAutomation $auto): array
-    {
-        // 1. Always skip bounced/failed addresses from this automation — never retry them
-        $failed = CampaignAutomationLog::where('automation_id', $auto->id)
-            ->where('status', 'failed')
-            ->pluck('email')
-            ->all();
-
-        // 2. Resend gap cooldown (global across ALL campaigns):
-        //    If resend_gap_days = 0  → no cooldown, send to everyone every run
-        //    If resend_gap_days = 30 → skip anyone who got ANY campaign email in the last 30 days
-        //    This prevents Ayub's campaign and Ali Hassan's campaign hitting the same client
-        $sent = [];
-        if ($auto->resend_gap_days > 0) {
-            $sent = CampaignAutomationLog::where('status', 'sent')
-                ->where('sent_at', '>=', now()->subDays($auto->resend_gap_days))
-                ->pluck('email')
-                ->all();
-        }
-
-        return array_unique(array_merge($failed, $sent));
+        $this->info("Automation #{$auto->id} \"{$auto->name}\": queued {$recipients->count()} email(s) for background sending.");
     }
 
     private function calculateNextRun(CampaignAutomation $auto): ?Carbon
