@@ -139,6 +139,27 @@ class CampaignAutomationController extends Controller
             ->with('success', $message);
     }
 
+    /**
+     * Manual fallback for when the server's queue:work cron isn't running (or
+     * isn't set up yet) — drains whatever is currently in the jobs table.
+     * Runs synchronously in this request, so it blocks until done; only meant
+     * as an emergency/manual drain, not a substitute for the cron.
+     */
+    public function processQueue()
+    {
+        set_time_limit(0);
+
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--tries'           => 3,
+            '--timeout'         => 3600,
+        ]);
+
+        $output = trim(Artisan::output());
+
+        return back()->with('success', $output !== '' ? $output : 'Queue is empty — nothing to process.');
+    }
+
     public function cancel(int $id)
     {
         CampaignAutomation::findOrFail($id)->update(['status' => 'cancelled', 'next_run_at' => null]);

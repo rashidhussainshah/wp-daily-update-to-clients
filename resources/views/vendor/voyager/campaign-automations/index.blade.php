@@ -25,9 +25,18 @@
             <div class="panel panel-bordered">
                 <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
                     <h3 class="panel-title">Scheduled Automations</h3>
-                    <a href="{{ route('campaign-automations.create') }}" class="btn btn-success btn-sm">
-                        <i class="voyager-plus"></i> New Automation
-                    </a>
+                    <div>
+                        <form method="POST" action="{{ route('campaign-automations.process-queue') }}" style="display:inline;">
+                            @csrf
+                            <button class="btn btn-default btn-sm" title="Manual fallback if the server's queue worker cron isn't running — processes whatever is currently queued. This blocks until done, so only use it if sends aren't going out on their own."
+                                onclick="return confirm('This runs the queue worker directly and will wait until all currently queued emails are sent. Use this only if scheduled sending isn\'t working. Continue?');">
+                                <i class="voyager-refresh"></i> Process Queue Now
+                            </button>
+                        </form>
+                        <a href="{{ route('campaign-automations.create') }}" class="btn btn-success btn-sm">
+                            <i class="voyager-plus"></i> New Automation
+                        </a>
+                    </div>
                 </div>
                 <div class="panel-body" style="padding:0;">
                     <table class="table table-hover" style="margin:0;">
