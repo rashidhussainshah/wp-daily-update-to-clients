@@ -27,6 +27,7 @@
                     <div class="panel-body">
                         <ol style="margin-bottom:0;">
                             <li>Make sure the <strong>Email Campaign</strong> you want to send already exists (Admin → Email Campaigns) — the automation just schedules an existing campaign, it doesn't write the email content itself.</li>
+                            <li>On that campaign, pick the <strong>SMTP Account</strong> — this is which sender identity it goes out as (Ayub, Ali Hassan, Zahid, or the shared contact@ address). See "Sending as different people" below for why this matters.</li>
                             <li>Go to <strong>Campaign Automations → New Automation</strong>.</li>
                             <li>Pick the campaign, the target role (who receives it), and a <strong>Frequency</strong> (see below).</li>
                             <li>Set <strong>Batch Size</strong> and <strong>Delay Between Emails</strong> together — this pair controls how many go out and how spread-out they are (worked example below).</li>
@@ -131,6 +132,58 @@
                     </div>
                 </div>
 
+                {{-- Hostinger / Titan sending limits --}}
+                <div class="panel panel-bordered">
+                    <div class="panel-heading"><h3 class="panel-title"><i class="voyager-warning"></i> Our actual sending limits (Titan Email via Hostinger)</h3></div>
+                    <div class="panel-body">
+                        <p>All four sender addresses (<code>contact@</code>, <code>ayub@</code>, <code>alihassan@</code>,
+                        <code>zahid@webpenter.com</code>) run through Titan Email — the mailbox service Hostinger provides
+                        for our domain. Titan enforces its own limits <strong>independently of anything this app does</strong>;
+                        Batch Size and Delay control our pacing, but Titan can still reject sends if we go over these:</p>
+
+                        <table class="table table-condensed" style="margin-bottom:0;">
+                            <thead><tr><th>Plan tier</th><th>Per mailbox (hour / day)</th><th>Per domain, all mailboxes combined (hour / day)</th></tr></thead>
+                            <tbody>
+                                <tr><td>Free &amp; Premium</td><td>50 / 300</td><td>1,000 / 2,000</td></tr>
+                                <tr><td>Business</td><td>200 / 500</td><td>No domain-wide limit</td></tr>
+                                <tr><td>Enterprise</td><td>300 / 1,000</td><td>No domain-wide limit</td></tr>
+                            </tbody>
+                        </table>
+
+                        <p style="margin-top:10px;">
+                            <strong>Check hPanel → Emails → Mailboxes → View limits</strong> to see which tier we're actually
+                            on. It matters for scheduling: on Free/Premium, the per-domain cap applies across <em>all four</em>
+                            mailboxes combined, so using multiple senders doesn't multiply how much we can send. On Business or
+                            Enterprise, there's no domain-wide cap — each mailbox's own limit is independent, so sending through
+                            all four senders genuinely multiplies total daily capacity (e.g. Business: up to 4 × 500 = 2,000/day
+                            combined).
+                        </p>
+
+                        <div class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
+                            <strong>Bounce lockout:</strong> more than 5 bounces in an hour, or 10 in a day, on one mailbox
+                            and Titan blocks that mailbox from sending anything further until the window resets — regardless
+                            of our Batch Size/Delay settings. This app never retries an address that already bounced for a
+                            given automation, but that doesn't stop the <em>first</em> bounce on a stale or unverified list.
+                            Start a new/unfamiliar list with a small Batch Size to gauge the bounce rate before scaling up.
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Multiple senders --}}
+                <div class="panel panel-bordered">
+                    <div class="panel-heading"><h3 class="panel-title"><i class="voyager-people"></i> Sending as different people</h3></div>
+                    <div class="panel-body">
+                        <p>The sender identity is set once, on the <strong>Email Campaign</strong> itself (the <strong>SMTP
+                        Account</strong> field) — not on the automation. An automation just runs whichever campaign it points
+                        at, so it automatically sends as whoever that campaign is configured to send as.</p>
+                        <p style="margin-bottom:0;">To split volume across Ayub, Ali Hassan, Zahid, etc.: create one campaign
+                        per sender (each with that person's SMTP Account selected), then one automation per campaign. Each
+                        automation gets its own Batch Size, Delay, and schedule, and — on Business/Enterprise — its own
+                        independent Titan mailbox limit, so running them side by side is the way to scale total daily volume
+                        beyond what a single mailbox allows.</p>
+                    </div>
+                </div>
+
                 {{-- Other settings --}}
                 <div class="panel panel-bordered">
                     <div class="panel-heading"><h3 class="panel-title"><i class="voyager-settings"></i> Other settings</h3></div>
@@ -158,6 +211,13 @@
                         </table>
                     </div>
                 </div>
+
+                <p class="text-muted" style="font-size:12px;">
+                    Sending limits sourced from
+                    <a href="https://www.hostinger.com/support/5326155-parameters-and-limits-of-titan-email-at-hostinger/" target="_blank" rel="noopener">
+                        Hostinger — Parameters and limits of Titan Email
+                    </a> (official documentation). Verify current limits in hPanel, as providers can change these over time.
+                </p>
 
             </div>
         </div>
