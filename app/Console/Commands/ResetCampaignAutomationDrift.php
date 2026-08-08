@@ -13,7 +13,7 @@ class ResetCampaignAutomationDrift extends Command
                             {--id= : Only check/reset this automation ID}
                             {--dry-run : Show what would change without saving}
                             {--force : Skip the confirmation prompt}';
-    protected $description = 'Recompute next_run_at from send_time for automations left mid-batch or drifted by the old scheduling bug';
+    protected $description = 'Recompute next_run_at from send_window_start for automations left mid-batch or drifted by the old scheduling bug';
 
     public function handle(): int
     {
@@ -26,7 +26,7 @@ class ResetCampaignAutomationDrift extends Command
         $candidates = $query->get()->filter(function (CampaignAutomation $auto) {
             return $auto->emails_sent_in_batch > 0
                 || !$auto->next_run_at
-                || $auto->next_run_at->format('H:i:s') !== $auto->send_time;
+                || $auto->next_run_at->format('H:i:s') !== $auto->send_window_start;
         });
 
         if ($candidates->isEmpty()) {
@@ -41,7 +41,7 @@ class ResetCampaignAutomationDrift extends Command
                 $auto->id,
                 $auto->name,
                 $auto->frequency,
-                $auto->send_time,
+                $auto->send_window_start,
                 $auto->next_run_at?->toDateTimeString() ?? 'null',
                 $auto->emails_sent_in_batch,
                 $corrected?->toDateTimeString() ?? 'null',
@@ -49,7 +49,7 @@ class ResetCampaignAutomationDrift extends Command
         });
 
         $this->table(
-            ['ID', 'Name', 'Frequency', 'Send Time', 'Current next_run_at', 'Sent in Batch', 'Corrected next_run_at'],
+            ['ID', 'Name', 'Frequency', 'Start Time', 'Current next_run_at', 'Sent in Batch', 'Corrected next_run_at'],
             $rows
         );
 
@@ -86,7 +86,7 @@ class ResetCampaignAutomationDrift extends Command
             return now();
         }
 
-        [$h, $m, $s] = array_pad(explode(':', $auto->send_time), 3, 0);
+        [$h, $m, $s] = array_pad(explode(':', $auto->send_window_start), 3, 0);
         $h = (int) $h;
         $m = (int) $m;
         $s = (int) $s;

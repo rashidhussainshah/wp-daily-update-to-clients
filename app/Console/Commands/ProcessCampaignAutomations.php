@@ -66,29 +66,30 @@ class ProcessCampaignAutomations extends Command
             return;
         }
 
-        // Skip weekends — reschedule to next Monday at the same send_time
+        // Skip weekends — reschedule to next Monday at the same start time
         if ($auto->skip_weekends && now()->isWeekend()) {
-            $nextMonday = now()->next('Monday')->setTimeFromTimeString($auto->send_time);
+            $nextMonday = now()->next('Monday')->setTimeFromTimeString($auto->send_window_start);
             $auto->update(['next_run_at' => $nextMonday]);
             Log::info("[Automations] #{$auto->id} \"{$auto->name}\": weekend skip — rescheduled to {$nextMonday->toDateTimeString()}");
             $this->info("Automation #{$auto->id}: weekend — rescheduled to {$nextMonday->toDateTimeString()}");
             return;
         }
 
-        // Optional send window — keeps sending confined to client-appropriate
-        // hours, independent of Send Time (which only controls when a batch
-        // starts). Only gates the start of a batch; batch_size/delay should be
-        // sized to finish within the window (see the setup guide's formula).
-        if ($auto->send_window_start && $auto->send_window_end) {
-            $windowStart = now()->copy()->setTimeFromTimeString($auto->send_window_start);
-            $windowEnd   = now()->copy()->setTimeFromTimeString($auto->send_window_end);
+        // send_window_start is when a batch may start (always set); send_window_end
+        // is an optional upper bound to keep sending confined to client-appropriate
+        // hours. Only gates the start of a batch — batch_size/delay should be sized
+        // to finish within the window (see the setup guide's formula).
+        $windowStart = now()->copy()->setTimeFromTimeString($auto->send_window_start);
 
-            if (now()->lt($windowStart)) {
-                $auto->update(['next_run_at' => $windowStart]);
-                Log::info("[Automations] #{$auto->id} \"{$auto->name}\": before send window — rescheduled to {$windowStart->toDateTimeString()}");
-                $this->info("Automation #{$auto->id}: before send window — rescheduled to {$windowStart->toDateTimeString()}");
-                return;
-            }
+        if (now()->lt($windowStart)) {
+            $auto->update(['next_run_at' => $windowStart]);
+            Log::info("[Automations] #{$auto->id} \"{$auto->name}\": before send window — rescheduled to {$windowStart->toDateTimeString()}");
+            $this->info("Automation #{$auto->id}: before send window — rescheduled to {$windowStart->toDateTimeString()}");
+            return;
+        }
+
+        if ($auto->send_window_end) {
+            $windowEnd = now()->copy()->setTimeFromTimeString($auto->send_window_end);
 
             if (now()->gt($windowEnd)) {
                 $nextWindow = now()->copy()->addDay()->setTimeFromTimeString($auto->send_window_start);

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class CampaignAutomation extends Model
 {
     protected $fillable = [
-        'name', 'campaign_id', 'status', 'frequency', 'send_time',
+        'name', 'campaign_id', 'status', 'frequency',
         'send_window_start', 'send_window_end',
         'send_day_of_week', 'send_day_of_month', 'start_date', 'end_date',
         'batch_size', 'resend_gap_days', 'email_delay_seconds', 'emails_sent_in_batch',

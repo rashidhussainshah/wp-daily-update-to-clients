@@ -94,34 +94,28 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Send Time <span class="text-danger">*</span></label>
-                                    <input type="time" name="send_time" class="form-control"
-                                           value="{{ old('send_time', isset($automation) ? substr($automation->send_time, 0, 5) : '09:00') }}"
+                                    <input type="time" name="send_window_start" class="form-control"
+                                           value="{{ old('send_window_start', isset($automation) ? substr($automation->send_window_start, 0, 5) : '09:00') }}"
                                            required>
-                                    <span class="help-block">Server time (Pakistan = UTC+5)</span>
+                                    <span class="help-block">Server time (Pakistan = UTC+5). This is when a batch starts.</span>
                                 </div>
                             </div>
                         </div>
 
-                        {{-- Send window --}}
+                        {{-- Send window end --}}
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
-                                    <label>Send Window Start <span class="text-muted">(optional)</span></label>
-                                    <input type="time" name="send_window_start" class="form-control"
-                                           value="{{ old('send_window_start', isset($automation) && $automation->send_window_start ? substr($automation->send_window_start, 0, 5) : '') }}">
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="form-group">
-                                    <label>Send Window End <span class="text-muted">(optional)</span></label>
+                                    <label>Stop Sending By <span class="text-muted">(optional)</span></label>
                                     <input type="time" name="send_window_end" class="form-control"
                                            value="{{ old('send_window_end', isset($automation) && $automation->send_window_end ? substr($automation->send_window_end, 0, 5) : '') }}">
                                     <span class="help-block">
-                                        If set, sending only starts within this window — e.g. 09:00–17:00 keeps a
-                                        delay-spread batch from trickling into off-hours. Size Batch Size/Delay to
-                                        finish inside the window (see the
+                                        If set, a batch won't start after this time — e.g. Send Time 09:00 with Stop
+                                        Sending By 17:00 keeps a delay-spread batch from trickling into off-hours; if
+                                        it's not caught up by 17:00 one day, it resumes at 09:00 the next. Size Batch
+                                        Size/Delay to finish inside that window (see the
                                         <a href="{{ route('campaign-automations.setup-guide') }}" style="font-weight:600;text-decoration:underline;">Recommended Setup</a> formula).
-                                        Leave both blank to allow sending any time of day.
+                                        Leave blank to allow sending any time after Send Time.
                                     </span>
                                 </div>
                             </div>

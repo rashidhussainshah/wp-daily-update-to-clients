@@ -192,9 +192,8 @@ class CampaignAutomationController extends Controller
             'name'               => 'required|string|max:255',
             'campaign_id'        => 'required|exists:email_campaigns,id',
             'frequency'          => 'required|in:once,daily,weekly,monthly',
-            'send_time'          => 'required|date_format:H:i',
-            'send_window_start' => 'nullable|date_format:H:i|required_with:send_window_end',
-            'send_window_end'   => 'nullable|date_format:H:i|required_with:send_window_start|after:send_window_start',
+            'send_window_start' => 'required|date_format:H:i',
+            'send_window_end'   => 'nullable|date_format:H:i|after:send_window_start',
             'send_day_of_week'   => 'nullable|integer|min:0|max:6',
             'send_day_of_month'  => 'nullable|integer|min:1|max:31',
             'start_date'         => 'required|date',
@@ -211,7 +210,7 @@ class CampaignAutomationController extends Controller
 
     private function buildFirstRun(array $data): Carbon
     {
-        [$h, $m] = explode(':', $data['send_time']);
+        [$h, $m] = explode(':', $data['send_window_start']);
 
         $base = Carbon::parse($data['start_date'])->setTime((int)$h, (int)$m, 0);
 
@@ -232,7 +231,7 @@ class CampaignAutomationController extends Controller
     private function scheduleChanged(CampaignAutomation $auto, array $data): bool
     {
         return $auto->frequency    !== $data['frequency']
-            || $auto->send_time    !== $data['send_time'] . ':00'
+            || $auto->send_window_start !== $data['send_window_start'] . ':00'
             || $auto->start_date->toDateString() !== $data['start_date'];
     }
 }
