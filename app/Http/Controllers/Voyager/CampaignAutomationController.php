@@ -110,6 +110,8 @@ class CampaignAutomationController extends Controller
 
     public function runNow(int $id)
     {
+        set_time_limit(0);
+
         $auto = CampaignAutomation::findOrFail($id);
 
         if (!in_array($auto->status, ['active', 'paused'])) {
@@ -123,8 +125,18 @@ class CampaignAutomationController extends Controller
         }
 
         Artisan::call('automations:process', ['--id' => $id]);
-
         $output = trim(Artisan::output());
+
+        // "Run Now" means now — drain the queue immediately instead of leaving
+        // the batch waiting for the next queue:work cron tick (up to 59s, or
+        // forever if that cron isn't set up). Blocks this request until the
+        // batch is sent, same trade-off as the "Process Queue Now" button.
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--tries'           => 3,
+            '--timeout'         => 3600,
+        ]);
+        $sendOutput = trim(Artisan::output());
 
         // Restore paused state if it was paused (command may have changed status)
         // Only restore if command didn't mark it completed/cancelled
@@ -133,7 +145,7 @@ class CampaignAutomationController extends Controller
             $auto->update(['status' => 'paused']);
         }
 
-        $message = $output ?: "Automation #{$id} triggered successfully.";
+        $message = trim($output . "\n" . $sendOutput) ?: "Automation #{$id} triggered successfully.";
 
         return redirect()->route('campaign-automations.show', $id)
             ->with('success', $message);
