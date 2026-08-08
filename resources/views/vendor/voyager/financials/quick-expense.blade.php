@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Quick Add Expense</title>
+<style>
+  :root{
+    --primary:#4361ee;
+    --primary-dark:#2f45c5;
+    --bg:#f2f4f8;
+    --card:#ffffff;
+    --text:#1c1f2a;
+    --muted:#6b7280;
+    --border:#e2e5ec;
+    --success:#1d9d5f;
+    --success-bg:#e8f8ef;
+    --danger:#e0393e;
+    --danger-bg:#fdeceb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    padding:16px;
+    padding-bottom:40px;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+  h1{
+    font-size:19px;
+    font-weight:700;
+    margin:4px 0 16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.04);
+  }
+  .alert{
+    padding:12px 14px;
+    border-radius:10px;
+    font-size:14px;
+    margin-bottom:14px;
+    font-weight:600;
+  }
+  .alert-success{background:var(--success-bg);color:var(--success);}
+  .alert-danger{background:var(--danger-bg);color:var(--danger);}
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    margin-bottom:6px;
+  }
+  .field{margin-bottom:16px;}
+  .row{display:flex;gap:12px;}
+  .row .field{flex:1;}
+  input, select{
+    width:100%;
+    padding:12px 12px;
+    font-size:16px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    background:#fbfbfd;
+    color:var(--text);
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--primary);
+    background:#fff;
+  }
+  optgroup{font-style:normal;font-weight:700;}
+  button[type=submit]{
+    width:100%;
+    padding:15px;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+    background:var(--primary);
+    border:none;
+    border-radius:12px;
+    margin-top:4px;
+  }
+  button[type=submit]:active{background:var(--primary-dark);}
+  .hint{font-size:12px;color:var(--muted);margin-top:10px;text-align:center;}
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1115;
+      --card:#181b22;
+      --text:#eef0f4;
+      --muted:#9aa0ac;
+      --border:#2a2e38;
+      --success-bg:#123625;
+      --danger-bg:#3a1a1b;
+    }
+    input, select{background:#12141a;}
+    input:focus, select:focus{background:#12141a;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>💸 Quick Add Expense</h1>
+
+  @if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+  @endif
+  @if(session('error'))
+    <div class="alert alert-danger">{{ session('error') }}</div>
+  @endif
+  @if($errors->any())
+    <div class="alert alert-danger">{{ $errors->first() }}</div>
+  @endif
+
+  <div class="card">
+    <form method="POST" action="{{ route('financials.store-expense') }}">
+      @csrf
+
+      <div class="row">
+        <div class="field">
+          <label>Month</label>
+          <input type="month" name="month" value="{{ now()->format('Y-m') }}" required>
+        </div>
+        <div class="field">
+          <label>Amount (PKR)</label>
+          <input type="number" name="amount_pkr" placeholder="e.g. 8500" required min="0" step="1" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Category</label>
+        <select name="category" required>
+          @foreach(\App\Models\MonthlyExpense::$categories as $key => $lbl)
+            @if(!in_array($key, ['rent','claude_accounts','internet_moon','internet_prime']))
+              <option value="{{ $key }}">{{ $lbl }}</option>
+            @endif
+          @endforeach
+          <optgroup label="─ Fixed (use Auto-fill on desktop instead) ─">
+            <option value="rent">Office Rent</option>
+            <option value="claude_accounts">Claude AI Accounts</option>
+            <option value="internet_moon">Internet — Moon</option>
+            <option value="internet_prime">Internet — Prime</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>Paid From</label>
+          <select name="paid_from">
+            <option value="">— not specified —</option>
+            @foreach(\App\Models\MonthlyExpense::$bankAccounts as $k => $v)
+              <option value="{{ $k }}">{{ $v }}</option>
+            @endforeach
+          </select>
+        </div>
+        <div class="field">
+          <label>Note (optional)</label>
+          <input type="text" name="note" placeholder="e.g. Jun bill">
+        </div>
+      </div>
+
+      <button type="submit">Add Expense</button>
+    </form>
+  </div>
+
+  <div class="hint">Signed in as {{ auth()->user()->name ?? auth()->user()->email }}</div>
+</div>
+</body>
+</html>
