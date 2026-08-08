@@ -172,6 +172,7 @@ class ProcessCampaignAutomations extends Command
 
         $updates = [
             'last_run_at'          => now(),
+            'queued_at'            => now(), // cleared by the job once it finishes — see SendCampaignAutomationBatchJob
             'emails_sent_in_batch' => 0, // batches always complete within a single run now
             'next_run_at'          => $this->calculateNextRun($auto),
         ];

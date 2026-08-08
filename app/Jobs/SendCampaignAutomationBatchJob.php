@@ -37,6 +37,7 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
     {
         $auto = CampaignAutomation::with('campaign')->find($this->automationId);
         if (!$auto || !$auto->campaign) {
+            $auto?->update(['queued_at' => null]);
             return;
         }
 
@@ -100,6 +101,7 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
         }
 
         $auto->increment('emails_sent_total', $sent);
+        $auto->update(['queued_at' => null]);
 
         Log::info("[Automations] #{$auto->id} \"{$auto->name}\": batch done — sent={$sent}, failed={$failed}");
 
@@ -110,5 +112,16 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
             Mail::to($auto->notify_email)
                 ->send(new AutomationCompletedMail($auto, $auto->emails_sent_total, $failed));
         }
+    }
+
+    /**
+     * Called once all $tries are exhausted — without this, a persistently
+     * failing job (e.g. bad SMTP credentials) would leave queued_at stuck
+     * forever, making the UI show "sending now" indefinitely.
+     */
+    public function failed(\Throwable $exception): void
+    {
+        CampaignAutomation::find($this->automationId)?->update(['queued_at' => null]);
+        Log::error("[Automations] #{$this->automationId}: job failed permanently — " . $exception->getMessage());
     }
 }
