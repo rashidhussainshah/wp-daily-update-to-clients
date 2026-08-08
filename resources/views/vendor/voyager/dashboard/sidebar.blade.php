@@ -34,8 +34,7 @@
                 // Items restricted to campaign-access users only
                 $restrictedTitles = ['Email Campaigns', 'Email Signatures', 'Signature Settings', 'Campaign Automations', 'SMTP Accounts'];
 
-                $userEmail = strtolower(Auth::user()->email ?? '');
-                $campaignAllowed = \App\Http\Middleware\EnsureCampaignAccess::isAllowed($userEmail);
+                $campaignAllowed = \App\Http\Middleware\EnsureCampaignAccess::isAllowed(Auth::user()->role_id ?? null);
 
                 $menuJson  = menu('admin', '_json');
                 if (!$campaignAllowed) {
