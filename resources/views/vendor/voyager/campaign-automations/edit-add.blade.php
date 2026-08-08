@@ -78,7 +78,7 @@
                     <div class="panel-body">
 
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-sm-12">
                                 <div class="form-group">
                                     <label>Frequency <span class="text-danger">*</span></label>
                                     <select name="frequency" id="frequency" class="form-control" required>
@@ -91,6 +91,10 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+
+                        {{-- Send Time + optional window end, same row --}}
+                        <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Send Time <span class="text-danger">*</span></label>
@@ -100,10 +104,6 @@
                                     <span class="help-block">Server time (Pakistan = UTC+5). This is when a batch starts.</span>
                                 </div>
                             </div>
-                        </div>
-
-                        {{-- Send window end --}}
-                        <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Stop Sending By <span class="text-muted">(optional)</span></label>
