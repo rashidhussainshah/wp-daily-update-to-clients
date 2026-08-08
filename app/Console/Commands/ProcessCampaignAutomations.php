@@ -75,6 +75,30 @@ class ProcessCampaignAutomations extends Command
             return;
         }
 
+        // Optional send window — keeps sending confined to client-appropriate
+        // hours, independent of Send Time (which only controls when a batch
+        // starts). Only gates the start of a batch; batch_size/delay should be
+        // sized to finish within the window (see the setup guide's formula).
+        if ($auto->send_window_start && $auto->send_window_end) {
+            $windowStart = now()->copy()->setTimeFromTimeString($auto->send_window_start);
+            $windowEnd   = now()->copy()->setTimeFromTimeString($auto->send_window_end);
+
+            if (now()->lt($windowStart)) {
+                $auto->update(['next_run_at' => $windowStart]);
+                Log::info("[Automations] #{$auto->id} \"{$auto->name}\": before send window — rescheduled to {$windowStart->toDateTimeString()}");
+                $this->info("Automation #{$auto->id}: before send window — rescheduled to {$windowStart->toDateTimeString()}");
+                return;
+            }
+
+            if (now()->gt($windowEnd)) {
+                $nextWindow = now()->copy()->addDay()->setTimeFromTimeString($auto->send_window_start);
+                $auto->update(['next_run_at' => $nextWindow]);
+                Log::info("[Automations] #{$auto->id} \"{$auto->name}\": past send window — rescheduled to {$nextWindow->toDateTimeString()}");
+                $this->info("Automation #{$auto->id}: past send window — rescheduled to {$nextWindow->toDateTimeString()}");
+                return;
+            }
+        }
+
         $role = Role::where('name', $auto->target_role)->first();
         if (!$role) {
             Log::error("[Automations] #{$auto->id} \"{$auto->name}\": role '{$auto->target_role}' not found in DB");

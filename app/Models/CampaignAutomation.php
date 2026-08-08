@@ -10,6 +10,7 @@ class CampaignAutomation extends Model
 {
     protected $fillable = [
         'name', 'campaign_id', 'status', 'frequency', 'send_time',
+        'send_window_start', 'send_window_end',
         'send_day_of_week', 'send_day_of_month', 'start_date', 'end_date',
         'batch_size', 'resend_gap_days', 'email_delay_seconds', 'emails_sent_in_batch',
         'target_role', 'emails_sent_total', 'last_run_at', 'next_run_at', 'created_by',

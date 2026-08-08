@@ -193,6 +193,8 @@ class CampaignAutomationController extends Controller
             'campaign_id'        => 'required|exists:email_campaigns,id',
             'frequency'          => 'required|in:once,daily,weekly,monthly',
             'send_time'          => 'required|date_format:H:i',
+            'send_window_start' => 'nullable|date_format:H:i|required_with:send_window_end',
+            'send_window_end'   => 'nullable|date_format:H:i|required_with:send_window_start|after:send_window_start',
             'send_day_of_week'   => 'nullable|integer|min:0|max:6',
             'send_day_of_month'  => 'nullable|integer|min:1|max:31',
             'start_date'         => 'required|date',

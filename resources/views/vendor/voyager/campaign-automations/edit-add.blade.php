@@ -102,6 +102,31 @@
                             </div>
                         </div>
 
+                        {{-- Send window --}}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Send Window Start <span class="text-muted">(optional)</span></label>
+                                    <input type="time" name="send_window_start" class="form-control"
+                                           value="{{ old('send_window_start', isset($automation) && $automation->send_window_start ? substr($automation->send_window_start, 0, 5) : '') }}">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Send Window End <span class="text-muted">(optional)</span></label>
+                                    <input type="time" name="send_window_end" class="form-control"
+                                           value="{{ old('send_window_end', isset($automation) && $automation->send_window_end ? substr($automation->send_window_end, 0, 5) : '') }}">
+                                    <span class="help-block">
+                                        If set, sending only starts within this window — e.g. 09:00–17:00 keeps a
+                                        delay-spread batch from trickling into off-hours. Size Batch Size/Delay to
+                                        finish inside the window (see the
+                                        <a href="{{ route('campaign-automations.setup-guide') }}" style="font-weight:600;text-decoration:underline;">Recommended Setup</a> formula).
+                                        Leave both blank to allow sending any time of day.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
                         {{-- Weekly day --}}
                         <div class="form-group" id="row-dow" style="display:none;">
                             <label>Day of Week</label>

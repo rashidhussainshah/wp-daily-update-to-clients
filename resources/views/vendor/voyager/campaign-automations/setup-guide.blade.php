@@ -100,34 +100,37 @@
                 <div class="panel panel-bordered">
                     <div class="panel-heading"><h3 class="panel-title"><i class="voyager-server"></i> Server cron jobs (Hostinger hPanel)</h3></div>
                     <div class="panel-body">
-                        <p>Two separate cron entries are needed, and <strong>both must run every minute</strong>. Add both
-                        under <strong>hPanel → Advanced → Cron Jobs</strong>.</p>
+                        <p>Two separate cron entries are needed. Running them <strong>every 20 minutes</strong> (rather than
+                        every minute) is deliberate — the priority here is keeping the server smooth and lightly loaded, not
+                        split-second precision. A send landing 20–30 minutes after its Send Time is fine. Add both under
+                        <strong>hPanel → Advanced → Cron Jobs</strong>.</p>
 
                         <table class="table table-condensed" style="margin-bottom:0;">
                             <thead><tr><th style="width:18%;">Job</th><th>Schedule</th><th>Command</th></tr></thead>
                             <tbody>
                                 <tr>
                                     <td><strong>Scheduler</strong><br><span class="label label-danger">check this — see warning below</span></td>
-                                    <td>Every minute</td>
-                                    <td><code>* * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan schedule:run</code></td>
+                                    <td>Every 20 min</td>
+                                    <td><code>*/20 * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan schedule:run</code></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Queue worker</strong><br><span class="label label-danger">needs adding</span></td>
-                                    <td>Every minute</td>
-                                    <td><code>* * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan queue:work --stop-when-empty --tries=3 --timeout=3600 >> /dev/null 2>&1</code></td>
+                                    <td>Every 20 min</td>
+                                    <td><code>*/20 * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan queue:work --stop-when-empty --tries=3 --timeout=3600 >> /dev/null 2>&1</code></td>
                                 </tr>
                             </tbody>
                         </table>
 
                         <div class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
-                            <strong>If the existing scheduler cron currently runs <code>0 0 * * *</code> (once a day)
-                            instead of every minute, Send Time doesn't actually work.</strong> An automation only gets
-                            checked at the moment this cron fires — with a once-daily cron, that's midnight, so
-                            every automation ends up sending around midnight regardless of its configured Send Time,
-                            roughly a day late. Running it every minute (like the row above) is what lets an automation
-                            actually fire close to its real Send Time. It's cheap to run this often — <code>schedule:run</code>
-                            just checks stored timestamps and exits instantly when nothing's due, the same way
-                            <code>queue:work --stop-when-empty</code> already does above.
+                            <strong>If the existing scheduler cron currently runs <code>0 0 * * *</code> (once a day),
+                            Send Time doesn't actually work at all — not just imprecisely.</strong> An automation only gets
+                            checked at the moment this cron fires — with a once-daily cron, that's midnight, so every
+                            automation ends up sending around midnight regardless of its configured Send Time, roughly a
+                            day late. It needs to run at <em>some</em> regular short interval — every 20 minutes is enough,
+                            every minute is unnecessary. Either is cheap: <code>schedule:run</code> just checks stored
+                            timestamps and exits instantly when nothing's due, the same way <code>queue:work
+                            --stop-when-empty</code> already does above — running it more often doesn't add real load,
+                            but there's no need to go finer than 20 minutes for our use case.
                         </div>
 
                         <p style="margin-top:10px;margin-bottom:0;">
