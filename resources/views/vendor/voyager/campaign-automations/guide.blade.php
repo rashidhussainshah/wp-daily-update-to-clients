@@ -129,7 +129,7 @@
                             Formula: <code>delay (seconds) = desired spread (seconds) &divide; batch size</code>.
                             Example: an 8-hour spread is 28,800 seconds; divided across 30 emails is 960 seconds each.
                             For ready-to-use settings based on our real list size and Titan limits, see
-                            <a href="{{ route('campaign-automations.setup-guide') }}">Recommended Setup</a>.
+                            <a href="{{ route('campaign-automations.setup-guide') }}" style="font-weight:600;text-decoration:underline;">Recommended Setup</a>.
                         </p>
                     </div>
                 </div>

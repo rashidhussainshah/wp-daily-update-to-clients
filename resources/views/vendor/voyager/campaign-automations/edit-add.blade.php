@@ -206,7 +206,8 @@
                                 Recommended: <strong>60</strong> (1 min) or <strong>120</strong> (2 min) to avoid spam filters.
                                 The whole batch is sent on its scheduled day, one email at a time, waiting this many
                                 seconds between each — so a bigger delay spreads the same batch across more of the day
-                                instead of sending it all in a burst. See the <a href="{{ route('campaign-automations.guide') }}">How This Works guide</a>
+                                instead of sending it all in a burst. See the
+                                <a href="{{ route('campaign-automations.guide') }}" style="font-weight:600;text-decoration:underline;">How This Works guide</a>
                                 for a worked example.
                             </span>
                         </div>

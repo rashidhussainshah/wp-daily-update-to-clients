@@ -17,9 +17,10 @@
             <div class="col-md-10 col-md-offset-1">
 
                 <div class="alert alert-info" style="padding:10px 15px;">
-                    Concrete settings to copy for common scenarios, and the exact server cron jobs needed to make
-                    automations actually run. For how the scheduling mechanics work underneath, see the
-                    <a href="{{ route('campaign-automations.guide') }}">How This Works</a> page.
+                    Copy-paste settings for common sending scenarios, plus the exact server cron jobs needed to make
+                    automations actually run. New to this feature? Read
+                    <a href="{{ route('campaign-automations.guide') }}" class="alert-link" style="text-decoration:underline;">
+                        How This Works</a> first — it explains the scheduling mechanics this page assumes you already know.
                 </div>
 
                 {{-- Pre-flight checklist --}}
