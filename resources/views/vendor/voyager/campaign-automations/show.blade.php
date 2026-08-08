@@ -4,10 +4,10 @@
 
 @section('page_header')
 <div class="container-fluid">
-    <h1 class="page-title">
-        <i class="voyager-list"></i> {{ $automation->name }}
+    <h1 class="page-title" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;">
+        <span><i class="voyager-list"></i> {{ $automation->name }}</span>
         <span class="badge badge-{{ $automation->status_badge }}">{{ ucfirst($automation->status) }}</span>
-        <span class="label label-{{ $automation->runtime_status['badge'] }}" style="font-size:12px;vertical-align:middle;">
+        <span class="label label-{{ $automation->runtime_status['badge'] }}" style="font-size:12px;">
             {{ $automation->runtime_status['text'] }}
         </span>
     </h1>
@@ -110,8 +110,8 @@
                 <div class="panel-heading">
                     <h3 class="panel-title">Send Log</h3>
                 </div>
-                <div class="panel-body" style="padding:0;">
-                    <table class="table table-hover" style="margin:0;">
+                <div class="panel-body" style="padding:0;overflow-x:auto;">
+                    <table class="table table-hover" style="margin:0;min-width:700px;">
                         <thead>
                             <tr>
                                 <th>#</th>
