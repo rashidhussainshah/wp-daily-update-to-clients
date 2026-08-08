@@ -100,23 +100,35 @@
                 <div class="panel panel-bordered">
                     <div class="panel-heading"><h3 class="panel-title"><i class="voyager-server"></i> Server cron jobs (Hostinger hPanel)</h3></div>
                     <div class="panel-body">
-                        <p>Two separate cron entries are needed. Add both under <strong>hPanel → Advanced → Cron Jobs</strong>.</p>
+                        <p>Two separate cron entries are needed, and <strong>both must run every minute</strong>. Add both
+                        under <strong>hPanel → Advanced → Cron Jobs</strong>.</p>
 
                         <table class="table table-condensed" style="margin-bottom:0;">
                             <thead><tr><th style="width:18%;">Job</th><th>Schedule</th><th>Command</th></tr></thead>
                             <tbody>
                                 <tr>
-                                    <td><strong>Scheduler</strong><br><span class="label label-success">already set up</span></td>
-                                    <td>Once a day</td>
-                                    <td><code>cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan schedule:run</code></td>
+                                    <td><strong>Scheduler</strong><br><span class="label label-danger">check this — see warning below</span></td>
+                                    <td>Every minute</td>
+                                    <td><code>* * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan schedule:run</code></td>
                                 </tr>
                                 <tr>
                                     <td><strong>Queue worker</strong><br><span class="label label-danger">needs adding</span></td>
                                     <td>Every minute</td>
-                                    <td><code>cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan queue:work --stop-when-empty --tries=3 --timeout=3600 >> /dev/null 2>&1</code></td>
+                                    <td><code>* * * * * cd /home/USERNAME/domains/portal.webpenter.com/public_html && php artisan queue:work --stop-when-empty --tries=3 --timeout=3600 >> /dev/null 2>&1</code></td>
                                 </tr>
                             </tbody>
                         </table>
+
+                        <div class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
+                            <strong>If the existing scheduler cron currently runs <code>0 0 * * *</code> (once a day)
+                            instead of every minute, Send Time doesn't actually work.</strong> An automation only gets
+                            checked at the moment this cron fires — with a once-daily cron, that's midnight, so
+                            every automation ends up sending around midnight regardless of its configured Send Time,
+                            roughly a day late. Running it every minute (like the row above) is what lets an automation
+                            actually fire close to its real Send Time. It's cheap to run this often — <code>schedule:run</code>
+                            just checks stored timestamps and exits instantly when nothing's due, the same way
+                            <code>queue:work --stop-when-empty</code> already does above.
+                        </div>
 
                         <p style="margin-top:10px;margin-bottom:0;">
                             Without the queue worker cron, automations get scheduled correctly but the emails just sit in

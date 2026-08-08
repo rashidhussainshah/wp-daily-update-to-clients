@@ -76,17 +76,19 @@
                             <tbody>
                                 <tr>
                                     <td><strong>Scheduler</strong></td>
-                                    <td>Runs once a day. Checks every automation's Frequency/Send Time, and for anything due, decides who the recipients are and hands that batch off — this step is fast, no emails are sent yet.</td>
+                                    <td>Meant to run every minute on the server. Checks every automation's Frequency/Send Time, and for anything actually due <em>right now</em>, decides who the recipients are and hands that batch off — this step is fast, no emails are sent yet.</td>
                                 </tr>
                                 <tr>
                                     <td><strong>Queue worker</strong></td>
-                                    <td>Picks up the batch the scheduler handed off and does the actual slow part — connecting to the mail server and sending each email, waiting your configured Delay between each one.</td>
+                                    <td>Also runs every minute. Picks up the batch the scheduler handed off and does the actual slow part — connecting to the mail server and sending each email, waiting your configured Delay between each one.</td>
                                 </tr>
                             </tbody>
                         </table>
                         <p style="margin-top:10px;margin-bottom:0;" class="text-muted">
                             If sends seem stuck, use <strong>Process Queue Now</strong> on the automations list — it manually runs
-                            the queue worker step for whatever's currently waiting.
+                            the queue worker step for whatever's currently waiting. If sends are consistently landing at the wrong
+                            time of day (e.g. always around midnight instead of the configured Send Time), the server's scheduler
+                            cron probably isn't running every minute — see <a href="{{ route('campaign-automations.setup-guide') }}" style="font-weight:600;text-decoration:underline;">Recommended Setup</a> for the exact cron line.
                         </p>
                     </div>
                 </div>
