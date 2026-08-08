@@ -7,23 +7,21 @@ use Illuminate\Http\Request;
 
 class EnsureCampaignAccess
 {
-    private const ALLOWED = [
-        'alihasanwebpenter@gmail.com',
-        'ayubkhokhar786@gmail.com',
-        'zaars59208@gmail.com',
-        'rashid.bukhari78600@gmail.com',
+    private const ALLOWED_ROLE_IDS = [
+        1,  // Administrator
+        33, // Bussiness Developer
     ];
 
-    public static function isAllowed(string $email): bool
+    public static function isAllowed(?int $roleId): bool
     {
-        return in_array(strtolower($email), self::ALLOWED, true);
+        return in_array($roleId, self::ALLOWED_ROLE_IDS, true);
     }
 
     public function handle(Request $request, Closure $next)
     {
         $user = auth()->user();
 
-        if (!$user || !self::isAllowed($user->email)) {
+        if (!$user || !self::isAllowed($user->role_id)) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Access denied.'], 403);
             }
