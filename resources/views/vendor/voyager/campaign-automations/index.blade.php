@@ -26,6 +26,9 @@
                 <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
                     <h3 class="panel-title">Scheduled Automations</h3>
                     <div>
+                        <a href="{{ route('campaign-automations.guide') }}" class="btn btn-default btn-sm">
+                            <i class="voyager-info-circled"></i> How This Works
+                        </a>
                         <form method="POST" action="{{ route('campaign-automations.process-queue') }}" style="display:inline;">
                             @csrf
                             <button class="btn btn-default btn-sm" title="Manual fallback if the server's queue worker cron isn't running — processes whatever is currently queued. This blocks until done, so only use it if sends aren't going out on their own."

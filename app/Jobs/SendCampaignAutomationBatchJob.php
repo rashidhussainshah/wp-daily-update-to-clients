@@ -20,12 +20,18 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, CampaignMailerTrait;
 
     public int $tries = 3;
-    public int $timeout = 3600;
+    public int $timeout;
 
     public function __construct(
         public int $automationId,
-        public array $recipients   // [['id'=>1,'email'=>'...','name'=>'...']]
-    ) {}
+        public array $recipients,  // [['id'=>1,'email'=>'...','name'=>'...']]
+        public int $delaySeconds = 0
+    ) {
+        // Must cover the longest this batch can legitimately take — spacing
+        // emails out across a whole day means the job runs for hours, not
+        // the Laravel default hour. +30min buffer for SMTP/connection overhead.
+        $this->timeout = max(3600, count($recipients) * $delaySeconds + 1800);
+    }
 
     public function handle(): void
     {
@@ -37,7 +43,7 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
         $campaign = $auto->campaign;
         $smtp     = $campaign->smtpAccount;
         $mailer   = $this->getMailer($smtp);
-        $delay    = (int) $auto->email_delay_seconds;
+        $delay    = $this->delaySeconds;
         $count    = count($this->recipients);
 
         $sent   = 0;

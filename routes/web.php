@@ -122,6 +122,7 @@ Route::group(['prefix' => 'admin'], function () {
     // Campaign Automations
     Route::prefix('campaign-automations')->name('campaign-automations.')->group(function () {
         Route::get('/',          [CampaignAutomationController::class, 'index'])->name('index');
+        Route::get('/guide',     [CampaignAutomationController::class, 'guide'])->name('guide');
         Route::post('/process-queue', [CampaignAutomationController::class, 'processQueue'])->name('process-queue');
         Route::get('/create',    [CampaignAutomationController::class, 'create'])->name('create');
         Route::post('/',         [CampaignAutomationController::class, 'store'])->name('store');

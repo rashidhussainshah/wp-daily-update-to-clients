@@ -173,7 +173,8 @@ class ProcessCampaignAutomations extends Command
 
         SendCampaignAutomationBatchJob::dispatch(
             $auto->id,
-            $recipients->map(fn ($u) => ['id' => $u->id, 'email' => $u->email, 'name' => $u->name])->all()
+            $recipients->map(fn ($u) => ['id' => $u->id, 'email' => $u->email, 'name' => $u->name])->all(),
+            (int) $auto->email_delay_seconds
         );
 
         $this->info("Automation #{$auto->id} \"{$auto->name}\": queued {$recipients->count()} email(s) for background sending.");
