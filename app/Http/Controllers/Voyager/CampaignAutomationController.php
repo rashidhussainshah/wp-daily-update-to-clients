@@ -27,6 +27,16 @@ class CampaignAutomationController extends Controller
         return view('vendor.voyager.campaign-automations.index', compact('automations'));
     }
 
+    public function guide()
+    {
+        return view('vendor.voyager.campaign-automations.guide');
+    }
+
+    public function setupGuide()
+    {
+        return view('vendor.voyager.campaign-automations.setup-guide');
+    }
+
     public function create()
     {
         $campaigns = EmailCampaign::orderBy('name')->get();
@@ -139,6 +149,27 @@ class CampaignAutomationController extends Controller
             ->with('success', $message);
     }
 
+    /**
+     * Manual fallback for when the server's queue:work cron isn't running (or
+     * isn't set up yet) — drains whatever is currently in the jobs table.
+     * Runs synchronously in this request, so it blocks until done; only meant
+     * as an emergency/manual drain, not a substitute for the cron.
+     */
+    public function processQueue()
+    {
+        set_time_limit(0);
+
+        Artisan::call('queue:work', [
+            '--stop-when-empty' => true,
+            '--tries'           => 3,
+            '--timeout'         => 3600,
+        ]);
+
+        $output = trim(Artisan::output());
+
+        return back()->with('success', $output !== '' ? $output : 'Queue is empty — nothing to process.');
+    }
+
     public function cancel(int $id)
     {
         CampaignAutomation::findOrFail($id)->update(['status' => 'cancelled', 'next_run_at' => null]);
@@ -161,7 +192,8 @@ class CampaignAutomationController extends Controller
             'name'               => 'required|string|max:255',
             'campaign_id'        => 'required|exists:email_campaigns,id',
             'frequency'          => 'required|in:once,daily,weekly,monthly',
-            'send_time'          => 'required|date_format:H:i',
+            'send_window_start' => 'required|date_format:H:i',
+            'send_window_end'   => 'nullable|date_format:H:i|after:send_window_start',
             'send_day_of_week'   => 'nullable|integer|min:0|max:6',
             'send_day_of_month'  => 'nullable|integer|min:1|max:31',
             'start_date'         => 'required|date',
@@ -178,7 +210,7 @@ class CampaignAutomationController extends Controller
 
     private function buildFirstRun(array $data): Carbon
     {
-        [$h, $m] = explode(':', $data['send_time']);
+        [$h, $m] = explode(':', $data['send_window_start']);
 
         $base = Carbon::parse($data['start_date'])->setTime((int)$h, (int)$m, 0);
 
@@ -199,7 +231,7 @@ class CampaignAutomationController extends Controller
     private function scheduleChanged(CampaignAutomation $auto, array $data): bool
     {
         return $auto->frequency    !== $data['frequency']
-            || $auto->send_time    !== $data['send_time'] . ':00'
+            || $auto->send_window_start !== $data['send_window_start'] . ':00'
             || $auto->start_date->toDateString() !== $data['start_date'];
     }
 }

@@ -23,14 +23,29 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-bordered">
-                <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;">
-                    <h3 class="panel-title">Scheduled Automations</h3>
-                    <a href="{{ route('campaign-automations.create') }}" class="btn btn-success btn-sm">
-                        <i class="voyager-plus"></i> New Automation
-                    </a>
+                <div class="panel-heading" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <h3 class="panel-title" style="margin:0;">Scheduled Automations</h3>
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                        <a href="{{ route('campaign-automations.guide') }}" class="btn btn-default btn-sm">
+                            <i class="voyager-info-circled"></i> How This Works
+                        </a>
+                        <a href="{{ route('campaign-automations.setup-guide') }}" class="btn btn-default btn-sm">
+                            <i class="voyager-rocket"></i> Recommended Setup
+                        </a>
+                        <form method="POST" action="{{ route('campaign-automations.process-queue') }}" style="display:inline;">
+                            @csrf
+                            <button class="btn btn-default btn-sm" title="Manual fallback if the server's queue worker cron isn't running — processes whatever is currently queued. This blocks until done, so only use it if sends aren't going out on their own."
+                                onclick="return confirm('This runs the queue worker directly and will wait until all currently queued emails are sent. Use this only if scheduled sending isn\'t working. Continue?');">
+                                <i class="voyager-refresh"></i> Process Queue Now
+                            </button>
+                        </form>
+                        <a href="{{ route('campaign-automations.create') }}" class="btn btn-success btn-sm">
+                            <i class="voyager-plus"></i> New Automation
+                        </a>
+                    </div>
                 </div>
-                <div class="panel-body" style="padding:0;">
-                    <table class="table table-hover" style="margin:0;">
+                <div class="panel-body" style="padding:0;overflow-x:auto;">
+                    <table class="table table-hover" style="margin:0;min-width:900px;">
                         <thead>
                             <tr>
                                 <th>Name</th>
@@ -63,7 +78,9 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge badge-{{ $auto->status_badge }}">{{ ucfirst($auto->status) }}</span>
+                                    <span class="label label-{{ $auto->runtime_status['badge'] }}" style="font-size:11px;">
+                                        {{ $auto->runtime_status['text'] }}
+                                    </span>
                                 </td>
                                 <td style="font-size:12px;">
                                     {{ $auto->next_run_at ? $auto->next_run_at->format('d M Y H:i') : '—' }}

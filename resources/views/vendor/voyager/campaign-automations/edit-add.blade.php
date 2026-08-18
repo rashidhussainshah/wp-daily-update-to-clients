@@ -78,7 +78,7 @@
                     <div class="panel-body">
 
                         <div class="row">
-                            <div class="col-sm-6">
+                            <div class="col-sm-12">
                                 <div class="form-group">
                                     <label>Frequency <span class="text-danger">*</span></label>
                                     <select name="frequency" id="frequency" class="form-control" required>
@@ -91,13 +91,32 @@
                                     </select>
                                 </div>
                             </div>
+                        </div>
+
+                        {{-- Send Time + optional window end, same row --}}
+                        <div class="row">
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label>Send Time <span class="text-danger">*</span></label>
-                                    <input type="time" name="send_time" class="form-control"
-                                           value="{{ old('send_time', isset($automation) ? substr($automation->send_time, 0, 5) : '09:00') }}"
+                                    <input type="time" name="send_window_start" class="form-control"
+                                           value="{{ old('send_window_start', isset($automation) ? substr($automation->send_window_start, 0, 5) : '09:00') }}"
                                            required>
-                                    <span class="help-block">Server time (Pakistan = UTC+5)</span>
+                                    <span class="help-block">Server time (Pakistan = UTC+5). This is when a batch starts.</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Stop Sending By <span class="text-muted">(optional)</span></label>
+                                    <input type="time" name="send_window_end" class="form-control"
+                                           value="{{ old('send_window_end', isset($automation) && $automation->send_window_end ? substr($automation->send_window_end, 0, 5) : '') }}">
+                                    <span class="help-block">
+                                        If set, a batch won't start after this time — e.g. Send Time 09:00 with Stop
+                                        Sending By 17:00 keeps a delay-spread batch from trickling into off-hours; if
+                                        it's not caught up by 17:00 one day, it resumes at 09:00 the next. Size Batch
+                                        Size/Delay to finish inside that window (see the
+                                        <a href="{{ route('campaign-automations.setup-guide') }}" style="font-weight:600;text-decoration:underline;">Recommended Setup</a> formula).
+                                        Leave blank to allow sending any time after Send Time.
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -204,7 +223,11 @@
                             </div>
                             <span class="help-block">
                                 Recommended: <strong>60</strong> (1 min) or <strong>120</strong> (2 min) to avoid spam filters.
-                                With delay set, the scheduler sends 1 email per tick and spaces them out automatically.
+                                The whole batch is sent on its scheduled day, one email at a time, waiting this many
+                                seconds between each — so a bigger delay spreads the same batch across more of the day
+                                instead of sending it all in a burst. See the
+                                <a href="{{ route('campaign-automations.guide') }}" style="font-weight:600;text-decoration:underline;">How This Works guide</a>
+                                for a worked example.
                             </span>
                         </div>
 
