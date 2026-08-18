@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use Spatie\SlackAlerts\Facades\SlackAlert;
+use Spatie\SlackAlerts\Jobs\SendToSlackChannelJob;
 
 /**
  *
@@ -273,7 +273,10 @@ class CheckinController extends Controller
     public function sendTxtToSlack($blocks, $slackWebhookUrl)
     {
         try {
-            SlackAlert::to($slackWebhookUrl)->blocks($blocks);
+            // dispatchSync (not the SlackAlert facade's ->blocks(), which always
+            // queues) so the message lands immediately instead of waiting for
+            // the next queue:work sweep (~15 min on this host).
+            SendToSlackChannelJob::dispatchSync($slackWebhookUrl, null, $blocks);
         } catch (\Throwable $e) {
             Log::error('Slack notification failed', [
                 'error' => $e->getMessage(),
