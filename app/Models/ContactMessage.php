@@ -13,13 +13,23 @@ class ContactMessage extends Model
         'name',
         'email',
         'company',
+        'subject',
         'phone',
         'message',
-        'status'
+        'status',
+        'source_domain',
+        'referer_url',
+        'ip_address',
+        'user_agent',
+        'country',
+        'region',
+        'city',
+        'extra_fields',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'extra_fields' => 'array',
     ];
 }
