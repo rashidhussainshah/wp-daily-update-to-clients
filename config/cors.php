@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://webpenter.com', 'https://staging.webpenter.com', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'https://houzilo.com', 'https://bookhere.tech', 'https://scriptandtools.com', 'https://www.scriptandtools.com'],
+    'allowed_origins' => ['https://webpenter.com', 'https://staging.webpenter.com', 'http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:5173', 'https://houzilo.com', 'https://bookhere.tech', 'https://scriptandtools.com', 'https://www.scriptandtools.com', 'http://localhost'],
 
     'allowed_origins_patterns' => [],
 
