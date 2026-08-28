@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Spatie\SlackAlerts\Facades\SlackAlert;
+use Spatie\SlackAlerts\Jobs\SendToSlackChannelJob;
 use TCG\Voyager\Events\BreadDataAdded;
 use TCG\Voyager\Facades\Voyager;
 use TCG\Voyager\Http\Controllers\VoyagerBaseController;
@@ -143,7 +143,10 @@ class LeaveController extends VoyagerBaseController
         }
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
         try {
-            SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+            // dispatchSync (not the SlackAlert facade's ->message(), which always
+            // queues) so the message lands immediately instead of waiting for a
+            // queue worker that isn't running on this host.
+            SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
         } catch (\Throwable $e) {
             Log::warning('Leave request Slack notification failed: ' . $e->getMessage());
         }
@@ -214,7 +217,7 @@ class LeaveController extends VoyagerBaseController
         $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL');
         if ($slackWebhookUrl) {
             try {
-                SlackAlert::to($slackWebhookUrl)->message(strip_tags($message));
+                SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
             } catch (\Throwable $e) {
                 Log::warning('Leave approval Slack notification failed: ' . $e->getMessage());
             }
