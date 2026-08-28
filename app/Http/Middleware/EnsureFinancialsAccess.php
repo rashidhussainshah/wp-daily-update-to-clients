@@ -13,16 +13,9 @@ class EnsureFinancialsAccess
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    private const ALLOWED = [
-        'rashid.bukhari78600@gmail.com',
-        'zaars59208@gmail.com',
-    ];
-
     public function handle(Request $request, Closure $next): Response
     {
-        $user = auth()->user();
-
-        if (!$user || !in_array($user->email, self::ALLOWED)) {
+        if (!auth()->check() || !isAdministrator()) {
             abort(403, 'Access restricted to authorised accounts only.');
         }
 
