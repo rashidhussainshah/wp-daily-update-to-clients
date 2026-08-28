@@ -12,11 +12,22 @@ trait CampaignMailerTrait
      * Returns a mailer configured for the given SMTP account.
      * If null or inactive, falls back to the default .env mailer.
      * Never modifies the existing 'smtp' mailer — creates a new named one.
+     *
+     * $fresh forces a brand-new SMTP connection instead of reusing a cached
+     * one. Callers that sleep between sends (e.g. automation batches with a
+     * per-recipient delay) must pass true — the mail server closes idle
+     * connections well before a typical delay elapses, and reusing the dead
+     * connection fails with "Expected response code 250 but got empty code"
+     * on the next send.
      */
-    protected function getMailer(?SmtpAccount $smtp): \Illuminate\Mail\Mailer
+    protected function getMailer(?SmtpAccount $smtp, bool $fresh = false): \Illuminate\Mail\Mailer
     {
         if (!$smtp || !$smtp->is_active) {
-            return Mail::mailer(config('mail.default'));
+            $key = config('mail.default');
+            if ($fresh) {
+                Mail::purge($key);
+            }
+            return Mail::mailer($key);
         }
 
         $key = 'acct_' . $smtp->id;
@@ -36,6 +47,10 @@ trait CampaignMailerTrait
             'timeout'    => 20,
             'auth_mode'  => null,
         ]);
+
+        if ($fresh) {
+            Mail::purge($key);
+        }
 
         return Mail::mailer($key);
     }

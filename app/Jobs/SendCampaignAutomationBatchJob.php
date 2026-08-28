@@ -49,7 +49,6 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
 
         $campaign = $auto->campaign;
         $smtp     = $campaign->smtpAccount;
-        $mailer   = $this->getMailer($smtp);
         $delay    = $this->delaySeconds;
         $count    = count($this->recipients);
 
@@ -72,7 +71,13 @@ class SendCampaignAutomationBatchJob implements ShouldQueue
                     continue;
                 }
 
-                $mailer->to($email, $name)
+                // A fresh connection per recipient — not one connection reused
+                // for the whole batch — because the delay between sends
+                // routinely exceeds how long the mail server keeps an idle
+                // SMTP connection open, otherwise causing every other send to
+                // fail against a dead connection.
+                $this->getMailer($smtp, fresh: true)
+                    ->to($email, $name)
                     ->send(new MarketingCampaignMail($campaign, $name, $smtp));
 
                 CampaignAutomationLog::create([
