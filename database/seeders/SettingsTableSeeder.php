@@ -188,6 +188,18 @@ class SettingsTableSeeder extends Seeder
                 'group'        => 'Contact',
             ])->save();
         }
+
+        $setting = $this->findSetting('leaves.slack_webhook_url');
+        if (!$setting->exists) {
+            $setting->fill([
+                'display_name' => 'Slack Webhook URL',
+                'value'        => 'https://hooks.slack.com/services/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',
+                'details'      => 'Slack webhook URL for leave request notifications',
+                'type'         => 'text',
+                'order'        => 31,
+                'group'        => 'Leaves',
+            ])->save();
+        }
     }
 
     /**
