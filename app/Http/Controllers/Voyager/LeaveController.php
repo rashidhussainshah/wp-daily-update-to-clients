@@ -141,14 +141,16 @@ class LeaveController extends VoyagerBaseController
         if ($quotaExceeded) {
             $message .= ' ⚠️ NOTE: Extra leave - Monthly quota exceeded';
         }
-        $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL') ?? 'https://hooks.slack.com/services/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';
-        try {
-            // dispatchSync (not the SlackAlert facade's ->message(), which always
-            // queues) so the message lands immediately instead of waiting for a
-            // queue worker that isn't running on this host.
-            SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
-        } catch (\Throwable $e) {
-            Log::warning('Leave request Slack notification failed: ' . $e->getMessage());
+        $slackWebhookUrl = setting('leaves.slack_webhook_url');
+        if ($slackWebhookUrl) {
+            try {
+                // dispatchSync (not the SlackAlert facade's ->message(), which always
+                // queues) so the message lands immediately instead of waiting for a
+                // queue worker that isn't running on this host.
+                SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
+            } catch (\Throwable $e) {
+                Log::warning('Leave request Slack notification failed: ' . $e->getMessage());
+            }
         }
 
         // Perform Voyager store here to customize the flash message
@@ -214,7 +216,7 @@ class LeaveController extends VoyagerBaseController
         $startDate = $leave->start_date;
         $endDate = $leave->end_date ?: $startDate;
         $message = "COO Approval: {$user->name} approved leave #{$leave->id} ({$startDate} to {$endDate}) for user ID {$leave->user_id}.";
-        $slackWebhookUrl = env('LOG_EOD_SLACK_WEBHOOK_URL');
+        $slackWebhookUrl = setting('leaves.slack_webhook_url');
         if ($slackWebhookUrl) {
             try {
                 SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
