@@ -23,7 +23,7 @@ class LeaveController extends VoyagerBaseController
     /**
      * Fallback used only when the "leaves.slack_webhook_url" setting is empty.
      */
-    const DEFAULT_SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
+    const LEAVE_SLACK_WEBHOOK_URL = 'https://hooks.slack.com/services/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';
 
     /**
      * Override store method to manage leave limits and send Slack alert before store
@@ -146,7 +146,7 @@ class LeaveController extends VoyagerBaseController
         if ($quotaExceeded) {
             $message .= ' ⚠️ NOTE: Extra leave - Monthly quota exceeded';
         }
-        $slackWebhookUrl = setting('leaves.slack_webhook_url', self::DEFAULT_SLACK_WEBHOOK_URL);
+        $slackWebhookUrl = setting('leaves.slack_webhook_url', self::LEAVE_SLACK_WEBHOOK_URL);
         if ($slackWebhookUrl) {
             try {
                 // dispatchSync (not the SlackAlert facade's ->message(), which always
@@ -221,7 +221,7 @@ class LeaveController extends VoyagerBaseController
         $startDate = $leave->start_date;
         $endDate = $leave->end_date ?: $startDate;
         $message = "COO Approval: {$user->name} approved leave #{$leave->id} ({$startDate} to {$endDate}) for user ID {$leave->user_id}.";
-        $slackWebhookUrl = setting('leaves.slack_webhook_url', self::DEFAULT_SLACK_WEBHOOK_URL);
+        $slackWebhookUrl = setting('leaves.slack_webhook_url', self::LEAVE_SLACK_WEBHOOK_URL);
         if ($slackWebhookUrl) {
             try {
                 SendToSlackChannelJob::dispatchSync($slackWebhookUrl, strip_tags($message));
