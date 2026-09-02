@@ -52,6 +52,12 @@ Each item below has a **Plan** — my current thinking on how to build it. These
 - [ ] **B6. Developer self-service dashboard**
   Plan: one controller pulling together `SalaryCalculationService`'s output, this month's fines/leaves/hours, next evaluation date, and (if applicable) `UserPayment` rows — purely a read-only view over existing services, no new calculation logic.
 
+- [ ] **B7. Positive recognition — on-time / good-conduct certifications**
+  The flip side of B3/B2: a resource with no short-hours deduction, no unpaid leave, no fines for a period earns a certification, not just avoids a penalty. Plan: reuse the exact same certificate engine as A4 (dompdf, a verify-code page) rather than building a second one — the only new pieces are the criteria check (e.g. "zero fines + zero shortfall this quarter") and the staff-facing template/copy. Exact qualifying criteria and cadence (monthly? quarterly?) — **open, to discuss.**
+
+- [ ] **B8. Employee of the Month**
+  Automated announcement based on a combination of factors — **factors themselves are not decided yet, to be discussed** (candidates likely include attendance/hours record, fines-free streak, leave conduct, evaluation score, client/BD feedback — not assumed, just listed as candidates). Once factors are agreed: a monthly scheduled command scores eligible users, picks a winner (or flags a tie for manual pick), and announces via Slack — possibly feeding A7's marketing feed too if you want it publicized externally. Nothing else planned here until the scoring factors are settled.
+
 ## Team roster reference (Academy + HR roles)
 
 | Person | Role |
