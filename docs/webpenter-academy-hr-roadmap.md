@@ -4,25 +4,53 @@ Working backlog for two related but separate builds. Nothing here is implemented
 
 Design reference (approved): https://claude.ai/code/artifact/08a89d27-4527-4eac-81a4-f6b1d20ec244
 
+Each item below has a **Plan** — my current thinking on how to build it. These are proposals, not commitments — they'll get revised as we discuss each one before building it.
+
 ## A. WebPenter IT Academy (student-facing)
 
-- [ ] **A1. Data foundation** — `academy_tracks`, `developer_academy_enrollments`, `academy_ai_reviews` tables. Seed real tracks: ML/AI Engineer, Full Stack AI Developer, AI Application Developer, WordPress Development & Customization, Full Stack Laravel/PHP Developer, Digital Marketing (Meta & Google Ads), SEO & AI Content Tools.
-- [ ] **A2. Student dashboard** — real Webpenter login + role (student), stepper/progress, skills checklist, project submission form.
-- [ ] **A3. AI-assisted review** — Gemini pre-review on submission, reviewer queue (approve/override), auto stage-advance + badge on approval.
-- [ ] **A4. Certificate generation** — configurable (student/track/template/signers), PDF via dompdf (already installed), public no-login verify page.
-- [ ] **A5. Badge/certificate on public profile** — extend existing `/developer-portfolios/{id}` API with certifications; render on webpenter-react public developer page.
-- [ ] **A6. Enrollment & billing** — registration fee toggle, monthly fee tracking, the ~50% service-charge trigger once a student starts earning independently. *(Open question: exact detection mechanism for "started earning independently.")*
-- [ ] **A7. Marketing automation** — milestone feed (enrollment/badge/certificate/placement) → Rumaisha's post composer (simple or carousel) → LinkedIn auto-post first (reuse the existing D:\wp\Linkedin-auto-post tool), then Instagram/Facebook. *(Open question: how much is auto-posted vs Rumaisha-reviewed first.)*
-- [ ] **A8. Role rollout** — flip `role_id` from Student → Developer when a student graduates/gets engaged (mechanism already exists in `User` model, just needs the workflow trigger).
+- [ ] **A1. Data foundation**
+  Plan: 3 migrations — `academy_tracks` (name, designation, curriculum stored as JSON: stages → skills/projects), `developer_academy_enrollments` (user_id, track_id, current_stage, progress JSON, badges_earned JSON), `academy_ai_reviews` (enrollment_id, submission link, AI score/verdict/feedback, reviewer decision). Matching Eloquent models + relationships. Seed a `AcademyTracksSeeder` with the 7 real tracks — full stage/skill/project detail for the 3 already-drafted dev tracks, placeholder stage names for the other 4 until we flesh those out. Register Voyager BREAD for the new tables via the admin UI (matches how `developer_cards`/`expertises` were done — not seeded in code). "Student" = existing `User` with `role_id = STUDENT_ROLE_ID`, no new user table.
+
+- [ ] **A2. Student dashboard**
+  Plan: new `/academy/*` route group behind the existing `web` guard + a role check (`role_id == STUDENT_ROLE_ID`). `AcademyController@dashboard` loads the user's enrollment, computes progress % from the JSON (never stored/typed in), renders Blade matching the approved design. Skill-check toggles and the submission form hit small AJAX endpoints (Blade + Alpine.js, no new frontend framework) that patch the enrollment's `progress` JSON in place.
+
+- [ ] **A3. AI-assisted review**
+  Plan: `GeminiReviewService` — `Http::post()` to Gemini's free-tier API with the stage rubric + submission, parsing back `{score, verdict, feedback}` into `academy_ai_reviews`. Runs inline (sync) on submission per the existing `QUEUE_CONNECTION=sync` setup, written as a dispatchable Job so it's a one-line change to make async later. Reviewer queue is a custom Voyager controller (same pattern as `DeveloperPaymentController`) with Approve/Send-Back. Approve fires an event → advances `current_stage`, appends the badge, notifies via the existing Slack `dispatchSync` pattern.
+
+- [ ] **A4. Certificate generation**
+  Plan: `CertificateService` renders the approved certificate design (as a real Blade view with data binding) to PDF via the already-installed `barryvdh/laravel-dompdf` — no new package. Auto-triggers on final-stage approval (same event as A3), stores the PDF + a random verify code on the enrollment. Public `GET /certificate/verify/{code}`, no auth. Starting with just the one approved template — I'd hold off building a template-picker until there's an actual second template to pick, rather than over-building the config UI now.
+
+- [ ] **A5. Badge on public profile**
+  Plan: extend `DeveloperCategoryController::developerPortfolios()` to eager-load certifications and add them to the JSON response — that's the half I can fully deliver from this repo. Rendering them on webpenter.com is in the separate `webpenter-react` repo, so this item really ends with "ship the API, hand off the shape" rather than a fully closed loop from here alone.
+
+- [ ] **A6. Enrollment & billing**
+  Plan: **before designing new tables** — this codebase already has a `Courses`/`StudentFee`/`RykStudentFee`/`OnlineStudentFee` subsystem with monthly-fee commands (`Add*StudentFeesForCurrentMonth`) for a different, existing student-fee business. I want to check that first — reusing it (or extending it) likely beats building a second, parallel billing system from scratch. The 50%-service-charge trigger I'd start as a manual "mark as placed" admin action rather than trying to auto-detect "earning independently," since that's not reliably detectable from data we have.
+
+- [ ] **A7. Marketing automation**
+  Plan: a lightweight milestone log (enrollment/badge/certificate/placement events) feeding an admin page for Rumaisha — pick a milestone, get an auto-drafted caption (Gemini again), post. Before deciding the LinkedIn integration seam, I need to actually look at how `D:\wp\Linkedin-auto-post` is triggered today (cron? manual run? does it read a queue/file?) rather than guessing an interface to it.
+
+- [ ] **A8. Role rollout**
+  Plan: a "Promote to Developer" action that flips `role_id` to `DEVELOPER_ROLE_ID` and optionally creates a pre-filled `DeveloperCard` from the enrollment's track/skills — this is what actually connects the Academy to the existing hire-marketplace system.
 
 ## B. Internal HR/Ops automation
 
-- [ ] **B1. Leave → Slack notification** — auto-post to Slack when a leave is submitted, so management/colleagues are informed immediately (no separate Microsoft Teams integration exists or was confirmed needed).
-- [ ] **B2. Leave advance-notice rule** — leaves need advance notice; sick leave needs notice before a cutoff; late notice auto-converts the leave to **unpaid** (full-day deduction, not just quota-exceeded). Applies to partners too. *(Open question: exact day/time thresholds — will be configurable settings, not hardcoded.)*
-- [ ] **B3. Month-end hours-shortfall deduction** — new deduction bucket in `SalaryCalculationService`/`ProcessMonthlySalaries`, built from existing `Checkin` data, replacing the disconnected `CalculateMonthlyShortHoursAndFines` prototype. Runs **independently** of the existing instant late-checkin fine toggle (`checkin.late_checkin_fine_enabled`) — both can be on at once.
-- [ ] **B4. Partner/BD deduction routing** — pure revenue-share partners (development_partner share type, no salary contract) get attendance deductions taken from their commission via `PaymentCalculationService`. Anyone with an active salary `Contract` (e.g. Ayub, Ali Hasan as BDs) gets deductions routed through the normal salary calc instead.
-- [ ] **B5. Yearly performance evaluation** — new model + persisted audit log (what/when/who decided), tied to `Contract` and salary increments. Automated reminder (Slack) when someone's annual review is due — no one has to remember.
-- [ ] **B6. Developer self-service dashboard** — salary breakdown, fines, leave balance, check-in/checkout hours vs required, next evaluation due date, and (for partners) pending/approved `UserPayment` rows. Read-only, built on existing services.
+- [ ] **B1. Leave → Slack notification**
+  Plan: new observer on `Leave::created()` (alongside the existing `saving` hook that computes `coo_required`) calling `SendToSlackChannelJob::dispatchSync()` — the identical pattern already used in `ContactMessageController`/`FineObserver`. Promote the currently-hardcoded webhook fallback in `Voyager/LeaveController.php:144` into a proper `leaves.slack_webhook_url` setting instead of leaving it hardcoded.
+
+- [ ] **B2. Leave advance-notice rule**
+  Plan: add `leave_type` (casual/sick) and `is_unpaid` columns. Extend `Leave::booted()`'s existing `saving` hook to also compute `is_unpaid` by comparing submission time to `start_date` against two new settings (`leaves.min_advance_notice_days`, `leaves.sick_leave_notice_cutoff_time`) — configurable, not hardcoded, so you can tune the thresholds without a code change. `SalaryCalculationService` deducts unpaid-leave days in full, separate from the existing quota-based deduction. Before building the "applies to partners too" part, I need to confirm `Leave` creation isn't already restricted to `is_development_team_member` users only.
+
+- [ ] **B3. Month-end hours-shortfall deduction**
+  Plan: move the logic that already half-exists in `CalculateMonthlyShortHoursAndFines` into a proper `SalaryCalculationService` method, fixed to use `Contract::monthly_salary`/`daily_salary` (not the stale unused fields it currently references), comparing required hours (9h weekday / 4.5h Saturday, from settings) against actual `Checkin` hours. Adds as its own bucket in `calculateMonthlySalary()`'s output, shown in `ProcessMonthlySalaries`. The existing instant late-checkin fine stays completely untouched, its own independent toggle.
+
+- [ ] **B4. Partner/BD deduction routing**
+  Plan: add a `User::hasSalaryContract()` helper (same active-contract-with-salary check `ProcessMonthlySalaries` already uses). In `PaymentCalculationService`, before finalizing a development-partner-type payment: if the partner has no salary contract, apply the same shortfall/unpaid-leave deduction against their commission directly; if they do have one (e.g. Ayub, Ali Hasan), skip — it's already been deducted via their salary in B3.
+
+- [ ] **B5. Yearly performance evaluation**
+  Plan: new `performance_evaluations` table (user, contract, evaluator, date, rating, notes, salary before/after, decision) with Voyager BREAD for staff to log outcomes. A daily scheduled command checks contract anniversaries / last-evaluation dates and Slack-reminds the CEO/COO when one's due — same notification pattern as B1.
+
+- [ ] **B6. Developer self-service dashboard**
+  Plan: one controller pulling together `SalaryCalculationService`'s output, this month's fines/leaves/hours, next evaluation date, and (if applicable) `UserPayment` rows — purely a read-only view over existing services, no new calculation logic.
 
 ## Team roster reference (Academy + HR roles)
 
