@@ -74,3 +74,90 @@ small,
 .breadcrumb .active {
     color: #2a3542;
 }
+
+/* ------------------------------------------------------------------
+   WebPenter admin theme (C1) — green/white rebrand of Voyager's
+   default blue Bootstrap 3 look. Pure CSS: no Blade/JS changes, same
+   classes/markup Voyager already renders (confirmed against the
+   actual vendor/tcg/voyager app.scss source before writing this).
+------------------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+.voyager,
+.voyager .btn,
+.voyager .form-control {
+    font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Sidebar: white instead of dark slate, green active/hover states */
+.voyager .side-menu.sidebar-inverse {
+    background-color: #ffffff !important;
+    border-right: 1px solid #e2e8f0;
+}
+.voyager .side-menu.sidebar-inverse .navbar {
+    background-color: #ffffff !important;
+}
+.voyager .side-menu.sidebar-inverse .navbar li > a {
+    color: #334155 !important;
+}
+.voyager .side-menu.sidebar-inverse .navbar li.active > a {
+    color: #15803d !important;
+    background-color: #dcfce7 !important;
+    border-left: 3px solid #16a34a !important;
+    font-weight: 700;
+}
+.voyager .side-menu.sidebar-inverse .navbar > li:hover > a {
+    background-color: #f0fdf4 !important;
+    color: #15803d !important;
+}
+.voyager .side-menu .navbar-header {
+    background: linear-gradient(135deg, #15803d, #22c55e) !important;
+}
+.voyager .side-menu .navbar-header .navbar-brand {
+    color: #ffffff !important;
+}
+
+/* Top navbar */
+.voyager .navbar.navbar-default {
+    background: #ffffff !important;
+}
+.voyager .navbar .navbar-nav > li:hover > a,
+.voyager .navbar.navbar-default .navbar-nav > li:hover > a,
+.voyager .navbar .navbar-nav > li.open > a,
+.voyager .navbar.navbar-default .navbar-nav > li.open > a {
+    color: #16a34a !important;
+}
+
+/* Primary buttons */
+.btn.btn-primary {
+    background: linear-gradient(135deg, #15803d, #22c55e) !important;
+    border-radius: 8px !important;
+}
+.btn.btn-primary.active,
+.btn.btn-primary:active {
+    background: #15803d !important;
+}
+
+/* Table headers */
+.voyager .table > thead > tr > th {
+    background: #f0fdf4 !important;
+}
+
+/* Panel headers (panel-primary) */
+.voyager .panel.panel-primary {
+    border: 1px solid #16a34a !important;
+}
+.voyager .panel.panel-primary .panel-heading {
+    background-color: #16a34a !important;
+    border-bottom-color: #15803d !important;
+}
+
+/* Form fields inside the admin content area only (not the login page) —
+   rounded corners + a green focus ring instead of Bootstrap's default blue */
+.side-body .form-control {
+    border-radius: 8px !important;
+}
+.side-body .form-control:focus {
+    border-color: #16a34a !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
+}

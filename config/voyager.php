@@ -189,7 +189,7 @@ return [
     |
     */
 
-    'primary_color' => '#22A7F0',
+    'primary_color' => '#16a34a', // WebPenter green (was Voyager default '#22A7F0') — see C1 admin theme rebrand
 
     'show_dev_tips' => true, // Show development tip "How To Use:" in Menu and Settings
 
