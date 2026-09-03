@@ -122,6 +122,10 @@ small,
     margin: 0;
     line-height: 1;
 }
+.voyager .side-menu.sidebar-inverse .navbar-nav li a .title {
+    position: static !important;
+    top: auto !important;
+}
 .voyager .side-menu.sidebar-inverse .navbar li.active > a {
     color: #15803d !important;
     background-color: #dcfce7 !important;
