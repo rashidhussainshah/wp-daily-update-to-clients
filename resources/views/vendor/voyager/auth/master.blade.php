@@ -68,22 +68,12 @@
             inset: 0;
             background: linear-gradient(180deg, rgba(15,23,42,0.15) 0%, rgba(15,23,42,0.65) 100%);
         }
-        .login-video-panel .logo-title-container,
-        .login-video-panel .login-quote {
+        .login-video-panel .logo-title-container {
             position: relative;
             z-index: 2;
         }
-        .login-quote {
-            max-width: 92%;
-            margin-top: 28px;
-            padding: 14px 20px;
-            border-radius: 14px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.18);
-            backdrop-filter: blur(3px);
-        }
-        .login-quote p {
-            margin: 0;
+        p.login-quote {
+            margin: 6px 0 0;
             color: #fff;
             font-size: 15px;
             font-style: italic;
@@ -118,17 +108,13 @@
                         @endif
                         <div class="copy animated fadeIn">
                             <h1>{{ Voyager::setting('admin.title', 'Voyager') }}</h1>
-                            @unless($loginVideoId)
+                            @if($loginVideoId)
+                                <p class="login-quote">&ldquo;{{ \App\Helpers\WebpenterQuotes::random() }}&rdquo;</p>
+                            @else
                                 <p>{{ Voyager::setting('admin.description', __('voyager::login.welcome')) }}</p>
-                            @endunless
+                            @endif
                         </div>
                     </div> <!-- .logo-title-container -->
-
-                    @if($loginVideoId)
-                        <div class="login-quote">
-                            <p>&ldquo;{{ \App\Helpers\WebpenterQuotes::random() }}&rdquo;</p>
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
