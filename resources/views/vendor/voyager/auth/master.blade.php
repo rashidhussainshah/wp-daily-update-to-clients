@@ -49,6 +49,7 @@
         .login-video-panel {
             position: relative;
             overflow: hidden;
+            min-height: 100vh; /* fill the whole left side, not just its content height */
         }
         .login-video-panel .login-video-bg {
             position: absolute;
@@ -117,7 +118,9 @@
                         @endif
                         <div class="copy animated fadeIn">
                             <h1>{{ Voyager::setting('admin.title', 'Voyager') }}</h1>
-                            <p>{{ Voyager::setting('admin.description', __('voyager::login.welcome')) }}</p>
+                            @unless($loginVideoId)
+                                <p>{{ Voyager::setting('admin.description', __('voyager::login.welcome')) }}</p>
+                            @endunless
                         </div>
                     </div> <!-- .logo-title-container -->
 
