@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 .floating-buttons {
     position: fixed;
     top: 15px; /* Adjust top positioning */
@@ -81,7 +83,6 @@ small,
    classes/markup Voyager already renders (confirmed against the
    actual vendor/tcg/voyager app.scss source before writing this).
 ------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 .voyager,
 .voyager .btn,
