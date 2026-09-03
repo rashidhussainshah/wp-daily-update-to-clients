@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 .floating-buttons {
     position: fixed;
     top: 15px; /* Adjust top positioning */
@@ -81,7 +83,6 @@ small,
    classes/markup Voyager already renders (confirmed against the
    actual vendor/tcg/voyager app.scss source before writing this).
 ------------------------------------------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 .voyager,
 .voyager .btn,
@@ -93,12 +94,27 @@ small,
 .voyager .side-menu.sidebar-inverse {
     background-color: #ffffff !important;
     border-right: 1px solid #e2e8f0;
+    box-shadow: none !important;
 }
 .voyager .side-menu.sidebar-inverse .navbar {
     background-color: #ffffff !important;
 }
+.voyager .side-menu.sidebar-inverse .navbar-nav li {
+    border: 0 !important;
+    padding: 0 10px;
+}
 .voyager .side-menu.sidebar-inverse .navbar li > a {
     color: #334155 !important;
+    border-radius: 9px;
+    margin: 2px 0;
+    padding: 10px 14px !important;
+    font-weight: 500;
+    transition: background-color .12s ease, color .12s ease;
+}
+.voyager .side-menu.sidebar-inverse .navbar-nav li a .icon {
+    color: #64748b !important;
+    width: 20px;
+    text-align: center;
 }
 .voyager .side-menu.sidebar-inverse .navbar li.active > a {
     color: #15803d !important;
@@ -106,8 +122,14 @@ small,
     border-left: 3px solid #16a34a !important;
     font-weight: 700;
 }
+.voyager .side-menu.sidebar-inverse .navbar li.active > a .icon {
+    color: #15803d !important;
+}
 .voyager .side-menu.sidebar-inverse .navbar > li:hover > a {
     background-color: #f0fdf4 !important;
+    color: #15803d !important;
+}
+.voyager .side-menu.sidebar-inverse .navbar > li:hover > a .icon {
     color: #15803d !important;
 }
 .voyager .side-menu .navbar-header {
@@ -115,6 +137,10 @@ small,
 }
 .voyager .side-menu .navbar-header .navbar-brand {
     color: #ffffff !important;
+}
+/* Profile card under the logo (avatar + name) */
+.voyager .side-menu .panel.widget.center {
+    border-bottom: 1px solid #e2e8f0 !important;
 }
 
 /* Top navbar */
@@ -138,9 +164,35 @@ small,
     background: #15803d !important;
 }
 
-/* Table headers */
-.voyager .table > thead > tr > th {
+/* Same rounded/consistent shape for the other row-action buttons
+   (Delete/View on browse listings) as Edit already has - keeps their
+   own semantic color, just matches the design language. Covers
+   btn-default too since some pages (e.g. user-payments) use it for
+   their View button instead of btn-info/btn-warning. */
+.btn.btn-danger,
+.btn.btn-warning,
+.btn.btn-info,
+.btn.btn-default,
+.btn.btn-success {
+    border-radius: 8px !important;
+    border: 0 !important;
+}
+
+/* Table headers - covers the whole header row, not just cells with
+   text, so DataTables-generated columns (e.g. a blank/user/actions
+   column) don't show a gap of unstyled white. Also sets text color
+   explicitly: some pages (e.g. user-payments/browse.blade.php) carry
+   their own page-specific header style with white text meant for a
+   dark background - without a color rule here, that white text wins
+   uncontested against our lighter background, becoming unreadable.
+   This makes every table header look the same everywhere, instead of
+   varying per page. */
+.voyager .table > thead > tr,
+.voyager .table > thead > tr > th,
+.side-body table.dataTable thead tr,
+.side-body table.dataTable thead th {
     background: #f0fdf4 !important;
+    color: #15803d !important;
 }
 
 /* Panel headers (panel-primary) */
