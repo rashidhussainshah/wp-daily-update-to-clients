@@ -159,6 +159,46 @@ class User extends \TCG\Voyager\Models\User
     }
 
     /**
+     * Academy instructor/reviewer capabilities are ADDITIVE (academy_staff_roles),
+     * separate from this user's one primary role_id - see that table's migration
+     * for why (a Developer-role user can also be an Academy Reviewer).
+     */
+    public function academyStaffRoles()
+    {
+        return $this->hasMany(\App\Models\AcademyStaffRole::class);
+    }
+    public function academyEnrollments()
+    {
+        return $this->hasMany(\App\Models\DeveloperAcademyEnrollment::class);
+    }
+    public function instructedAcademyEnrollments()
+    {
+        return $this->hasMany(\App\Models\DeveloperAcademyEnrollment::class, 'instructor_id');
+    }
+    public function academyCertificates()
+    {
+        return $this->hasMany(\App\Models\AcademyCertificate::class);
+    }
+    public function isAcademyInstructor(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_INSTRUCTOR)->exists();
+    }
+    public function isAcademyReviewer(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_REVIEWER)->exists();
+    }
+    public function scopeAcademyInstructors($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_INSTRUCTOR));
+    }
+    public function scopeAcademyReviewers($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_REVIEWER));
+    }
+
+    /**
      * Excludes Homey Client role users (marketing-campaign leads imported
      * via ImportHomeyClients, not real portal staff) - used to scope the
      * admin Users listing so it shows everyone else instead.

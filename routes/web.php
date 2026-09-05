@@ -70,7 +70,39 @@ Route::permanentRedirect('/', 'admin/login');
 //    return view('welcome');
 //});
 
+// WebPenter IT Academy - public routes (no login required)
+Route::prefix('academy')->name('academy.')->group(function () {
+    Route::get('register', [\App\Http\Controllers\AcademyRegistrationController::class, 'create'])->name('register');
+    Route::post('register', [\App\Http\Controllers\AcademyRegistrationController::class, 'store'])->name('register.store');
+    Route::get('register/success/{enrollment}', [\App\Http\Controllers\AcademyRegistrationController::class, 'success'])->name('register.success');
+    Route::get('parent/{token}', [\App\Http\Controllers\AcademyParentController::class, 'show'])->name('parent');
+});
+Route::get('certificate/verify/{code}', [\App\Http\Controllers\AcademyCertificateController::class, 'verify'])->name('academy.certificate.verify');
+
+// WebPenter IT Academy - authenticated routes (student dashboard + instructor
+// view). Plain 'auth' middleware - same Users table/session as Voyager admin,
+// role-checked inside each controller rather than a separate auth system.
+Route::middleware('auth')->prefix('academy')->name('academy.')->group(function () {
+    Route::get('dashboard', [\App\Http\Controllers\AcademyDashboardController::class, 'index'])->name('dashboard');
+    Route::post('dashboard/toggle-skill', [\App\Http\Controllers\AcademyDashboardController::class, 'toggleSkill'])->name('dashboard.toggle-skill');
+    Route::post('dashboard/submit', [\App\Http\Controllers\AcademyDashboardController::class, 'submitProject'])->name('dashboard.submit');
+    Route::get('instructor', [\App\Http\Controllers\AcademyInstructorController::class, 'index'])->name('instructor');
+});
+
 Route::group(['prefix' => 'admin'], function () {
+    // WebPenter IT Academy - staff screens (Voyager admin auth already
+    // applies to this whole 'admin' prefix group; each controller also
+    // checks its own role - Reviewer/HR/Administrator).
+    Route::prefix('academy')->name('academy.')->group(function () {
+        Route::get('review', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'index'])->name('review.index');
+        Route::post('review/{review}/approve', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'approve'])->name('review.approve');
+        Route::post('review/{review}/send-back', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'sendBack'])->name('review.send-back');
+        Route::get('fees', [\App\Http\Controllers\Voyager\AcademyFeeController::class, 'index'])->name('fees.index');
+        Route::post('fees/{invoice}/mark-paid', [\App\Http\Controllers\Voyager\AcademyFeeController::class, 'markPaid'])->name('fees.mark-paid');
+        Route::get('course-certificates', [\App\Http\Controllers\Voyager\AcademyCourseCertificateController::class, 'create'])->name('course-certificates.create');
+        Route::post('course-certificates', [\App\Http\Controllers\Voyager\AcademyCourseCertificateController::class, 'store'])->name('course-certificates.store');
+    });
+
     Route::get('clockify/today-entries', [ClockifyController::class, 'getTodayEntries'])->name('clockify.today-entries');
     Route::get('/get-yesterdays-plan', [CheckinController::class, 'getYesterdaysPlan'])->name('get.yesterdays.plan');
     Route::post('/checkin', [CheckinController::class, 'storeCheckin'])->name('checkin.store');
