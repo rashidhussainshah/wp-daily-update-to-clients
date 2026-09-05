@@ -91,6 +91,13 @@ class User extends \TCG\Voyager\Models\User
     private $ONLINE_STUDENT_ROLE_ID = 41;
     private $BUSINESS_DEVELOPER_ROLE_ID = 33;
     private $HOMEY_CLIENT_ROLE_ID = 61;
+    // WebPenter IT Academy student - deliberately a DISTINCT role from
+    // STUDENT_ROLE_ID/RYK_STUDENT_ROLE_ID above (both 12, an unrelated legacy
+    // student-fee system) so Academy students are never ambiguously picked up
+    // by that old system's queries. Fallback only - create the real "IT
+    // Academy Student" role in Voyager admin and set
+    // `academy.it_academy_student_role_id` to its actual id.
+    private $IT_ACADEMY_STUDENT_ROLE_ID = 70;
 
     /**
      * The attributes that should be cast.
@@ -141,6 +148,14 @@ class User extends \TCG\Voyager\Models\User
     public function scopeBusinessDeveloper($query)
     {
         return $query->where('role_id', setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
+    }
+    public function scopeOnlyItAcademyStudent($query)
+    {
+        return $query->where('role_id', setting('academy.it_academy_student_role_id') ?? $this->IT_ACADEMY_STUDENT_ROLE_ID);
+    }
+    public function isItAcademyStudent(): bool
+    {
+        return (int) $this->role_id === (int) (setting('academy.it_academy_student_role_id') ?? $this->IT_ACADEMY_STUDENT_ROLE_ID);
     }
 
     /**
