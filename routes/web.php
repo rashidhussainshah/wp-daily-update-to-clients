@@ -89,10 +89,16 @@ Route::middleware('auth')->prefix('academy')->name('academy.')->group(function (
     Route::get('instructor', [\App\Http\Controllers\AcademyInstructorController::class, 'index'])->name('instructor');
 });
 
-Route::group(['prefix' => 'admin'], function () {
-    // WebPenter IT Academy - staff screens (Voyager admin auth already
-    // applies to this whole 'admin' prefix group; each controller also
-    // checks its own role - Reviewer/HR/Administrator).
+// Sharing the '/admin' URL prefix with Voyager's own routes does NOT share
+// its middleware - that's a separate Route::group registered by Voyager's
+// service provider. Voyager's own 'admin.user' middleware additionally
+// requires the 'browse_admin' permission, which an Academy reviewer/
+// instructor may not hold - so this uses plain 'auth' (redirect-to-login for
+// guests) and leaves the actual role/capability check to each controller's
+// authorizeStaff(), same as the student-side group above.
+Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
+    // WebPenter IT Academy - staff screens. Each controller checks its own
+    // role - Reviewer/HR/Administrator - via authorizeStaff().
     Route::prefix('academy')->name('academy.')->group(function () {
         Route::get('review', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'index'])->name('review.index');
         Route::post('review/{review}/approve', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'approve'])->name('review.approve');

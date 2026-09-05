@@ -15,7 +15,10 @@ class Authenticate extends Middleware
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            return route('login');
+            // This app has no standalone 'login' route - everyone (admin
+            // staff and, now, Academy students/instructors) authenticates
+            // through Voyager's login screen against the same users table.
+            return route('voyager.login');
         }
     }
 }
