@@ -89,17 +89,20 @@ Route::middleware('auth')->prefix('academy')->name('academy.')->group(function (
     Route::get('instructor', [\App\Http\Controllers\AcademyInstructorController::class, 'index'])->name('instructor');
 });
 
-// Sharing the '/admin' URL prefix with Voyager's own routes does NOT share
-// its middleware - that's a separate Route::group registered by Voyager's
-// service provider. Voyager's own 'admin.user' middleware additionally
-// requires the 'browse_admin' permission, which an Academy reviewer/
-// instructor may not hold - so this uses plain 'auth' (redirect-to-login for
-// guests) and leaves the actual role/capability check to each controller's
-// authorizeStaff(), same as the student-side group above.
-Route::group(['prefix' => 'admin', 'middleware' => 'auth'], function () {
-    // WebPenter IT Academy - staff screens. Each controller checks its own
-    // role - Reviewer/HR/Administrator - via authorizeStaff().
-    Route::prefix('academy')->name('academy.')->group(function () {
+Route::group(['prefix' => 'admin'], function () {
+    // WebPenter IT Academy - staff screens. This 'admin' group also carries
+    // Voyager::routes() itself (below) plus a lot of pre-existing unrelated
+    // admin routes - do NOT add middleware at this outer level, it would
+    // apply to all of those too (this previously broke Voyager's own login
+    // page: 'auth' on this whole group meant a guest hitting admin/login
+    // got redirected by 'auth' back to admin/login - an infinite loop).
+    // Scope 'auth' to just this academy sub-group instead. Voyager's own
+    // 'admin.user' middleware isn't used here because it additionally
+    // requires the 'browse_admin' permission, which an Academy reviewer/
+    // instructor may not hold - so this uses plain 'auth' (redirect-to-login
+    // for guests) and leaves the actual role/capability check to each
+    // controller's authorizeStaff(), same as the student-side group above.
+    Route::prefix('academy')->name('academy.')->middleware('auth')->group(function () {
         Route::get('review', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'index'])->name('review.index');
         Route::post('review/{review}/approve', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'approve'])->name('review.approve');
         Route::post('review/{review}/send-back', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'sendBack'])->name('review.send-back');

@@ -46,6 +46,12 @@
             <label>Phone</label>
             <input type="text" name="phone" value="{{ old('phone') }}">
 
+            <label>Password</label>
+            <input type="password" name="password" required minlength="8">
+
+            <label>Confirm Password</label>
+            <input type="password" name="password_confirmation" required minlength="8">
+
             <label>Choose a Track</label>
             <select name="track_id" required>
                 <option value="">Select a track...</option>

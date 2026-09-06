@@ -8,7 +8,6 @@ use App\Models\DeveloperAcademyEnrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
@@ -30,6 +29,7 @@ class AcademyRegistrationController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:30',
+            'password' => 'required|string|min:8|confirmed',
             'track_id' => [
                 'required',
                 Rule::exists('academy_tracks', 'id')->where('is_open_for_enrollment', true),
@@ -44,7 +44,7 @@ class AcademyRegistrationController extends Controller
         $user = new User([
             'name' => $data['name'],
             'email' => $data['email'],
-            'password' => Hash::make(Str::random(16)), // student sets/resets their own password via the normal flow
+            'password' => Hash::make($data['password']),
         ]);
         $user->role_id = setting('academy.it_academy_student_role_id');
         $user->save();
