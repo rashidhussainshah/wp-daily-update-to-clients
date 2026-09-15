@@ -170,6 +170,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/cash',                         [FinancialsController::class, 'storeCash'])->name('store-cash');
         Route::delete('/cash/{id}',                  [FinancialsController::class, 'destroyCash'])->name('destroy-cash');
         Route::post('/expenses',                     [FinancialsController::class, 'storeExpense'])->name('store-expense');
+        Route::get('/expenses/{id}',                 [FinancialsController::class, 'showExpense'])->name('show-expense');
         Route::delete('/expenses/{id}',              [FinancialsController::class, 'destroyExpense'])->name('destroy-expense');
         Route::post('/expenses/seed-fixed',          [FinancialsController::class, 'seedFixedExpenses'])->name('seed-fixed');
         Route::post('/bd-targets',                   [FinancialsController::class, 'storeBdTarget'])->name('store-bd-target');

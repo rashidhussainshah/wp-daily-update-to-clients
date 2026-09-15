@@ -81,6 +81,11 @@
     background:#fff;
   }
   optgroup{font-style:normal;font-weight:700;}
+  .checkbox-field{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+  .checkbox-field input{width:auto;}
+  .checkbox-field label{margin:0;text-transform:none;font-size:14px;color:var(--text);letter-spacing:0;}
+  .divider{border:none;border-top:1px dashed var(--border);margin:18px 0;}
+  .section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px;}
   button[type=submit]{
     width:100%;
     padding:15px;
@@ -124,7 +129,7 @@
   @endif
 
   <div class="card">
-    <form method="POST" action="{{ route('financials.store-expense') }}">
+    <form method="POST" action="{{ route('financials.store-expense') }}" enctype="multipart/form-data">
       @csrf
 
       <div class="row">
@@ -133,8 +138,8 @@
           <input type="month" name="month" value="{{ now()->format('Y-m') }}" required>
         </div>
         <div class="field">
-          <label>Amount (PKR)</label>
-          <input type="number" name="amount_pkr" placeholder="e.g. 8500" required min="0" step="1" inputmode="numeric">
+          <label>Amount Paid (PKR)</label>
+          <input type="number" name="amount_pkr" placeholder="leave blank if only setting Expected Total below" min="0" step="1" inputmode="numeric">
         </div>
       </div>
 
@@ -169,6 +174,42 @@
           <label>Note (optional)</label>
           <input type="text" name="note" placeholder="e.g. Jun bill">
         </div>
+      </div>
+
+      <div class="checkbox-field">
+        <input type="checkbox" name="is_advance" id="is_advance" value="1">
+        <label for="is_advance">This is an advance payment</label>
+      </div>
+
+      <div class="field">
+        <label>Attachment (optional)</label>
+        <input type="file" name="attachments[]" accept="image/*,.pdf" capture="environment" multiple>
+      </div>
+
+      @if($openBills->count())
+      <hr class="divider">
+      <div class="section-label">Settling a pending bill?</div>
+      <div class="field">
+        <label>Link to existing bill (optional)</label>
+        <select name="parent_expense_id">
+          <option value="">— none, this is a standalone expense —</option>
+          @foreach($openBills as $bill)
+            <option value="{{ $bill->id }}">
+              {{ $bill->category_label }} ({{ $bill->month }}) — Rs {{ number_format($bill->pending_amount,0) }} pending
+            </option>
+          @endforeach
+        </select>
+      </div>
+      @endif
+
+      <hr class="divider">
+      <div class="section-label">Or create a new bill to track</div>
+      <div class="field">
+        <label>Expected Total (optional)</label>
+        <input type="number" name="expected_amount_pkr" placeholder="e.g. 16500 — full rent amount" min="0" step="1" inputmode="numeric">
+      </div>
+      <div class="hint" style="margin-top:-8px;margin-bottom:14px;text-align:left;">
+        Fill this in instead of "Amount" above to create a trackable bill with nothing paid yet. Come back later and link payments to it as they happen.
       </div>
 
       <button type="submit">Add Expense</button>

@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class MonthlyExpense extends Model
 {
     protected $fillable = [
-        'month', 'category', 'amount_pkr', 'is_fixed',
-        'paid_from', 'note', 'domain_id', 'created_by',
+        'month', 'category', 'amount_pkr', 'expected_amount_pkr', 'parent_expense_id', 'is_fixed',
+        'is_advance', 'paid_from', 'note', 'attachments', 'domain_id', 'created_by',
     ];
 
-    protected $casts = ['is_fixed' => 'boolean'];
+    protected $casts = [
+        'is_fixed'   => 'boolean',
+        'is_advance' => 'boolean',
+        'attachments' => 'array',
+    ];
 
     public static array $categories = [
         'rent'            => 'Office Rent',
@@ -52,6 +56,32 @@ class MonthlyExpense extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    // A "bill" (expected_amount_pkr set) can have many partial payments against it.
+    public function payments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'parent_expense_id')->orderBy('created_at');
+    }
+
+    public function parentExpense(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_expense_id');
+    }
+
+    public function isBill(): bool
+    {
+        return !is_null($this->expected_amount_pkr);
+    }
+
+    public function getPaidAmountAttribute(): float
+    {
+        return $this->isBill() ? (float) $this->payments()->sum('amount_pkr') : (float) $this->amount_pkr;
+    }
+
+    public function getPendingAmountAttribute(): ?float
+    {
+        return $this->isBill() ? max(0, (float) $this->expected_amount_pkr - $this->paid_amount) : null;
     }
 
     public function getCategoryLabelAttribute(): string
