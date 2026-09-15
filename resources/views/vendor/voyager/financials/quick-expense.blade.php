@@ -64,7 +64,7 @@
   .field{margin-bottom:16px;}
   .row{display:flex;gap:12px;}
   .row .field{flex:1;}
-  input, select{
+  input:not([type=checkbox]), select{
     width:100%;
     padding:12px 12px;
     font-size:16px;
@@ -75,14 +75,19 @@
     appearance:none;
     -webkit-appearance:none;
   }
-  input:focus, select:focus{
+  input:not([type=checkbox]):focus, select:focus{
     outline:none;
     border-color:var(--primary);
     background:#fff;
   }
   optgroup{font-style:normal;font-weight:700;}
   .checkbox-field{display:flex;align-items:center;gap:8px;margin-bottom:16px;}
-  .checkbox-field input{width:auto;}
+  .checkbox-field input[type=checkbox]{
+    width:20px;
+    height:20px;
+    accent-color:var(--primary);
+    flex-shrink:0;
+  }
   .checkbox-field label{margin:0;text-transform:none;font-size:14px;color:var(--text);letter-spacing:0;}
   .divider{border:none;border-top:1px dashed var(--border);margin:18px 0;}
   .section-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:10px;}
