@@ -48,6 +48,26 @@ class MonthlyExpense extends Model
         ['category' => 'internet_prime',  'amount_pkr' => 1900,   'paid_from' => 'rashid_al_habib', 'note' => 'Prime connection'],
     ];
 
+    /**
+     * Create this month's fixed expenses (rent, internet, etc.) if not already added.
+     * Used by both the "Auto-fill Fixed" button and the monthly scheduled job.
+     */
+    public static function seedFixedDefaultsForMonth(?string $month = null, ?int $userId = null): int
+    {
+        $month ??= now()->format('Y-m');
+        $added = 0;
+
+        foreach (self::$fixedDefaults as $row) {
+            $exists = self::where('month', $month)->where('category', $row['category'])->where('is_fixed', true)->exists();
+            if (!$exists) {
+                self::create(array_merge($row, ['month' => $month, 'is_fixed' => true, 'created_by' => $userId]));
+                $added++;
+            }
+        }
+
+        return $added;
+    }
+
     public function domain(): BelongsTo
     {
         return $this->belongsTo(Domain::class);
