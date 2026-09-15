@@ -323,15 +323,7 @@ class FinancialsController extends Controller
     public function seedFixedExpenses(Request $request)
     {
         $month = $request->input('month', now()->format('Y-m'));
-
-        $added = 0;
-        foreach (MonthlyExpense::$fixedDefaults as $row) {
-            $exists = MonthlyExpense::where('month', $month)->where('category', $row['category'])->where('is_fixed', true)->exists();
-            if (!$exists) {
-                MonthlyExpense::create(array_merge($row, ['month' => $month, 'is_fixed' => true, 'created_by' => auth()->id()]));
-                $added++;
-            }
-        }
+        $added = MonthlyExpense::seedFixedDefaultsForMonth($month, auth()->id());
 
         return back()->with('success', "{$added} fixed expense(s) added for {$month}.");
     }
