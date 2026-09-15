@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FinancialsController extends Controller
 {
@@ -35,15 +36,31 @@ class FinancialsController extends Controller
         $bdUsers        = User::whereIn('email', ['ayubkhokhar786@gmail.com', 'alihasanwebpenter@gmail.com'])->get();
         $bdTargets      = BdMonthlyTarget::whereBetween('month', [$from->format('Y-m'), $to->format('Y-m')])->get()->keyBy(fn($t) => $t->user_id . '_' . $t->month);
 
+        // Bills (rent, etc.) still awaiting full payment — shown regardless of the
+        // period filter above, since "pending" is a running balance, not period-scoped.
+        $openBills = MonthlyExpense::whereNotNull('expected_amount_pkr')
+            ->orderByDesc('created_at')
+            ->get()
+            ->filter(fn($bill) => $bill->pending_amount > 0)
+            ->values();
+
         return view('vendor.voyager.financials.index', compact(
-            'data', 'domains', 'bdUsers', 'bdTargets', 'from', 'to', 'label'
+            'data', 'domains', 'bdUsers', 'bdTargets', 'from', 'to', 'label', 'openBills'
         ));
     }
 
     // ── Mobile quick-add expense form ──────────────────────────────────────────
     public function quickExpense()
     {
-        return view('vendor.voyager.financials.quick-expense');
+        // Bills still awaiting full payment, most recent first — offered so a
+        // payment made on the go can be linked straight to the obligation it settles.
+        $openBills = MonthlyExpense::whereNotNull('expected_amount_pkr')
+            ->orderByDesc('created_at')
+            ->get()
+            ->filter(fn($bill) => $bill->pending_amount > 0)
+            ->values();
+
+        return view('vendor.voyager.financials.quick-expense', compact('openBills'));
     }
 
     // ── Charts & Overview page ────────────────────────────────────────────────
@@ -242,30 +259,64 @@ class FinancialsController extends Controller
     public function storeExpense(Request $request)
     {
         $request->validate([
-            'month'      => 'required|regex:/^\d{4}-\d{2}$/',
-            'category'   => 'required|string',
-            'amount_pkr' => 'required|numeric|min:0',
-            'paid_from'  => 'nullable|string',
-            'note'       => 'nullable|string|max:255',
+            'month'                => 'required|regex:/^\d{4}-\d{2}$/',
+            'category'             => 'required|string',
+            'amount_pkr'           => 'nullable|required_without:expected_amount_pkr|numeric|min:0',
+            'paid_from'            => 'nullable|string',
+            'note'                 => 'nullable|string|max:255',
+            'expected_amount_pkr'  => 'nullable|numeric|min:0',
+            'parent_expense_id'    => 'nullable|integer|exists:monthly_expenses,id',
+            'is_advance'           => 'nullable|boolean',
+            'attachments'          => 'nullable|array',
+            'attachments.*'        => 'file|mimes:jpg,jpeg,png,pdf|max:10240',
         ]);
+
+        // A payment linked to an existing bill is never itself a new bill.
+        $isNewBill = $request->filled('expected_amount_pkr') && !$request->filled('parent_expense_id');
+
+        $attachments = [];
+        if ($request->hasFile('attachments')) {
+            $disk   = config('voyager.storage.disk');
+            $folder = 'expenses/' . $request->month;
+
+            foreach ($request->file('attachments') as $file) {
+                $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+                $file->storeAs($folder, $filename, $disk);
+                $attachments[] = $folder . '/' . $filename;
+            }
+        }
 
         MonthlyExpense::create([
-            'month'      => $request->month,
-            'category'   => $request->category,
-            'amount_pkr' => $request->amount_pkr,
-            'is_fixed'   => (bool) $request->is_fixed,
-            'paid_from'  => $request->paid_from,
-            'note'       => $request->note,
-            'created_by' => auth()->id(),
+            'month'               => $request->month,
+            'category'            => $request->category,
+            'amount_pkr'          => $isNewBill ? 0 : ($request->amount_pkr ?? 0),
+            'expected_amount_pkr' => $isNewBill ? $request->expected_amount_pkr : null,
+            'parent_expense_id'   => $request->parent_expense_id,
+            'is_fixed'            => (bool) $request->is_fixed,
+            'is_advance'          => (bool) $request->is_advance,
+            'paid_from'           => $request->paid_from,
+            'note'                => $request->note,
+            'attachments'         => $attachments ?: null,
+            'created_by'          => auth()->id(),
         ]);
 
-        return back()->with('success', 'Expense added.');
+        return back()->with('success', $isNewBill
+            ? 'Bill created — add payments against it as they happen.'
+            : 'Expense added.');
     }
 
     public function destroyExpense(int $id)
     {
         MonthlyExpense::findOrFail($id)->delete();
         return back()->with('success', 'Expense deleted.');
+    }
+
+    // ── Bill detail view: payments made so far + pending balance ──────────────
+    public function showExpense(int $id)
+    {
+        $expense = MonthlyExpense::with(['payments.creator', 'parentExpense', 'creator'])->findOrFail($id);
+
+        return view('vendor.voyager.financials.expense-detail', compact('expense'));
     }
 
     // ── Auto-fill fixed expenses for a month ──────────────────────────────────
@@ -464,6 +515,9 @@ class FinancialsController extends Controller
 
         $netSavingPkr = $totalIncomePkr - $totalOutgoingsPkr;
 
+        // Fixed costs only: salaries + fixed/monthly expenses — excludes partner share and BD commissions.
+        $fixedCostsOnlyPkr = $salaryTotalPkr + ($salaryTotalUsd * $this->avgConversionRate($from, $to)) + $expensesTotalPkr;
+
         return compact(
             'totalIncomeUsd', 'totalIncomePkr', 'incomeByAccount', 'incomeBySource',
             'partnerPayments', 'bdByDev', 'bdPayments',
@@ -471,7 +525,7 @@ class FinancialsController extends Controller
             'finesDeducted', 'finesTotal',
             'expenses', 'expensesByCategory', 'expensesTotalPkr', 'expensesByAccount',
             'bdTargetData',
-            'totalOutgoingsPkr', 'netSavingPkr'
+            'totalOutgoingsPkr', 'netSavingPkr', 'fixedCostsOnlyPkr'
         );
     }
 
