@@ -48,7 +48,7 @@ class SmtpAccountSeeder extends Seeder
                 'port'         => 465,
                 'encryption'   => 'ssl',
                 'username'     => 'zahid@webpenter.com',
-                'password'     => 'iampak@786',
+                'password'     => 'Zahid@786786',
                 'from_address' => 'zahid@webpenter.com',
                 'from_name'    => 'Zahid',
             ],
