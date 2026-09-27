@@ -24,7 +24,13 @@ class GeminiReviewService
             ];
         }
 
-        $model = setting('academy.gemini_model', 'gemini-2.0-flash');
+        // gemini-2.0-flash (and 2.5-flash) were retired for new accounts;
+        // pinned dot-versions (e.g. gemini-3.6-flash) worked in ListModels
+        // but hung indefinitely on generateContent when checked live
+        // (2026-09-12) - gemini-flash-latest (an alias Google keeps
+        // pointed at their current recommended flash model) responded
+        // correctly and is the future-proof choice as models keep rotating.
+        $model = setting('academy.gemini_model', 'gemini-flash-latest');
         $skillList = implode(', ', $skills);
 
         $prompt = "You are reviewing a student's project submission for a software development training academy.\n"

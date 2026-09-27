@@ -35,8 +35,11 @@
         <h1>Register for a Track</h1>
         <p class="sub">Takes about 2 minutes. You'll get portal access right after.</p>
 
-        <form method="POST" action="{{ route('academy.register.store') }}">
+        <form method="POST" action="{{ route('academy.register.store') }}" enctype="multipart/form-data">
             @csrf
+            <label>Your Photo (for your Academy ID card)</label>
+            <input type="file" name="photo" accept="image/*">
+
             <label>Full Name</label>
             <input type="text" name="name" value="{{ old('name') }}" required>
 

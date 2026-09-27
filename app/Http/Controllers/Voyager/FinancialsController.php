@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Voyager;
 
+use App\Models\AcademyFeeInvoice;
 use App\Models\BankBalance;
 use App\Models\BdMonthlyTarget;
 use App\Models\CashTransaction;
@@ -54,7 +55,12 @@ class FinancialsController extends Controller
             $months->push(now()->subMonths($i)->format('Y-m'));
         }
 
-        $chartData = $months->map(function ($month) {
+        // Academy Income filters - scoped to just that section (track/
+        // instructor), the main P&L/income figures below are unaffected.
+        $academyTrackId = $request->query('academy_track_id');
+        $academyInstructorId = $request->query('academy_instructor_id');
+
+        $chartData = $months->map(function ($month) use ($academyTrackId, $academyInstructorId) {
             $from = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
             $to   = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
@@ -86,16 +92,28 @@ class FinancialsController extends Controller
             $totalOut = $partnerPkr + $bdPkr + $salaryPkr + $expensesPkr;
             $saving   = $totalIncomePkr - $totalOut;
 
+            // Academy income - informational only, deliberately kept OUT of
+            // income/outgoings/saving above (a separate revenue line, not
+            // client-project income) per instruction not to mix the two.
+            $academyIncome = AcademyFeeInvoice::where('status', 'paid')
+                ->whereBetween('paid_at', [$from, $to])
+                ->when($academyTrackId || $academyInstructorId, fn ($q) => $q->whereHas('enrollment', function ($eq) use ($academyTrackId, $academyInstructorId) {
+                    $eq->when($academyTrackId, fn ($q2) => $q2->where('track_id', $academyTrackId));
+                    $eq->when($academyInstructorId, fn ($q2) => $q2->where('instructor_id', $academyInstructorId));
+                }))
+                ->sum('total_amount');
+
             return [
-                'month'       => $month,
-                'label'       => Carbon::createFromFormat('Y-m', $month)->format('M y'),
-                'income'      => round($totalIncomePkr),
-                'outgoings'   => round($totalOut),
-                'saving'      => round($saving),
-                'partners'    => round($partnerPkr),
-                'bd'          => round($bdPkr),
-                'salaries'    => round($salaryPkr),
-                'expenses'    => round($expensesPkr),
+                'month'          => $month,
+                'label'          => Carbon::createFromFormat('Y-m', $month)->format('M y'),
+                'income'         => round($totalIncomePkr),
+                'outgoings'      => round($totalOut),
+                'saving'         => round($saving),
+                'partners'       => round($partnerPkr),
+                'bd'             => round($bdPkr),
+                'salaries'       => round($salaryPkr),
+                'expenses'       => round($expensesPkr),
+                'academy_income' => round($academyIncome),
             ];
         });
 
@@ -138,8 +156,22 @@ class FinancialsController extends Controller
             ];
         });
 
+        $totalAcademyIncome = $chartData->sum('academy_income');
+        $academyStudentsPaidThisMonth = AcademyFeeInvoice::where('status', 'paid')
+            ->whereBetween('paid_at', [now()->startOfMonth(), now()->endOfMonth()])
+            ->when($academyTrackId || $academyInstructorId, fn ($q) => $q->whereHas('enrollment', function ($eq) use ($academyTrackId, $academyInstructorId) {
+                $eq->when($academyTrackId, fn ($q2) => $q2->where('track_id', $academyTrackId));
+                $eq->when($academyInstructorId, fn ($q2) => $q2->where('instructor_id', $academyInstructorId));
+            }))
+            ->count();
+
+        $academyTracks = \App\Models\AcademyTrack::orderBy('name')->get(['id', 'name']);
+        $academyInstructors = User::academyInstructors()->orderBy('name')->get(['id', 'name']);
+
         return view('vendor.voyager.financials.charts', compact(
-            'chartData', 'bankHistory', 'latestBalances', 'totalBankBalance', 'bdPerformance', 'months'
+            'chartData', 'bankHistory', 'latestBalances', 'totalBankBalance', 'bdPerformance', 'months',
+            'totalAcademyIncome', 'academyStudentsPaidThisMonth', 'academyTracks', 'academyInstructors',
+            'academyTrackId', 'academyInstructorId'
         ));
     }
 

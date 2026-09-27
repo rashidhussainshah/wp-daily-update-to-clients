@@ -14,7 +14,7 @@
                 <div class="alert alert-success">
                     {{ session('status') }}
                     @if(session('download_url'))
-                        &middot; <a href="{{ session('download_url') }}" target="_blank">Download PDF</a>
+                        &middot; <a href="{{ session('download_url') }}" download>Download PDF</a>
                     @endif
                 </div>
             @endif

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AcademyFeeInvoice;
 use App\Models\AcademyTrack;
+use App\Models\CheckinConfiguration;
 use App\Models\DeveloperAcademyEnrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class AcademyRegistrationController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:30',
             'password' => 'required|string|min:8|confirmed',
+            'photo' => 'nullable|image|max:4096',
             'track_id' => [
                 'required',
                 Rule::exists('academy_tracks', 'id')->where('is_open_for_enrollment', true),
@@ -47,6 +49,15 @@ class AcademyRegistrationController extends Controller
             'password' => Hash::make($data['password']),
         ]);
         $user->role_id = setting('academy.it_academy_student_role_id');
+
+        // Stored the same way Voyager stores every other avatar (a plain
+        // relative path on the public disk) so it also shows correctly
+        // anywhere Voyager already renders a user's avatar, not just on
+        // the Academy ID card.
+        if ($request->hasFile('photo')) {
+            $user->avatar = $request->file('photo')->store('users', 'public');
+        }
+
         $user->save();
 
         $enrollment = DeveloperAcademyEnrollment::create([
@@ -55,6 +66,20 @@ class AcademyRegistrationController extends Controller
             'instructor_id' => $track->default_instructor_id,
             'status' => DeveloperAcademyEnrollment::STATUS_ACTIVE,
         ]);
+
+        // Check-in/check-out (CheckinController) requires a
+        // CheckinConfiguration row to exist for the user - it's what
+        // supplies the Slack webhook and designation shown in the
+        // notification. Students don't use Clockify, so this is the only
+        // setup they need; the shared Academy webhook lives in the
+        // academy.slack_webhook_url setting, editable in Voyager.
+        CheckinConfiguration::firstOrCreate(
+            ['developer_id' => $user->id],
+            [
+                'slack_webhook_url' => setting('academy.slack_webhook_url'),
+                'designation' => $track->designation ?? $track->name,
+            ]
+        );
 
         $registrationFee = $track->registration_fee_enabled ? (float) $track->registration_fee_amount : 0;
         $monthlyFee = (float) $track->monthly_fee_amount;

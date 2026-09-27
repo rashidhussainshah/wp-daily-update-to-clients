@@ -108,4 +108,30 @@ class DeveloperAcademyEnrollment extends Model
 
         return (int) round((($completedStages + $currentStageWeight) / $totalStages) * 100);
     }
+
+    /**
+     * Motivational level badge for this enrollment - Fiverr-style tiers
+     * (New Talent -> ... -> Certified Professional), computed purely from
+     * progressPercent() and status so there's no new data to maintain.
+     *
+     * Deliberately a plain method (not a stored column) so it's cheap to
+     * reuse anywhere this enrollment is already loaded - the student
+     * dashboard today, and later the public developer-hire/marketing
+     * profile page without any schema change.
+     */
+    public function levelTier(): array
+    {
+        if ($this->status === self::STATUS_COMPLETED) {
+            return ['tier' => 5, 'key' => 'certified', 'label' => 'Certified Professional', 'icon' => '🏆'];
+        }
+
+        $percent = $this->progressPercent();
+
+        return match (true) {
+            $percent >= 75 => ['tier' => 4, 'key' => 'advanced', 'label' => 'Advanced Talent', 'icon' => '🏅'],
+            $percent >= 50 => ['tier' => 3, 'key' => 'skilled', 'label' => 'Skilled Talent', 'icon' => '⭐'],
+            $percent >= 25 => ['tier' => 2, 'key' => 'developing', 'label' => 'Developing Talent', 'icon' => '🚀'],
+            default => ['tier' => 1, 'key' => 'new', 'label' => 'New Talent', 'icon' => '🌱'],
+        };
+    }
 }

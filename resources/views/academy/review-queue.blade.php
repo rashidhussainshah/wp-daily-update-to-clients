@@ -3,7 +3,9 @@
 @section('page_title', 'Academy Review Queue')
 
 @section('page_header')
-    <h1 class="page-title"><i class="voyager-check"></i> Academy Review Queue</h1>
+    <h1 class="page-title"><i class="voyager-check"></i> Academy Review Queue
+        <span class="label {{ $reviews->count() > 0 ? 'label-warning' : 'label-default' }}">{{ $reviews->count() }} pending</span>
+    </h1>
 @stop
 
 @section('content')

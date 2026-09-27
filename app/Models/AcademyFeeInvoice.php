@@ -21,10 +21,15 @@ class AcademyFeeInvoice extends Model
         'monthly_fee_amount',
         'total_amount',
         'status',
+        'payment_proof_path',
+        'payment_proof_submitted_at',
         'paid_at',
         'marked_paid_by',
         'instructor_commission_amount',
         'instructor_commission_credited',
+        'instructor_paid_at',
+        'instructor_paid_by',
+        'instructor_payout_proof_path',
     ];
 
     protected $casts = [
@@ -35,6 +40,8 @@ class AcademyFeeInvoice extends Model
         'instructor_commission_amount' => 'decimal:2',
         'instructor_commission_credited' => 'boolean',
         'paid_at' => 'datetime',
+        'payment_proof_submitted_at' => 'datetime',
+        'instructor_paid_at' => 'datetime',
     ];
 
     public function enrollment(): BelongsTo
@@ -45,6 +52,37 @@ class AcademyFeeInvoice extends Model
     public function markedPaidBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'marked_paid_by');
+    }
+
+    public function instructorPaidBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'instructor_paid_by');
+    }
+
+    /**
+     * Commission "credited" (calculated, attributed) is not the same as
+     * the instructor actually having been paid it - this is that second,
+     * separate step. Administrator-only (see AcademyInstructorPayoutController).
+     */
+    public function markInstructorPaid(User $paidBy, ?string $proofPath = null): void
+    {
+        if ($this->instructor_paid_at) {
+            return; // already paid out - never double-pay
+        }
+
+        $this->update([
+            'instructor_paid_at' => now(),
+            'instructor_paid_by' => $paidBy->id,
+            'instructor_payout_proof_path' => $proofPath,
+        ]);
+    }
+
+    /**
+     * Commission owed but not yet actually paid to the instructor.
+     */
+    public function scopePendingInstructorPayout($query)
+    {
+        return $query->where('instructor_commission_credited', true)->whereNull('instructor_paid_at');
     }
 
     /**

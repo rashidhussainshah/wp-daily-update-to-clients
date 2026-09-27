@@ -79,6 +79,10 @@
 
 <!-- Floating Buttons -->
 <div class="floating-buttons">
+    @php $academyRoute = Auth::user()?->academyLandingRoute(); @endphp
+    @if($academyRoute)
+        <a href="{{ route($academyRoute) }}" class="btn btn-success" style="background-color:#16a34a; border-color:#15803d;">🎓 My Academy Page</a>
+    @endif
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#checkinModal"  onclick="focusTextarea('today_work_plan')">Check In</button>
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#checkoutModal" onclick="focusTextarea('end_of_day_report')">Check Out</button>
 </div>

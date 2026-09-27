@@ -14,21 +14,42 @@ class AcademyCertificate extends Model
     const TYPE_TRACK = 'track';
     const TYPE_COURSE = 'course';
 
+    const DESIGN_CLASSIC = 'classic';
+    const DESIGN_LINKEDIN = 'linkedin';
+    const DESIGN_UDEMY = 'udemy';
+
+    /** @return array<string, string> design key => display label, for dropdowns */
+    public static function designs(): array
+    {
+        return [
+            self::DESIGN_CLASSIC => 'Classic (green, formal)',
+            self::DESIGN_LINKEDIN => 'LinkedIn-style (blue, badge)',
+            self::DESIGN_UDEMY => 'Udemy-style (bold banner)',
+        ];
+    }
+
     protected $fillable = [
         'user_id',
         'enrollment_id',
         'course_id',
         'type',
+        'design',
         'title',
+        'achievement_note',
+        'is_staff_certificate',
         'recipient_name',
         'verify_code',
         'pdf_path',
         'issued_by',
         'issued_at',
+        'posted_at',
+        'posted_by',
     ];
 
     protected $casts = [
         'issued_at' => 'datetime',
+        'posted_at' => 'datetime',
+        'is_staff_certificate' => 'boolean',
     ];
 
     protected static function booted()
@@ -57,5 +78,10 @@ class AcademyCertificate extends Model
     public function issuedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'issued_by');
+    }
+
+    public function postedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'posted_by');
     }
 }

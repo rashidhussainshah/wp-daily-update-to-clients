@@ -15,8 +15,20 @@ class AcademyInstructorController extends Controller
         abort_unless(Auth::check() && (Auth::user()->isAcademyInstructor() || isAdministrator()), 403);
 
         $enrollments = Auth::user()->instructedAcademyEnrollments()->with('user', 'track', 'feeInvoices')->get();
-        $totalCommission = $enrollments->flatMap->feeInvoices->where('instructor_commission_credited', true)->sum('instructor_commission_amount');
 
-        return view('academy.instructor', compact('enrollments', 'totalCommission'));
+        $totalCommission = $enrollments->flatMap->feeInvoices
+            ->where('instructor_commission_credited', true)
+            ->sum('instructor_commission_amount');
+
+        $commissionThisMonth = $enrollments->flatMap->feeInvoices
+            ->where('instructor_commission_credited', true)
+            ->filter(fn ($invoice) => $invoice->paid_at && $invoice->paid_at->isCurrentMonth())
+            ->sum('instructor_commission_amount');
+
+        $pendingFeesCount = $enrollments->flatMap->feeInvoices
+            ->where('status', '!=', 'paid')
+            ->count();
+
+        return view('academy.instructor', compact('enrollments', 'totalCommission', 'commissionThisMonth', 'pendingFeesCount'));
     }
 }
