@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             HouzezCampaignSeeder::class,
             RetainerCampaignSeeder::class,
             EmailCampaignMenuSeeder::class,
+            DeviceManagerRoleSeeder::class,
         ]);
     }
 }

@@ -31,9 +31,21 @@ class EmailSignatureSettingsSeeder extends Seeder
             ]
         );
 
-        // ── Sidebar menu item ─────────────────────────────────────────────────
+        // ── Sidebar menu items ────────────────────────────────────────────────
         $menu = \TCG\Voyager\Models\Menu::where('name', 'admin')->first();
         if ($menu) {
+            \TCG\Voyager\Models\MenuItem::firstOrCreate(
+                ['menu_id' => $menu->id, 'title' => 'Email Signatures'],
+                [
+                    'url'        => '/admin/email-signatures',
+                    'target'     => '_self',
+                    'icon_class' => 'voyager-mail',
+                    'color'      => null,
+                    'parent_id'  => null,
+                    'order'      => 99,
+                ]
+            );
+
             \TCG\Voyager\Models\MenuItem::firstOrCreate(
                 ['menu_id' => $menu->id, 'title' => 'Signature Settings'],
                 [

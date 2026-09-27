@@ -195,7 +195,9 @@ return [
 
     // Here you can specify additional assets you would like to be included in the master.blade
     'additional_css' => [
-        'css/custom.css',
+        // Cache-busted by file mtime so browsers never serve a stale copy
+        // after this file changes (was a plain path with no version string).
+        'css/custom.css?v=' . (is_file(public_path('css/custom.css')) ? filemtime(public_path('css/custom.css')) : time()),
 //        'css/fonts.css',
     ],
 

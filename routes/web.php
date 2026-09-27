@@ -10,6 +10,8 @@ use App\Http\Controllers\Voyager\SmtpAccountController;
 use App\Http\Controllers\Voyager\EmailSignatureController;
 use App\Http\Controllers\Voyager\FinancialsController;
 use App\Http\Controllers\Voyager\LeaveController;
+use App\Http\Controllers\Voyager\MyDevicesController;
+use App\Http\Controllers\Voyager\CompanyDeviceMaintenanceLogController;
 use App\Http\Controllers\Voyager\EodController;
 use Illuminate\Support\Facades\Route;
 use Spatie\SlackAlerts\Facades\SlackAlert;
@@ -183,6 +185,16 @@ Route::group(['prefix' => 'admin'], function () {
     Route::get('payment-flow', [DeveloperPaymentController::class, 'flowGuide'])->name('user-payments.flow-guide');
     Route::get('leaves/{id}/approve', [LeaveController::class, 'approve'])->name('leaves.approve');
 
+    // My Devices - read-only view of company devices assigned to the logged-in user
+    Route::get('my-devices', [MyDevicesController::class, 'index'])->name('my-devices.index');
+
+    // Company Device Maintenance Logs - quick "log a repair" (battery, hard drive, etc.)
+    // from the device detail page, see resources/views/vendor/voyager/company-devices/read.blade.php
+    Route::post('company-devices/{device}/maintenance-logs', [CompanyDeviceMaintenanceLogController::class, 'store'])
+        ->name('company-device-maintenance-logs.store');
+    Route::delete('company-device-maintenance-logs/{log}', [CompanyDeviceMaintenanceLogController::class, 'destroy'])
+        ->name('company-device-maintenance-logs.destroy');
+
     // Salary Invoice routes
     Route::get('salary-invoice/pdf', [SalaryInvoiceController::class, 'viewPdf'])->name('salary-invoice.pdf');
     Route::get('salary-invoice/html', [SalaryInvoiceController::class, 'viewHtml'])->name('salary-invoice.html');
@@ -255,6 +267,7 @@ Route::group(['prefix' => 'admin'], function () {
         Route::post('/cash',                         [FinancialsController::class, 'storeCash'])->name('store-cash');
         Route::delete('/cash/{id}',                  [FinancialsController::class, 'destroyCash'])->name('destroy-cash');
         Route::post('/expenses',                     [FinancialsController::class, 'storeExpense'])->name('store-expense');
+        Route::get('/expenses/{id}',                 [FinancialsController::class, 'showExpense'])->name('show-expense');
         Route::delete('/expenses/{id}',              [FinancialsController::class, 'destroyExpense'])->name('destroy-expense');
         Route::post('/expenses/seed-fixed',          [FinancialsController::class, 'seedFixedExpenses'])->name('seed-fixed');
         Route::post('/bd-targets',                   [FinancialsController::class, 'storeBdTarget'])->name('store-bd-target');

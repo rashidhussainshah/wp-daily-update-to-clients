@@ -78,6 +78,13 @@
       <div style="font-size:12px;color:rgba(255,255,255,0.5);">within 30 days</div>
     </div>
   </div>
+  <div class="col-md-3 col-sm-6">
+    <div class="panel" style="background:#1a1a2e;border:none;border-radius:8px;padding:18px 20px;">
+      <div style="font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;">Fixed Costs Only</div>
+      <div style="font-size:22px;font-weight:700;color:#38bdf8;margin-top:4px;">Rs {{ number_format($data['fixedCostsOnlyPkr'],0) }}</div>
+      <div style="font-size:12px;color:rgba(255,255,255,0.5);">Salaries + Fixed Expenses — excl. Partner &amp; BD</div>
+    </div>
+  </div>
 </div>
 
 {{-- ── Main 2-col layout ──────────────────────────────────────────────────── --}}
@@ -239,7 +246,7 @@
       </form>
     </div>
     <div class="panel-body">
-      <form method="POST" action="{{ route('financials.store-expense') }}">
+      <form method="POST" action="{{ route('financials.store-expense') }}" enctype="multipart/form-data">
         @csrf
         <div class="row">
           <div class="col-xs-6">
@@ -250,8 +257,8 @@
           </div>
           <div class="col-xs-6">
             <div class="form-group" style="margin-bottom:8px;">
-              <label style="font-size:11px;">Amount (PKR)</label>
-              <input type="number" name="amount_pkr" class="form-control input-sm" placeholder="e.g. 8500" required min="0" step="1">
+              <label style="font-size:11px;">Amount Paid (PKR)</label>
+              <input type="number" name="amount_pkr" class="form-control input-sm" placeholder="e.g. 8500" min="0" step="1">
             </div>
           </div>
         </div>
@@ -290,6 +297,30 @@
             </div>
           </div>
         </div>
+        <div class="checkbox" style="margin:0 0 8px;">
+          <label style="font-size:12px;font-weight:normal;">
+            <input type="checkbox" name="is_advance" value="1"> This is an advance payment
+          </label>
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Attachment (optional)</label>
+          <input type="file" name="attachments[]" class="form-control input-sm" accept="image/*,.pdf" multiple>
+        </div>
+        @if($openBills->count())
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Link to existing bill (optional)</label>
+          <select name="parent_expense_id" class="form-control input-sm">
+            <option value="">— none, standalone expense —</option>
+            @foreach($openBills as $bill)
+              <option value="{{ $bill->id }}">{{ $bill->category_label }} ({{ $bill->month }}) — Rs {{ number_format($bill->pending_amount,0) }} pending</option>
+            @endforeach
+          </select>
+        </div>
+        @endif
+        <div class="form-group" style="margin-bottom:8px;">
+          <label style="font-size:11px;">Expected Total <span class="text-muted">(optional — fill instead of Amount Paid to create a trackable bill)</span></label>
+          <input type="number" name="expected_amount_pkr" class="form-control input-sm" placeholder="e.g. 16500" min="0" step="1">
+        </div>
         <button type="submit" class="btn btn-primary btn-sm btn-block">Add Expense</button>
       </form>
     </div>
@@ -302,7 +333,17 @@
           @foreach($data['expenses'] as $exp)
           <tr>
             <td>{{ $exp->month }}</td>
-            <td>{{ $exp->category_label }}</td>
+            <td>
+              <a href="{{ route('financials.show-expense', $exp->id) }}">{{ $exp->category_label }}</a>
+              @if($exp->is_advance) <span class="label label-info" style="font-size:9px;">advance</span> @endif
+              @if($exp->attachments) <i class="voyager-attachment" title="Has attachment"></i> @endif
+              @if($exp->isBill())
+                <br><small class="text-muted">Bill: Rs {{ number_format($exp->paid_amount,0) }} / {{ number_format($exp->expected_amount_pkr,0) }}
+                  ({{ $exp->pending_amount > 0 ? 'Rs '.number_format($exp->pending_amount,0).' pending' : 'settled' }})</small>
+              @elseif($exp->parent_expense_id)
+                <br><small class="text-muted">↳ payment toward {{ $exp->parentExpense?->category_label }}</small>
+              @endif
+            </td>
             <td>{{ \App\Models\MonthlyExpense::$bankAccounts[$exp->paid_from] ?? '—' }}</td>
             <td class="text-right">Rs {{ number_format($exp->amount_pkr,0) }}</td>
             <td>
@@ -318,6 +359,31 @@
     </div>
     @endif
   </div>
+
+  {{-- ── Bills tracking (rent, etc. paid in installments) ────────────────── --}}
+  @if($openBills->count())
+  <div class="panel panel-bordered">
+    <div class="panel-heading"><h3 class="panel-title">Pending Bills <small class="text-muted">(across all months)</small></h3></div>
+    <div class="panel-body" style="padding:0;">
+      <table class="table table-condensed" style="margin:0;font-size:12px;">
+        <thead><tr style="background:#f8fafc;">
+          <th>Bill</th><th class="text-right">Expected</th><th class="text-right">Paid</th><th class="text-right">Pending</th><th></th>
+        </tr></thead>
+        <tbody>
+          @foreach($openBills as $bill)
+          <tr>
+            <td>{{ $bill->category_label }} <small class="text-muted">({{ $bill->month }})</small></td>
+            <td class="text-right">Rs {{ number_format($bill->expected_amount_pkr,0) }}</td>
+            <td class="text-right">Rs {{ number_format($bill->paid_amount,0) }}</td>
+            <td class="text-right" style="color:#dc2626;font-weight:600;">Rs {{ number_format($bill->pending_amount,0) }}</td>
+            <td><a href="{{ route('financials.show-expense', $bill->id) }}" class="btn btn-xs btn-default">View</a></td>
+          </tr>
+          @endforeach
+        </tbody>
+      </table>
+    </div>
+  </div>
+  @endif
 
   {{-- ── BD Targets ──────────────────────────────────────────────────────── --}}
   <div class="panel panel-bordered">
