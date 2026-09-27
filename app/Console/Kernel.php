@@ -28,6 +28,9 @@ class Kernel extends ConsoleKernel
         Log::info("Current time with timezone: " . $current_time->format('Y-m-d H:i:s') . ' ' . $timezone);
 //        $schedule->command('eod:check')->everyMinute();
         $schedule->command('automations:process')->everyMinute()->withoutOverlapping();
+        // Runs on the 1st of every month - unlike the old add:fees-style
+        // commands (never actually scheduled), this one is wired up here.
+        $schedule->command('academy:generate-monthly-invoices')->monthlyOn(1, '01:00')->withoutOverlapping();
         $schedule->command('expenses:seed-fixed')->monthlyOn(1, '01:00')->timezone('Asia/Karachi');
 //            ->timezone('Asia/Karachi') // Set timezone to Pakistan Standard Time
 //            ->dailyAt('22:00'); // Run daily at 10 PM (22:00)

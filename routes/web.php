@@ -72,7 +72,104 @@ Route::permanentRedirect('/', 'admin/login');
 //    return view('welcome');
 //});
 
+// WebPenter IT Academy - public routes (no login required)
+Route::prefix('academy')->name('academy.')->group(function () {
+    Route::get('register', [\App\Http\Controllers\AcademyRegistrationController::class, 'create'])->name('register');
+    Route::post('register', [\App\Http\Controllers\AcademyRegistrationController::class, 'store'])->name('register.store');
+    Route::get('register/success/{enrollment}', [\App\Http\Controllers\AcademyRegistrationController::class, 'success'])->name('register.success');
+    Route::get('parent/{token}', [\App\Http\Controllers\AcademyParentController::class, 'show'])->name('parent');
+});
+Route::get('certificate/verify/{code}', [\App\Http\Controllers\AcademyCertificateController::class, 'verify'])->name('academy.certificate.verify');
+Route::get('hr-documents/verify/{code}', [\App\Http\Controllers\DocumentVerifyController::class, 'verify'])->name('hr-documents.verify');
+Route::get('academy/badge/{token}', [\App\Http\Controllers\AcademyStudentBadgeController::class, 'show'])->name('academy.student-badge.show');
+
+// WebPenter IT Academy - authenticated routes (student dashboard + instructor
+// view). Plain 'auth' middleware - same Users table/session as Voyager admin,
+// role-checked inside each controller rather than a separate auth system.
+Route::middleware('auth')->prefix('academy')->name('academy.')->group(function () {
+    Route::get('help', [\App\Http\Controllers\AcademyHelpController::class, 'index'])->name('help');
+    Route::get('dashboard', [\App\Http\Controllers\AcademyDashboardController::class, 'index'])->name('dashboard');
+    Route::post('dashboard/toggle-skill', [\App\Http\Controllers\AcademyDashboardController::class, 'toggleSkill'])->name('dashboard.toggle-skill');
+    Route::post('dashboard/submit', [\App\Http\Controllers\AcademyDashboardController::class, 'submitProject'])->name('dashboard.submit');
+    Route::post('dashboard/fee/{invoice}/submit-proof', [\App\Http\Controllers\AcademyDashboardController::class, 'submitPaymentProof'])->name('dashboard.submit-payment-proof');
+    Route::get('instructor', [\App\Http\Controllers\AcademyInstructorController::class, 'index'])->name('instructor');
+    Route::get('reviewer', [\App\Http\Controllers\AcademyReviewerDashboardController::class, 'index'])->name('reviewer.index');
+    Route::get('marketing', [\App\Http\Controllers\AcademyMarketingDashboardController::class, 'index'])->name('marketing.index');
+    Route::post('marketing/certificates/{certificate}/suggest-post', [\App\Http\Controllers\AcademyMarketingDashboardController::class, 'suggestPost'])->name('marketing.suggest-post');
+    Route::post('marketing/certificates/{certificate}/mark-posted', [\App\Http\Controllers\AcademyMarketingDashboardController::class, 'markPosted'])->name('marketing.mark-posted');
+    Route::get('marketing/certificates/{certificate}/download', [\App\Http\Controllers\AcademyMarketingDashboardController::class, 'downloadPdf'])->name('marketing.download');
+
+    Route::prefix('accountant')->name('accountant.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AcademyAccountantDashboardController::class, 'index'])->name('index');
+        Route::post('{invoice}/mark-paid', [\App\Http\Controllers\AcademyAccountantDashboardController::class, 'markPaid'])->name('mark-paid');
+        Route::get('students', [\App\Http\Controllers\AcademyAccountantDashboardController::class, 'students'])->name('students');
+        Route::delete('students/{enrollment}', [\App\Http\Controllers\AcademyAccountantDashboardController::class, 'removeStudent'])->name('remove-student');
+    });
+});
+
 Route::group(['prefix' => 'admin'], function () {
+    // WebPenter IT Academy - staff screens. This 'admin' group also carries
+    // Voyager::routes() itself (below) plus a lot of pre-existing unrelated
+    // admin routes - do NOT add middleware at this outer level, it would
+    // apply to all of those too (this previously broke Voyager's own login
+    // page: 'auth' on this whole group meant a guest hitting admin/login
+    // got redirected by 'auth' back to admin/login - an infinite loop).
+    // Scope 'auth' to just this academy sub-group instead. Voyager's own
+    // 'admin.user' middleware isn't used here because it additionally
+    // requires the 'browse_admin' permission, which an Academy reviewer/
+    // instructor may not hold - so this uses plain 'auth' (redirect-to-login
+    // for guests) and leaves the actual role/capability check to each
+    // controller's authorizeStaff(), same as the student-side group above.
+    Route::prefix('academy')->name('academy.')->middleware('auth')->group(function () {
+        Route::get('review', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'index'])->name('review.index');
+        Route::post('review/{review}/approve', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'approve'])->name('review.approve');
+        Route::post('review/{review}/send-back', [\App\Http\Controllers\Voyager\AcademyReviewController::class, 'sendBack'])->name('review.send-back');
+        Route::get('fees', [\App\Http\Controllers\Voyager\AcademyFeeController::class, 'index'])->name('fees.index');
+        Route::post('fees/{invoice}/mark-paid', [\App\Http\Controllers\Voyager\AcademyFeeController::class, 'markPaid'])->name('fees.mark-paid');
+        Route::get('course-certificates', [\App\Http\Controllers\Voyager\AcademyCourseCertificateController::class, 'create'])->name('course-certificates.create');
+        Route::post('course-certificates', [\App\Http\Controllers\Voyager\AcademyCourseCertificateController::class, 'store'])->name('course-certificates.store');
+        Route::get('certificates', [\App\Http\Controllers\Voyager\AcademyMarketingCertificatesController::class, 'index'])->name('certificates.index');
+        Route::get('student-cards', [\App\Http\Controllers\Voyager\AcademyStudentCardController::class, 'index'])->name('student-cards.index');
+        Route::post('student-cards/print', [\App\Http\Controllers\Voyager\AcademyStudentCardController::class, 'print'])->name('student-cards.print');
+        Route::get('student-cards/batches/{batch}/print', [\App\Http\Controllers\Voyager\AcademyStudentCardController::class, 'printBatch'])->name('student-cards.print-batch');
+        Route::post('student-cards/batches/{batch}/mark-printed', [\App\Http\Controllers\Voyager\AcademyStudentCardController::class, 'markBatchPrinted'])->name('student-cards.mark-batch-printed');
+        Route::post('student-cards/batch-items/{item}/mark-printed', [\App\Http\Controllers\Voyager\AcademyStudentCardController::class, 'markItemPrinted'])->name('student-cards.mark-item-printed');
+
+        Route::prefix('card-batches')->name('card-batches.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'store'])->name('store');
+            Route::post('add-students', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'addStudents'])->name('add-students');
+            Route::delete('items/{item}', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'removeItem'])->name('remove-item');
+            Route::post('{batch}/mark-ready', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'markReady'])->name('mark-ready');
+            Route::delete('{batch}', [\App\Http\Controllers\Voyager\AcademyCardBatchController::class, 'destroy'])->name('destroy');
+        });
+        Route::get('instructor-payouts', [\App\Http\Controllers\Voyager\AcademyInstructorPayoutController::class, 'index'])->name('instructor-payouts.index');
+        Route::post('instructor-payouts/{invoice}/mark-paid', [\App\Http\Controllers\Voyager\AcademyInstructorPayoutController::class, 'markPaid'])->name('instructor-payouts.mark-paid');
+        Route::post('instructor-payouts/manual', [\App\Http\Controllers\Voyager\AcademyInstructorPayoutController::class, 'storeManualPayment'])->name('instructor-payouts.store-manual');
+    });
+    // WebPenter HR - staff document-template builder + issuance flow (NOT
+    // part of the IT Academy student system - separate feature for
+    // WebPenter's own staff). Same 'auth'-only-at-this-level pattern as the
+    // academy admin group above; each controller's authorizeStaff() enforces
+    // HR-or-Administrator.
+    Route::prefix('hr-documents')->name('hr-documents.')->middleware('auth')->group(function () {
+        Route::get('/', [\App\Http\Controllers\HrDocumentsDashboardController::class, 'index'])->name('dashboard');
+        Route::get('templates', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'index'])->name('templates.index');
+        Route::get('templates/create', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'create'])->name('templates.create');
+        Route::post('templates', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'store'])->name('templates.store');
+        Route::post('templates/preview', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'preview'])->name('templates.preview');
+        Route::get('templates/{template}/edit', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'edit'])->name('templates.edit');
+        Route::put('templates/{template}', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'update'])->name('templates.update');
+        Route::delete('templates/{template}', [\App\Http\Controllers\Voyager\DocumentTemplateController::class, 'destroy'])->name('templates.destroy');
+
+        Route::get('issue', [\App\Http\Controllers\Voyager\DocumentIssuanceController::class, 'create'])->name('issue.create');
+        Route::post('issue/preview', [\App\Http\Controllers\Voyager\DocumentIssuanceController::class, 'preview'])->name('issue.preview');
+        Route::post('issue', [\App\Http\Controllers\Voyager\DocumentIssuanceController::class, 'store'])->name('issue.store');
+        Route::get('issuances', [\App\Http\Controllers\Voyager\DocumentIssuanceController::class, 'index'])->name('issuances.index');
+        Route::post('issuances/{issuance}/send-email', [\App\Http\Controllers\Voyager\DocumentIssuanceController::class, 'sendEmail'])->name('issuances.send-email');
+    });
+
+
     Route::get('clockify/today-entries', [ClockifyController::class, 'getTodayEntries'])->name('clockify.today-entries');
     Route::get('/get-yesterdays-plan', [CheckinController::class, 'getYesterdaysPlan'])->name('get.yesterdays.plan');
     Route::post('/checkin', [CheckinController::class, 'storeCheckin'])->name('checkin.store');
@@ -179,4 +276,14 @@ Route::group(['prefix' => 'admin'], function () {
     });
 
     Voyager::routes();
+
+    // Single login page for existing admin staff AND Academy-only users.
+    // Registered AFTER Voyager::routes() above - Laravel's route
+    // collection is keyed by method+URI, so a later registration for the
+    // same admin/login GET/POST replaces Voyager's own entry rather than
+    // being shadowed by it. See AcademyAwareAuthController for why this
+    // override exists.
+    Route::get('login', [\App\Http\Controllers\Voyager\AcademyAwareAuthController::class, 'login'])->name('voyager.login');
+    Route::post('login', [\App\Http\Controllers\Voyager\AcademyAwareAuthController::class, 'postLogin'])->name('voyager.postlogin');
+    Route::post('logout', [\App\Http\Controllers\Voyager\AcademyAwareAuthController::class, 'logout'])->name('voyager.logout');
 });

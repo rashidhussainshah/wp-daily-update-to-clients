@@ -158,6 +158,57 @@
     </div>
 </div>
 
+{{-- ── Academy Income — a separate revenue line, not mixed into the P&L/
+     income figures above (student fees, not client-project income).
+     Informational only. ─────────────────────────────────────────────── --}}
+<div class="panel panel-bordered" style="border-top: 3px solid #16a34a;">
+    <div class="panel-heading">
+        <h3 class="panel-title">🎓 Academy Income</h3>
+    </div>
+    <div class="panel-body">
+        <p style="color:#64748b; font-size:13px; margin-top:-6px;">
+            Fees actually collected from IT Academy students (registration + monthly fees, at the moment your
+            accountant marks each invoice paid) - kept entirely separate from the client-project income and P&amp;L
+            figures above. Filter by track or instructor to see just that slice.
+        </p>
+
+        <form method="GET" action="{{ route('financials.charts') }}" style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px;">
+            <select name="academy_track_id" class="form-control" style="width:auto;">
+                <option value="">All tracks</option>
+                @foreach($academyTracks as $track)
+                    <option value="{{ $track->id }}" @selected($academyTrackId == $track->id)>{{ $track->name }}</option>
+                @endforeach
+            </select>
+            <select name="academy_instructor_id" class="form-control" style="width:auto;">
+                <option value="">All instructors</option>
+                @foreach($academyInstructors as $instructor)
+                    <option value="{{ $instructor->id }}" @selected($academyInstructorId == $instructor->id)>{{ $instructor->name }}</option>
+                @endforeach
+            </select>
+            <button type="submit" class="btn btn-success btn-sm">Filter</button>
+            @if($academyTrackId || $academyInstructorId)
+                <a href="{{ route('financials.charts') }}" class="btn btn-default btn-sm">Reset</a>
+            @endif
+        </form>
+
+        <div class="row" style="margin-bottom:16px;">
+            <div class="col-md-6">
+                <div style="background:#f0fdf4; border:1px solid #dcfce7; border-radius:8px; padding:14px 18px;">
+                    <div style="font-size:12px; color:#15803d; font-weight:700;">TOTAL, LAST 6 MONTHS</div>
+                    <div style="font-size:24px; font-weight:800; color:#0f172a;">Rs. {{ number_format($totalAcademyIncome) }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div style="background:#f0fdf4; border:1px solid #dcfce7; border-radius:8px; padding:14px 18px;">
+                    <div style="font-size:12px; color:#15803d; font-weight:700;">STUDENTS PAID THIS MONTH</div>
+                    <div style="font-size:24px; font-weight:800; color:#0f172a;">{{ $academyStudentsPaidThisMonth }}</div>
+                </div>
+            </div>
+        </div>
+        <canvas id="academyIncomeChart" height="90"></canvas>
+    </div>
+</div>
+
 {{-- Balance history table --}}
 <div class="panel panel-bordered">
     <div class="panel-heading"><h3 class="panel-title">Bank Balance History</h3></div>
@@ -219,6 +270,7 @@
     $bd         = $chartData->pluck('bd')->toJson();
     $salaries   = $chartData->pluck('salaries')->toJson();
     $expenses   = $chartData->pluck('expenses')->toJson();
+    $academyIncome = $chartData->pluck('academy_income')->toJson();
 
     // Bank balance series
     $bankLabels = $months->map(fn($m) => \Carbon\Carbon::createFromFormat('Y-m', $m)->format('M y'))->toJson();
@@ -323,6 +375,21 @@ new Chart(document.getElementById('bdChart'), {
         ]
     },
     options: { ...chartDefaults, scales: { y: { ticks: { callback: v => '$'+v } } } }
+});
+
+// ── Academy income bar chart ────────────────────────────────────────────────
+new Chart(document.getElementById('academyIncomeChart'), {
+    type: 'bar',
+    data: {
+        labels: {!! $labels !!},
+        datasets: [{
+            label: 'Academy Income',
+            data: {!! $academyIncome !!},
+            backgroundColor: 'rgba(22,163,74,0.75)',
+            borderRadius: 4,
+        }]
+    },
+    options: { ...chartDefaults, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => 'Rs ' + (v/1000).toFixed(0) + 'k' } } } }
 });
 </script>
 @stop

@@ -91,6 +91,13 @@ class User extends \TCG\Voyager\Models\User
     private $ONLINE_STUDENT_ROLE_ID = 41;
     private $BUSINESS_DEVELOPER_ROLE_ID = 33;
     private $HOMEY_CLIENT_ROLE_ID = 61;
+    // WebPenter IT Academy student - deliberately a DISTINCT role from
+    // STUDENT_ROLE_ID/RYK_STUDENT_ROLE_ID above (both 12, an unrelated legacy
+    // student-fee system) so Academy students are never ambiguously picked up
+    // by that old system's queries. Fallback only - create the real "IT
+    // Academy Student" role in Voyager admin and set
+    // `academy.it_academy_student_role_id` to its actual id.
+    private $IT_ACADEMY_STUDENT_ROLE_ID = 70;
 
     /**
      * The attributes that should be cast.
@@ -141,6 +148,129 @@ class User extends \TCG\Voyager\Models\User
     public function scopeBusinessDeveloper($query)
     {
         return $query->where('role_id', setting('academy.business_developer_role_id') ?? $this->BUSINESS_DEVELOPER_ROLE_ID);
+    }
+    public function scopeOnlyItAcademyStudent($query)
+    {
+        return $query->where('role_id', setting('academy.it_academy_student_role_id') ?? $this->IT_ACADEMY_STUDENT_ROLE_ID);
+    }
+    public function isItAcademyStudent(): bool
+    {
+        return (int) $this->role_id === (int) (setting('academy.it_academy_student_role_id') ?? $this->IT_ACADEMY_STUDENT_ROLE_ID);
+    }
+
+    /**
+     * Academy instructor/reviewer capabilities are ADDITIVE (academy_staff_roles),
+     * separate from this user's one primary role_id - see that table's migration
+     * for why (a Developer-role user can also be an Academy Reviewer).
+     */
+    public function academyStaffRoles()
+    {
+        return $this->hasMany(\App\Models\AcademyStaffRole::class);
+    }
+    public function academyEnrollments()
+    {
+        return $this->hasMany(\App\Models\DeveloperAcademyEnrollment::class);
+    }
+    public function instructedAcademyEnrollments()
+    {
+        return $this->hasMany(\App\Models\DeveloperAcademyEnrollment::class, 'instructor_id');
+    }
+    public function academyCertificates()
+    {
+        return $this->hasMany(\App\Models\AcademyCertificate::class);
+    }
+    public function cardBatchItems()
+    {
+        return $this->hasMany(\App\Models\AcademyCardBatchItem::class);
+    }
+    public function isAcademyInstructor(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_INSTRUCTOR)->exists();
+    }
+    public function isAcademyReviewer(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_REVIEWER)->exists();
+    }
+    public function scopeAcademyInstructors($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_INSTRUCTOR));
+    }
+    public function scopeAcademyReviewers($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_REVIEWER));
+    }
+    public function isAcademyAccountant(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_ACCOUNTANT)->exists();
+    }
+    public function isAcademyMarketing(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_MARKETING)->exists();
+    }
+    public function scopeAcademyAccountants($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_ACCOUNTANT));
+    }
+    public function scopeAcademyMarketingStaff($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_MARKETING));
+    }
+    public function isAcademyPrinter(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_PRINTER)->exists();
+    }
+    public function scopeAcademyPrinters($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_PRINTER));
+    }
+    public function isAcademyCardManager(): bool
+    {
+        return $this->isItAcademyStudent() ? false : $this->academyStaffRoles()
+            ->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_CARD_MANAGER)->exists();
+    }
+    public function scopeAcademyCardManagers($query)
+    {
+        return $query->whereHas('academyStaffRoles', fn ($q) => $q->where('capability', \App\Models\AcademyStaffRole::CAPABILITY_CARD_MANAGER));
+    }
+
+    /**
+     * The one Academy screen most relevant to this user, if any - same
+     * priority order AcademyAwareAuthController uses for the post-login
+     * redirect, reused here so a Voyager-panel user (someone with
+     * browse_admin who ALSO holds an Academy capability, e.g. Ahmad Raza)
+     * can jump straight to it from the navbar instead of hunting the
+     * sidebar. Null if this user has no Academy role at all.
+     */
+    public function academyLandingRoute(): ?string
+    {
+        if ($this->isItAcademyStudent()) {
+            return 'academy.dashboard';
+        }
+        if ($this->isAcademyInstructor()) {
+            return 'academy.instructor';
+        }
+        if ($this->isAcademyReviewer()) {
+            return 'academy.reviewer.index';
+        }
+        if ($this->isAcademyAccountant()) {
+            return 'academy.accountant.index';
+        }
+        if ($this->isAcademyMarketing()) {
+            return 'academy.marketing.index';
+        }
+        if ($this->isAcademyCardManager()) {
+            return 'academy.card-batches.index';
+        }
+        if ($this->isAcademyPrinter()) {
+            return 'academy.student-cards.index';
+        }
+
+        return null;
     }
 
     /**
