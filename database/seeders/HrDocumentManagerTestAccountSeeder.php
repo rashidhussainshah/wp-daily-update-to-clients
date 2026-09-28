@@ -19,10 +19,11 @@ class HrDocumentManagerTestAccountSeeder extends Seeder
     {
         $roleId = Role::where('name', 'hr-document-manager')->value('id');
 
-        // withTrashed(): see AcademyTestAccountsSeeder - User uses
-        // SoftDeletes, so a previously-deleted test account would
-        // otherwise collide on the unique email index when re-created.
-        $user = User::withTrashed()->where('email', 'test.hrdocs@webpenter.test')->first()
+        // withTrashed() + withoutGlobalScope(SCOPE_EXCLUDE_HOMEY): see
+        // AcademyTestAccountsSeeder - either scope can hide an existing row
+        // from a plain first() while it still collides on the unique email
+        // index when re-created.
+        $user = User::withTrashed()->withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)->where('email', 'test.hrdocs@webpenter.test')->first()
             ?? new User(['name' => 'Test HR Documents', 'email' => 'test.hrdocs@webpenter.test']);
 
         if ($user->trashed()) {
