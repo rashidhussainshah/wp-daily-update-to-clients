@@ -15,10 +15,11 @@ use Illuminate\Support\Facades\Storage;
  * real skill/achievement certificates for actual WebPenter staff, so
  * Marketing has genuine content to post rather than fake names. Each
  * person's certificates match their real, current skill set (see
- * AcademyInstructorRealignmentSeeder for the same mapping). NOT idempotent
- * in the usual sense - re-running this wipes and re-issues everything, by
- * design, since this is a one-time content replacement, not an ongoing
- * setup step.
+ * AcademyInstructorRealignmentSeeder for the same mapping). Idempotent and
+ * production-safe: only ever deletes certificates belonging to
+ * @example.com/@webpenter.test demo/test accounts, never a real
+ * student/staff certificate, and skips re-issuing a certificate a person
+ * already has.
  *
  * Run: php artisan db:seed --class=AcademyRealStaffCertificatesSeeder
  */
@@ -71,15 +72,31 @@ class AcademyRealStaffCertificatesSeeder extends Seeder
         $this->command?->info('Real staff certificates issued.');
     }
 
+    /**
+     * Scoped to ONLY the fake demo/test certificates this session created
+     * for local testing (recipients on the @example.com or @webpenter.test
+     * domains - the two domains used exclusively for demo/test accounts
+     * throughout this whole effort, never for a real person). Deliberately
+     * does NOT touch any certificate belonging to a real student/staff
+     * email - production may already have real, live-issued certificates
+     * from the Academy program predating this feature, and those must
+     * never be deleted.
+     */
     protected function wipeDemoCertificates(): void
     {
-        AcademyCertificate::whereNotNull('pdf_path')->get(['pdf_path'])->each(function ($cert) {
-            Storage::disk('public')->delete($cert->pdf_path);
+        $demoCertificates = AcademyCertificate::whereHas('user', function ($q) {
+            $q->where('email', 'like', '%@example.com')
+                ->orWhere('email', 'like', '%@webpenter.test');
+        })->with('user:id,email')->get(['id', 'user_id', 'pdf_path']);
+
+        $demoCertificates->each(function ($cert) {
+            if ($cert->pdf_path) {
+                Storage::disk('public')->delete($cert->pdf_path);
+            }
+            $cert->delete();
         });
 
-        $count = AcademyCertificate::count();
-        AcademyCertificate::query()->delete();
-        $this->command?->info("Deleted {$count} placeholder/demo certificate(s).");
+        $this->command?->info("Deleted {$demoCertificates->count()} demo/test certificate(s) (@example.com / @webpenter.test recipients only - real certificates untouched).");
     }
 
     /** @return array<string, AcademyCourse> */
@@ -104,8 +121,23 @@ class AcademyRealStaffCertificatesSeeder extends Seeder
         return $courses;
     }
 
+    /**
+     * Guards against issuing the same person the same certificate twice if
+     * this seeder is ever re-run (e.g. after an unrelated failure earlier
+     * in the same deploy chain) - checked by user + course, since that pair
+     * is exactly what would otherwise duplicate.
+     */
     protected function issue(CertificateService $service, User $user, AcademyCourse $course, string $design, ?string $achievementNote = null, ?Carbon $issuedAt = null): void
     {
+        $alreadyIssued = AcademyCertificate::where('user_id', $user->id)
+            ->where('course_id', $course->id)
+            ->exists();
+
+        if ($alreadyIssued) {
+            $this->command?->info("Already has \"{$course->name}\": {$user->name} - skipped.");
+            return;
+        }
+
         $service->issueCourseCertificate($user, $course->id, $course->name, $user->name, null, $design, $achievementNote, $issuedAt, true);
         $this->command?->info("Issued \"{$course->name}\" to {$user->name}.");
     }

@@ -35,6 +35,11 @@ class AcademyProductionDeploySeeder extends Seeder
         $this->call([
             ProductionAcademySeeder::class,
             ProductionHrDocumentsSeeder::class,
+            // The 4 dedicated restricted roles AcademyTestAccountsSeeder
+            // assigns by name (academy-instructor/reviewer/accountant/
+            // marketing) - only ever created ad hoc via tinker in dev,
+            // never seeded until now. Must run before the test accounts.
+            AcademyStaffRolesSeeder::class,
             AcademyTestAccountsSeeder::class,
             HrDocumentManagerTestAccountSeeder::class,
             AcademyRealStaffCertificatesSeeder::class,

@@ -25,6 +25,7 @@ class AcademySeeder extends Seeder
         $this->call([
             AcademyTracksSeeder::class,
             AcademyGithubStageAndNewTracksSeeder::class,
+            AcademyStaffRolesSeeder::class,
             AcademyStaffSetupSeeder::class,
             AcademyAccountantMarketingSeeder::class,
             AcademyMarketingResourceSeeder::class,
