@@ -19,8 +19,15 @@ class HrDocumentManagerTestAccountSeeder extends Seeder
     {
         $roleId = Role::where('name', 'hr-document-manager')->value('id');
 
-        $user = User::where('email', 'test.hrdocs@webpenter.test')->first()
+        // withTrashed(): see AcademyTestAccountsSeeder - User uses
+        // SoftDeletes, so a previously-deleted test account would
+        // otherwise collide on the unique email index when re-created.
+        $user = User::withTrashed()->where('email', 'test.hrdocs@webpenter.test')->first()
             ?? new User(['name' => 'Test HR Documents', 'email' => 'test.hrdocs@webpenter.test']);
+
+        if ($user->trashed()) {
+            $user->restore();
+        }
 
         $user->role_id = $roleId;
         $user->password = Hash::make('Test@12345');

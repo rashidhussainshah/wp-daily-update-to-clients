@@ -36,10 +36,17 @@ class AcademyTestAccountsSeeder extends Seeder
         ];
 
         foreach ($accounts as $acc) {
-            $user = User::where('email', $acc['email'])->first();
+            // withTrashed(): User uses SoftDeletes, so a test account
+            // deleted via Voyager (soft-delete by default) would otherwise
+            // be invisible to a plain where()->first() while still holding
+            // its email in the unique index - the next create() then fails
+            // with a duplicate-key error instead of just reusing the row.
+            $user = User::withTrashed()->where('email', $acc['email'])->first();
 
             if (!$user) {
                 $user = new User(['name' => $acc['name'], 'email' => $acc['email'], 'password' => Hash::make('Test@12345')]);
+            } elseif ($user->trashed()) {
+                $user->restore();
             }
 
             $user->role_id = $acc['role_id'];
