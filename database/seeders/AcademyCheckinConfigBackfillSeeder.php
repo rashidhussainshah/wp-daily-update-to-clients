@@ -19,7 +19,17 @@ class AcademyCheckinConfigBackfillSeeder extends Seeder
 {
     public function run(): void
     {
-        $webhook = setting('academy.slack_webhook_url');
+        // `slack_webhook_url` is NOT NULL on this table - on an environment
+        // where the Academy Slack webhook hasn't been configured yet (e.g.
+        // right after a fresh deploy, before the secret is set in Voyager
+        // Settings), setting() returns null and the insert would violate
+        // that constraint. Falling back to '' keeps the backfill from
+        // crashing - CheckinController only checks whether a
+        // CheckinConfiguration row exists at all (not whether the URL is
+        // non-empty), so check-in/checkout still work; sendTxtToSlack()
+        // already catches a failed post to an empty URL and just logs it
+        // instead of blocking the student.
+        $webhook = setting('academy.slack_webhook_url') ?: '';
 
         User::onlyItAcademyStudent()->with('academyEnrollments.track')->get()->each(function (User $student) use ($webhook) {
             $track = $student->academyEnrollments->first()?->track;
