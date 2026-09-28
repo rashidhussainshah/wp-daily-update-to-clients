@@ -36,12 +36,19 @@ class AcademyTestAccountsSeeder extends Seeder
         ];
 
         foreach ($accounts as $acc) {
-            // withTrashed(): User uses SoftDeletes, so a test account
-            // deleted via Voyager (soft-delete by default) would otherwise
-            // be invisible to a plain where()->first() while still holding
-            // its email in the unique index - the next create() then fails
-            // with a duplicate-key error instead of just reusing the row.
-            $user = User::withTrashed()->where('email', $acc['email'])->first();
+            // withTrashed() + withoutGlobalScope(SCOPE_EXCLUDE_HOMEY): User
+            // has two global scopes that can each hide an existing row from
+            // a plain where()->first() while it still occupies the unique
+            // email index - SoftDeletingScope (if the account was deleted
+            // via Voyager, soft-delete by default) and User's own
+            // exclude-homey-clients scope (if this row's role_id ever
+            // happened to match the cached homey_client role id from an
+            // earlier partial seeder run). Either way the next create()
+            // then fails with a duplicate-key error instead of reusing the
+            // row. This codebase's own convention for this exact situation
+            // (see User::booted()) is "console commands use
+            // withoutGlobalScope()".
+            $user = User::withTrashed()->withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)->where('email', $acc['email'])->first();
 
             if (!$user) {
                 $user = new User(['name' => $acc['name'], 'email' => $acc['email'], 'password' => Hash::make('Test@12345')]);
@@ -81,8 +88,8 @@ class AcademyTestAccountsSeeder extends Seeder
 
         // So the instructor dashboard has something real to show - assign
         // test.instructor as test.student's instructor.
-        if (($testInstructor = User::where('email', 'test.instructor@webpenter.test')->first())
-            && ($testStudent = User::where('email', 'test.student@webpenter.test')->first())
+        if (($testInstructor = User::withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)->where('email', 'test.instructor@webpenter.test')->first())
+            && ($testStudent = User::withoutGlobalScope(User::SCOPE_EXCLUDE_HOMEY)->where('email', 'test.student@webpenter.test')->first())
         ) {
             $testStudent->academyEnrollments()->update(['instructor_id' => $testInstructor->id]);
             $this->command?->info('Assigned test.instructor as test.student\'s instructor.');
