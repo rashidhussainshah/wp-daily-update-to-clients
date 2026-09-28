@@ -32,6 +32,7 @@ class ProductionAcademySeeder extends Seeder
             AcademyMarketingResourceSeeder::class,
             AcademyBeginnerTracksInstructorSeeder::class,
             AcademyInstructorRealignmentSeeder::class,
+            AcademyCardWorkflowRealAssignmentSeeder::class,
             AcademyPrinterRoleSeeder::class,
             AcademyCardManagerRoleSeeder::class,
             AcademyBreadSeeder::class,
