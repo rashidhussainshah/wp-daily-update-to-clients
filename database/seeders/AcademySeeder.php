@@ -31,6 +31,7 @@ class AcademySeeder extends Seeder
             AcademyMarketingResourceSeeder::class,
             AcademyBeginnerTracksInstructorSeeder::class,
             AcademyInstructorRealignmentSeeder::class,
+            AcademyCardWorkflowRealAssignmentSeeder::class,
             AcademyPrinterRoleSeeder::class,
             AcademyCardManagerRoleSeeder::class,
             AcademyTestAccountsSeeder::class,
